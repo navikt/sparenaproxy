@@ -9,7 +9,7 @@ val coroutinesVersion = "1.3.3"
 val javaxActivationVersion = "1.1.1"
 val jacksonVersion = "2.9.7"
 val kluentVersion = "1.49"
-val ktorVersion = "1.3.0"
+val ktorVersion = "1.3.2"
 val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val prometheusVersion = "0.6.0"
@@ -113,7 +113,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "12"
+        kotlinOptions.jvmTarget = "13"
     }
 
     withType<JacocoReport> {

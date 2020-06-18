@@ -1,9 +1,8 @@
 package no.nav.syfo.application.metrics
 
-import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 
-const val METRICS_NS = ""
+const val METRICS_NS = "sparenaproxy"
 
 val HTTP_HISTOGRAM: Histogram = Histogram.Builder()
     .labelNames("path")
