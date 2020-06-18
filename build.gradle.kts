@@ -24,10 +24,10 @@ tasks.withType<Jar> {
 }
 
 plugins {
-    id("org.jmailen.kotlinter") version "2.1.1"
-    kotlin("jvm") version "1.3.70"
+    id("org.jmailen.kotlinter") version "2.2.0"
+    kotlin("jvm") version "1.3.72"
     id("com.diffplug.gradle.spotless") version "3.23.1"
-    id("com.github.johnrengelman.shadow") version "4.0.4"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     jacoco
 }
 
