@@ -14,7 +14,7 @@ val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.9"
-val smCommonVersion = "1.7cb158e"
+val smCommonVersion = "1.7bf5e6f"
 val mockkVersion = "1.9.3"
 val nimbusdsVersion = "7.5.1"
 val testContainerKafkaVersion = "1.12.5"
@@ -73,6 +73,8 @@ dependencies {
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+
+    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")

@@ -34,7 +34,21 @@ spec:
       cpu: 400m
       memory: 768Mi
   vault:
-    enabled: false
+    enabled: true
+    paths:
+      - kvPath: /azuread/data/dev/creds/sparenaproxy
+        mountPath: /secrets/azuread/sparenaproxy
+      - kvPath: serviceuser/data/dev/srvsparenaproxy
+        mountPath: /secrets/serviceuser
+      - kvPath: /kv/preprod/fss/sparenaproxy/default
+        mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://sparenaproxy.nais.preprod.local"
   webproxy: true
+  env:
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+    - name: MOUNT_PATH_VAULT
+      value: /postgresql/preprod-fss
+    - name: SPARENAPROXY_DB_URL
+      value: jdbc:postgresql://b27dbvl016.preprod.local:5432/sparenaproxy
