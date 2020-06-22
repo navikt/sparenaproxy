@@ -14,10 +14,14 @@ val logbackVersion = "1.2.3"
 val logstashEncoderVersion = "5.1"
 val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.9"
-val smCommonVersion = "1.7cb158e"
+val smCommonVersion = "1.7bf5e6f"
 val mockkVersion = "1.9.3"
 val nimbusdsVersion = "7.5.1"
 val testContainerKafkaVersion = "1.12.5"
+val postgresVersion = "42.2.5"
+val flywayVersion = "5.2.4"
+val hikariVersion = "3.3.0"
+val vaultJavaDriveVersion = "3.1.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -74,8 +78,15 @@ dependencies {
     implementation("io.ktor:ktor-auth:$ktorVersion")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
 
+    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
+
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
+
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.bettercloud:vault-java-driver:$vaultJavaDriveVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
