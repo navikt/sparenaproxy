@@ -7,6 +7,7 @@ import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.serialization.StringDeserializer
 
 class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
     val kafkaUtbetaltEventConsumer = getKafkaUtbetaltEventConsumer(vaultSecrets, env)
@@ -15,7 +16,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
         kafkaBaseConfig["auto.offset.reset"] = "latest"
 
-        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", JacksonKafkaDeserializer::class)
+        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = StringDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
         val kafkaUtbetaltEventConsumer = KafkaConsumer<String, String>(properties)
