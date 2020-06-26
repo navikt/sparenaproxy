@@ -1,5 +1,6 @@
 package no.nav.syfo.lagrevedtak
 
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.syfo.application.ApplicationState
@@ -14,18 +15,16 @@ class VedtakService(
     private val utbetaltEventConsumer: UtbetaltEventConsumer,
     private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService
 ) {
-    fun start() {
+    suspend fun start() {
         while (applicationState.ready) {
             val jsonNodesAsString = utbetaltEventConsumer.poll()
             jsonNodesAsString.forEach {
-                log.info("Lest melding fra topic")
                 val jsonNode = objectMapper.readTree(it)
                 if (jsonNode["@event_name"].asText() == "utbetalt") {
                     handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode))
-                } else {
-                    log.info("Mottatt melding med annen type, ignorerer...")
                 }
             }
+            delay(1)
         }
     }
 

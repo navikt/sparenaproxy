@@ -7,6 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
@@ -54,7 +58,9 @@ fun main() {
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val vedtakService = VedtakService(applicationState, utbetaltEventConsumer, lagreUtbetaltEventOgPlanlagtMeldingService)
 
-    vedtakService.start()
+    createListener(applicationState) {
+        vedtakService.start()
+    }
 
     // Del 1:
     // lytt på topic
@@ -70,3 +76,15 @@ fun main() {
     // Del 3:
     // ikke sett til sendt før kvittering er mottatt.
 }
+
+fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
+    GlobalScope.launch {
+        try {
+            action()
+        } catch (ex: Exception) {
+            log.error("Noe gikk galt", ex.cause)
+        } finally {
+            applicationState.alive = false
+            applicationState.ready = false
+        }
+    }
