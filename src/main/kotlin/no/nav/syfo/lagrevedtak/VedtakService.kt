@@ -7,6 +7,7 @@ import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
 import no.nav.syfo.log
+import no.nav.syfo.objectMapper
 
 class VedtakService(
     private val applicationState: ApplicationState,
@@ -15,11 +16,12 @@ class VedtakService(
 ) {
     fun start() {
         while (applicationState.ready) {
-            val jsonNodes = utbetaltEventConsumer.poll()
-            jsonNodes.forEach {
+            val jsonNodesAsString = utbetaltEventConsumer.poll()
+            jsonNodesAsString.forEach {
                 log.info("Lest melding fra topic")
-                if (it["@event_name"].asText() == "utbetalt") {
-                    handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(it))
+                val jsonNode = objectMapper.readTree(it)
+                if (jsonNode["@event_name"].asText() == "utbetalt") {
+                    handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode))
                 } else {
                     log.info("Mottatt melding med annen type, ignorerer...")
                 }
