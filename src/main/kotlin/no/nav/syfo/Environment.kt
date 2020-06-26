@@ -12,7 +12,8 @@ data class Environment(
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val sparenaproxyDBURL: String = getEnvVar("SPARENAPROXY_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
-    val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy")
+    val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
+    val utbetaltEventTopic: String = getEnvVar("UTBETALTEVENT_TOPIC", "helse-rapid-v1")
 ) : KafkaConfig
 
 data class VaultSecrets(
