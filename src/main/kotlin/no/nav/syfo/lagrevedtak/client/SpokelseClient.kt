@@ -21,7 +21,15 @@ class SpokelseClient(
 
     suspend fun finnSykmeldingId(dokumenter: Set<UUID>, utbetaltEventId: UUID): UUID {
         log.info("Henter sykmeldingId for utbetaltevent {}", utbetaltEventId)
-        return hentDokumenter(dokumenter).first { it.type == "Sykmelding" }.dokumentId
+
+        try {
+            val hendelser = hentDokumenter(dokumenter)
+            log.info("Fant {} antall dokumenter for {}", hendelser.size, utbetaltEventId)
+            return hendelser.first { it.type == "Sykmelding" }.dokumentId
+        } catch (e: Exception) {
+            log.error("Feil ved henting av sykemdlingid {}", e.message)
+            throw e
+        }
     }
 
     suspend fun hentDokumenter(dokumenter: Set<UUID>): List<Hendelse> =
