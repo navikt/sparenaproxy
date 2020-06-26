@@ -52,3 +52,7 @@ spec:
       value: /postgresql/prod-fss
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://A01DBVL014.adeo.no:5432/sparenaproxy
+    - name: AADACCESSTOKEN_URL
+      value: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/token
+    - name: SPOKELSE_CLIENTID
+      value: 2cfc9652-f3c7-4b23-a43b-e8844f49aeca

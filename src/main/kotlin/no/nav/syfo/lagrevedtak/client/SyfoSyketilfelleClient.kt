@@ -11,7 +11,7 @@ import no.nav.syfo.client.StsOidcClient
 
 @KtorExperimentalAPI
 class SyfoSyketilfelleClient(
-    private val syfosyketilfelleUrl: String,
+    private val syketilfelleEndpointURL: String,
     private val stsClient: StsOidcClient,
     private val httpClient: HttpClient
 ) {
@@ -22,7 +22,7 @@ class SyfoSyketilfelleClient(
     }
 
     suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
-        httpClient.get<SyketilfelleRespons>("$syfosyketilfelleUrl/sparenaproxy/$aktorId/sykeforloep") {
+        httpClient.get<SyketilfelleRespons>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
             accept(ContentType.Application.Json)
             val oidcToken = stsClient.oidcToken()
             headers {
