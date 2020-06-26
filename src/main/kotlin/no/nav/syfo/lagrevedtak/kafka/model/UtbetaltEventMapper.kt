@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.syfo.lagrevedtak.Utbetalingslinje
 import no.nav.syfo.lagrevedtak.Utbetalt
-import no.nav.syfo.objectMapper
 
 fun tilUtbetaltEventKafkaMessage(node: JsonNode): UtbetaltEventKafkaMessage {
     return UtbetaltEventKafkaMessage(
@@ -16,11 +15,11 @@ fun tilUtbetaltEventKafkaMessage(node: JsonNode): UtbetaltEventKafkaMessage {
         organisasjonsnummer = node["organisasjonsnummer"].asText(),
         hendelser = node["hendelser"].toHendelser(),
         oppdrag = node["utbetalt"].toOppdrag(),
-        fom = objectMapper.readValue(node["fom"].textValue(), LocalDate::class.java),
-        tom = objectMapper.readValue(node["tom"].textValue(), LocalDate::class.java),
+        fom = LocalDate.parse(node["fom"].textValue()),
+        tom = LocalDate.parse(node["tom"].textValue()),
         forbrukteSykedager = node["forbrukteSykedager"].asInt(),
         gjenstaendeSykedager = node["gjenståendeSykedager"].asInt(),
-        opprettet = objectMapper.readValue(node["@opprettet"].textValue(), LocalDateTime::class.java)
+        opprettet = LocalDateTime.parse(node["@opprettet"].textValue())
     )
 }
 
@@ -40,8 +39,8 @@ private fun JsonNode.toOppdrag() = map {
 
 private fun JsonNode.toUtbetalingslinjer() = map {
     Utbetalingslinje(
-        fom = objectMapper.readValue(it["fom"].textValue(), LocalDate::class.java),
-        tom = objectMapper.readValue(it["tom"].textValue(), LocalDate::class.java),
+        fom = LocalDate.parse(it["fom"].textValue()),
+        tom = LocalDate.parse(it["tom"].textValue()),
         dagsats = it["dagsats"].asInt(),
         belop = it["beløp"].asInt(),
         grad = it["grad"].asDouble(),
