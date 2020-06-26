@@ -16,7 +16,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
         kafkaBaseConfig["auto.offset.reset"] = "latest"
 
-        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = JacksonKafkaDeserializer::class)
+        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", JacksonKafkaDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
         val kafkaUtbetaltEventConsumer = KafkaConsumer<String, JsonNode>(properties)
