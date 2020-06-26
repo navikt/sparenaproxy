@@ -33,7 +33,7 @@ class SpokelseClient(
     }
 
     suspend fun hentDokumenter(dokumenter: Set<UUID>): List<Hendelse> =
-        httpClient.get<DokumenterRespons>("$spokelseEndpointURL/spokelse/dokumenter") {
+        httpClient.get<DokumenterRespons>("$spokelseEndpointURL/dokumenter") {
             accept(ContentType.Application.Json)
             dokumenter.forEach { parameter("hendelseId", it) }
             val accessToken = accessTokenClient.hentAccessToken(resourceId)
