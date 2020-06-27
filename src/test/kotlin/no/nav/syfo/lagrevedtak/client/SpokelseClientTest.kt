@@ -23,7 +23,9 @@ import io.mockk.mockk
 import java.net.ServerSocket
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.client.AccessTokenClient
+import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -52,7 +54,7 @@ object SpokelseClientTest : Spek({
             jackson {}
         }
         routing {
-            get("/spokelse/dokumenter?hendelseId=$hendelseId2&hendelseId=$hendelseId1") {
+            get("/dokumenter") {
                 call.respond(DokumenterRespons(listOf(Hendelse(dokumentId = sykmeldingUUID, hendelseId = hendelseId1, type = "Sykmelding"), Hendelse(dokumentId = soknadUUD, hendelseId = hendelseId2, type = "Søknad"))))
             }
         }
@@ -61,15 +63,21 @@ object SpokelseClientTest : Spek({
     val spokelseClient = SpokelseClient(mockHttpServerUrl, accessTokenClientMock, "resourceId", httpClient)
 
     afterGroup {
-        mockServer.stop(TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(10))
+        mockServer.stop(TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
     }
 
     beforeEachTest {
         coEvery { accessTokenClientMock.hentAccessToken(any()) } returns "token"
     }
 
-    describe("Test av klient") {
-        it("Test") {
+    describe("Test av SpokelseClient") {
+        it("Henter sykmeldingId fra spokelse") {
+            var sykmeldingId: UUID? = null
+            runBlocking {
+                sykmeldingId = spokelseClient.finnSykmeldingId(listOf(hendelseId1, hendelseId2).toSet(), UUID.randomUUID())
+            }
+
+            sykmeldingId shouldEqual sykmeldingUUID
         }
     }
 })

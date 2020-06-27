@@ -7,7 +7,7 @@ import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
-import no.nav.syfo.client.StsOidcClient
+import no.nav.syfo.client.sts.StsOidcClient
 
 @KtorExperimentalAPI
 class SyfoSyketilfelleClient(

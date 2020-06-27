@@ -21,7 +21,6 @@ class SpokelseClient(
 
     suspend fun finnSykmeldingId(dokumenter: Set<UUID>, utbetaltEventId: UUID): UUID {
         log.info("Henter sykmeldingId for utbetaltevent {}", utbetaltEventId)
-
         try {
             val hendelser = hentDokumenter(dokumenter)
             log.info("Fant {} antall dokumenter for {}", hendelser.size, utbetaltEventId)
@@ -32,7 +31,7 @@ class SpokelseClient(
         }
     }
 
-    suspend fun hentDokumenter(dokumenter: Set<UUID>): List<Hendelse> =
+    private suspend fun hentDokumenter(dokumenter: Set<UUID>): List<Hendelse> =
         httpClient.get<DokumenterRespons>("$spokelseEndpointURL/dokumenter") {
             accept(ContentType.Application.Json)
             dokumenter.forEach { parameter("hendelseId", it) }

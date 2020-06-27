@@ -25,7 +25,7 @@ import no.nav.syfo.application.db.Database
 import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClient
-import no.nav.syfo.client.StsOidcClient
+import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.VedtakService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
@@ -77,8 +77,8 @@ fun main() {
     val httpClientWithProxy = HttpClient(Apache, proxyConfig)
     val httpClient = HttpClient(Apache, config)
 
-    // val oidcClient = StsOidcClient(vaultSecrets.serviceuserUsername, vaultSecrets.serviceuserPassword)
-    // val syfoSyketilfelleClient = SyfoSyketilfelleClient(env.syketilfelleEndpointURL, oidcClient, httpClient)
+    val oidcClient = StsOidcClient(vaultSecrets.serviceuserUsername, vaultSecrets.serviceuserPassword)
+    val syfoSyketilfelleClient = SyfoSyketilfelleClient(env.syketilfelleEndpointURL, oidcClient, httpClient)
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
     val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClient, env.clientIdSpokelse, httpClient)
 
