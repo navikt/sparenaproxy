@@ -7,7 +7,9 @@ import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.syfo.client.sts.StsOidcClient
+import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SyfoSyketilfelleClient(
@@ -16,12 +18,22 @@ class SyfoSyketilfelleClient(
     private val httpClient: HttpClient
 ) {
 
-    suspend fun finnStartdato(aktorId: String, sykmeldingId: String): LocalDate {
+    suspend fun finnStartdato(aktorId: String, sykmeldingId: String, utbetaltEventId: UUID): LocalDate {
         val sykeforloep = hentSykeforloep(aktorId)
-        return LocalDate.now()
+        val aktueltSykeforloep = sykeforloep.firstOrNull {
+            it.sykmeldinger.any { simpleSykmelding -> simpleSykmelding.id == sykmeldingId }
+        }
+
+        if (aktueltSykeforloep == null) {
+            log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", utbetaltEventId)
+            throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
+            // hvis dev: returner tilfeldig dato for å forenkle test..?
+        } else {
+            return aktueltSykeforloep.oppfolgingsdato
+        }
     }
 
-    suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
+    private suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
         httpClient.get<SyketilfelleRespons>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
             accept(ContentType.Application.Json)
             val oidcToken = stsClient.oidcToken()
@@ -37,7 +49,7 @@ data class SyketilfelleRespons(
 
 data class Sykeforloep(
     var oppfolgingsdato: LocalDate,
-    val sykmeldinger: ArrayList<SimpleSykmelding>
+    val sykmeldinger: List<SimpleSykmelding>
 )
 
 data class SimpleSykmelding(

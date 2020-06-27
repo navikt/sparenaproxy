@@ -85,7 +85,7 @@ fun main() {
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val utbetaltEventConsumer = UtbetaltEventConsumer(kafkaClients.kafkaUtbetaltEventConsumer)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
-    val vedtakService = VedtakService(applicationState, utbetaltEventConsumer, spokelseClient, lagreUtbetaltEventOgPlanlagtMeldingService)
+    val vedtakService = VedtakService(applicationState, utbetaltEventConsumer, spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -100,20 +100,6 @@ fun main() {
     createListener(applicationState) {
         vedtakService.start()
     }
-
-    // Del 1:
-    // lytt på topic
-    // finn sykmeldingsid fra nytt api (kommer)
-    // slå opp i syfosyketilfelle for å finne startdato for riktig sykeforløp
-    // lagre utbetaltevent med startdato, samt planlagt varsel
-
-    // Del 2:
-    // cronjobb som sender varsel til arena
-    // hvis sendes er passert og ikke sendt/avbrutt: slå opp i utbetaltevents, sjekk om aktivt vedtak på samme fnr?
-    // hvis ja: send melding og sett til sendt. Hvis nei: Sett til avbrutt.
-
-    // Del 3:
-    // ikke sett til sendt før kvittering er mottatt.
 }
 
 fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =

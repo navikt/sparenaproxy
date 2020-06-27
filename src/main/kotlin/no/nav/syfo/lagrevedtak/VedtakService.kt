@@ -1,10 +1,10 @@
 package no.nav.syfo.lagrevedtak
 
 import io.ktor.util.KtorExperimentalAPI
-import java.time.LocalDate
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
+import no.nav.syfo.lagrevedtak.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
@@ -16,6 +16,7 @@ class VedtakService(
     private val applicationState: ApplicationState,
     private val utbetaltEventConsumer: UtbetaltEventConsumer,
     private val spokelseClient: SpokelseClient,
+    private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService
 ) {
     suspend fun start() {
@@ -32,14 +33,12 @@ class VedtakService(
     }
 
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage) {
-        // finn sykmeldingsid fra nytt api
-        // slå opp i syfosyketilfelle for å finne startdato for riktig sykeforløp (kommer)
-        // lagre utbetaltevent med startdato, samt planlagt varsel, evt oppdatere planlagt varsel
         log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid}")
         val sykmeldingId = spokelseClient.finnSykmeldingId(utbetaltEventKafkaMessage.hendelser, utbetaltEventKafkaMessage.utbetalteventid)
+        val startdato = syfoSyketilfelleClient.finnStartdato(utbetaltEventKafkaMessage.aktorid, sykmeldingId.toString(), utbetaltEventKafkaMessage.utbetalteventid)
         val utbetaltEvent = UtbetaltEvent(
             utbetalteventid = utbetaltEventKafkaMessage.utbetalteventid,
-            startdato = LocalDate.now(), // hentes fra syfosyketilfelle
+            startdato = startdato,
             sykmeldingid = sykmeldingId,
             aktorid = utbetaltEventKafkaMessage.aktorid,
             fnr = utbetaltEventKafkaMessage.fnr,
