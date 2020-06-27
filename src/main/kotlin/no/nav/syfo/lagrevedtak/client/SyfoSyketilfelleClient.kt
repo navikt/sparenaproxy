@@ -34,18 +34,14 @@ class SyfoSyketilfelleClient(
     }
 
     private suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
-        httpClient.get<SyketilfelleRespons>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
+        httpClient.get<List<Sykeforloep>>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
             accept(ContentType.Application.Json)
             val oidcToken = stsClient.oidcToken()
             headers {
                 append("Authorization", "Bearer ${oidcToken.access_token}")
             }
-        }.sykeforloep
+        }
 }
-
-data class SyketilfelleRespons(
-    val sykeforloep: List<Sykeforloep>
-)
 
 data class Sykeforloep(
     var oppfolgingsdato: LocalDate,

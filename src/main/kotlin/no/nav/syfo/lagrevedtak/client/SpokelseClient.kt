@@ -22,7 +22,7 @@ class SpokelseClient(
     suspend fun finnSykmeldingId(dokumenter: Set<UUID>, utbetaltEventId: UUID): UUID {
         log.info("Henter sykmeldingId for utbetaltevent {}", utbetaltEventId)
         try {
-            val hendelser = hentDokumenter(dokumenter)
+            val hendelser = hentHendelser(dokumenter)
             log.info("Fant {} antall dokumenter for {}", hendelser.size, utbetaltEventId)
             return hendelser.first { it.type == "Sykmelding" }.dokumentId
         } catch (e: Exception) {
@@ -31,20 +31,16 @@ class SpokelseClient(
         }
     }
 
-    private suspend fun hentDokumenter(dokumenter: Set<UUID>): List<Hendelse> =
-        httpClient.get<DokumenterRespons>("$spokelseEndpointURL/dokumenter") {
+    private suspend fun hentHendelser(dokumenter: Set<UUID>): List<Hendelse> =
+        httpClient.get<List<Hendelse>>("$spokelseEndpointURL/dokumenter") {
             accept(ContentType.Application.Json)
             dokumenter.forEach { parameter("hendelseId", it) }
             val accessToken = accessTokenClient.hentAccessToken(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
             }
-        }.hendelser
+        }
 }
-
-data class DokumenterRespons(
-    val hendelser: List<Hendelse>
-)
 
 data class Hendelse(
     val dokumentId: UUID,

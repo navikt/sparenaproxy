@@ -20,17 +20,17 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.net.ServerSocket
-import java.time.LocalDate
-import java.util.UUID
-import java.util.concurrent.TimeUnit
-import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.client.sts.OidcToken
 import no.nav.syfo.client.sts.StsOidcClient
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.net.ServerSocket
+import java.time.LocalDate
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertFailsWith
 
 @KtorExperimentalAPI
 object SyfoSyketilfelleClientTest : Spek({
@@ -67,17 +67,17 @@ object SyfoSyketilfelleClientTest : Spek({
         }
         routing {
             get("/sparenaproxy/$aktorId1/sykeforloep") {
-                call.respond(SyketilfelleRespons(listOf(
+                call.respond(listOf(
                     Sykeforloep(oppfolgingsdato1, listOf(SimpleSykmelding(UUID.randomUUID().toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(3)))),
                     Sykeforloep(oppfolgingsdato2, listOf(SimpleSykmelding(sykmeldingUUID.toString(), oppfolgingsdato2, oppfolgingsdato2.plusWeeks(4)))),
                     Sykeforloep(oppfolgingsdato3, listOf(SimpleSykmelding(UUID.randomUUID().toString(), oppfolgingsdato3, oppfolgingsdato3.plusWeeks(8))))
-                )))
+                ))
             }
             get("/sparenaproxy/$aktorId2/sykeforloep") {
-                call.respond(SyketilfelleRespons(listOf(
+                call.respond(listOf(
                     Sykeforloep(oppfolgingsdato1, listOf(SimpleSykmelding(UUID.randomUUID().toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(3)))),
                     Sykeforloep(oppfolgingsdato3, listOf(SimpleSykmelding(UUID.randomUUID().toString(), oppfolgingsdato3, oppfolgingsdato3.plusWeeks(8))))
-                )))
+                ))
             }
         }
     }.start()

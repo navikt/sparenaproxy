@@ -55,7 +55,7 @@ object SpokelseClientTest : Spek({
         }
         routing {
             get("/dokumenter") {
-                call.respond(DokumenterRespons(listOf(Hendelse(dokumentId = sykmeldingUUID, hendelseId = hendelseId1, type = "Sykmelding"), Hendelse(dokumentId = soknadUUD, hendelseId = hendelseId2, type = "Søknad"))))
+                call.respond(listOf(Hendelse(dokumentId = sykmeldingUUID, hendelseId = hendelseId1, type = "Sykmelding"), Hendelse(dokumentId = soknadUUD, hendelseId = hendelseId2, type = "Søknad")))
             }
         }
     }.start()
