@@ -1,6 +1,7 @@
 package no.nav.syfo.lagrevedtak
 
 import io.ktor.util.KtorExperimentalAPI
+import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
@@ -34,7 +35,8 @@ class VedtakService(
 
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage) {
         log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid}")
-        val sykmeldingId = spokelseClient.finnSykmeldingId(utbetaltEventKafkaMessage.hendelser, utbetaltEventKafkaMessage.utbetalteventid)
+        // val sykmeldingId = spokelseClient.finnSykmeldingId(utbetaltEventKafkaMessage.hendelser, utbetaltEventKafkaMessage.utbetalteventid)
+        val sykmeldingId = UUID.fromString("ef9b076a-acd4-4219-a6d4-e4107d9023cb")
         val startdato = syfoSyketilfelleClient.finnStartdato(utbetaltEventKafkaMessage.aktorid, sykmeldingId.toString(), utbetaltEventKafkaMessage.utbetalteventid)
         val utbetaltEvent = UtbetaltEvent(
             utbetalteventid = utbetaltEventKafkaMessage.utbetalteventid,
