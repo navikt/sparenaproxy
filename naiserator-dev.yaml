@@ -53,6 +53,6 @@ spec:
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://b27dbvl016.preprod.local:5432/sparenaproxy
     - name: AADACCESSTOKEN_URL
-      value: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/token
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/token
     - name: SPOKELSE_CLIENTID
       value: 60c763a5-2b52-4d0f-b080-0effbf75de2e

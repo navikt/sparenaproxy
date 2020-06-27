@@ -27,7 +27,7 @@ class SpokelseClient(
             log.info("Fant {} antall dokumenter for {}", hendelser.size, utbetaltEventId)
             return hendelser.first { it.type == "Sykmelding" }.dokumentId
         } catch (e: Exception) {
-            log.error("Feil ved henting av sykemdlingid {}", e.message)
+            log.error("Feil ved henting av sykmeldingid for utbetaltevent $utbetaltEventId {}", e.message)
             throw e
         }
     }
