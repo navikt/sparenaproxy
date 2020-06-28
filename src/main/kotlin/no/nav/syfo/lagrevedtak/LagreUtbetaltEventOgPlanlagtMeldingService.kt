@@ -5,6 +5,8 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
+import no.nav.syfo.application.metrics.KUN_LAGRET_VEDTAK
+import no.nav.syfo.application.metrics.OPPRETTET_PLANLAGT_MELDING
 import no.nav.syfo.lagrevedtak.db.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.lagrevedtak.db.PlanlagtMeldingDbModel
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEvent
@@ -17,9 +19,11 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
     fun lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent: UtbetaltEvent) {
         if (database.planlagtMeldingFinnes(utbetaltEvent.fnr, utbetaltEvent.startdato)) {
             log.info("Meldinger er allerede opprettet, lagrer nytt utbetalingsevent {}", utbetaltEvent.utbetalteventid)
+            KUN_LAGRET_VEDTAK.inc()
             database.lagreUtbetaltEvent(utbetaltEvent)
         } else {
             log.info("Lagrer utbetalingsevent {} og planlagte meldinger", utbetaltEvent.utbetalteventid)
+            OPPRETTET_PLANLAGT_MELDING.labels(AKTIVITETSKRAV_8_UKER_TYPE).inc()
             database.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
                 listOf(lagPlanlagtMeldingDbModelForUtbetaling(
