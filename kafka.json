@@ -1,0 +1,20 @@
+{
+  "topics": [
+    {
+      "topicName": "privat-aktiver-melding",
+      "members": [
+        {"member":"srvsparenaproxy", "role":"PRODUCER"},
+        {"member":"srvsparenaproxy", "role":"CONSUMER"},
+        {"member":"f133008", "role":"MANAGER"},
+        {"member":"n157016", "role":"MANAGER"},
+        {"member":"k157140", "role":"MANAGER"},
+        {"member":"h157812", "role":"MANAGER"},
+        {"member":"h157644", "role":"MANAGER"}
+      ],
+      "numPartitions": 3,
+      "configEntries": {
+        "retention.ms": "-1"
+      }
+    }
+  ]
+}
