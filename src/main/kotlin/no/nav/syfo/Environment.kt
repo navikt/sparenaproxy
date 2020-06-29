@@ -9,6 +9,7 @@ import no.nav.syfo.kafka.KafkaCredentials
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
     val applicationName: String = getEnvVar("NAIS_APP_NAME", "sparenaproxy"),
+    val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val sparenaproxyDBURL: String = getEnvVar("SPARENAPROXY_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
@@ -17,7 +18,8 @@ data class Environment(
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL", "http://syfosyketilfelle"),
     val spokelseEndpointURL: String = getEnvVar("SPOKELSE_ENDPOINT_URL", "http://spokelse.tbd.svc.nais.local"),
     val clientIdSpokelse: String = getEnvVar("SPOKELSE_CLIENTID"),
-    val aadAccessTokenUrl: String = getEnvVar("AADACCESSTOKEN_URL")
+    val aadAccessTokenUrl: String = getEnvVar("AADACCESSTOKEN_URL"),
+    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token")
 ) : KafkaConfig
 
 data class VaultSecrets(

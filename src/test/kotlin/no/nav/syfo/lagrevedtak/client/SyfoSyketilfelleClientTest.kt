@@ -82,7 +82,7 @@ object SyfoSyketilfelleClientTest : Spek({
         }
     }.start()
 
-    val syfoSyketilfelleClient = SyfoSyketilfelleClient(mockHttpServerUrl, stsOidcClient, httpClient)
+    val syfoSyketilfelleClient = SyfoSyketilfelleClient(mockHttpServerUrl, stsOidcClient, httpClient, "prod-fss")
 
     afterGroup {
         mockServer.stop(TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1))
@@ -107,6 +107,15 @@ object SyfoSyketilfelleClientTest : Spek({
                     syfoSyketilfelleClient.finnStartdato(aktorId2, sykmeldingUUID.toString(), UUID.randomUUID())
                 }
             }
+        }
+        it("Returnerer dato hvis sykmelding ikke er knyttet til syketilfelle og vi kjører i dev-fss") {
+            val syfoSyketilfelleClientDev = SyfoSyketilfelleClient(mockHttpServerUrl, stsOidcClient, httpClient, "dev-fss")
+            var startDato: LocalDate? = null
+            runBlocking {
+                startDato = syfoSyketilfelleClientDev.finnStartdato(aktorId2, sykmeldingUUID.toString(), UUID.randomUUID())
+            }
+
+            startDato shouldEqual LocalDate.now().minusMonths(1)
         }
     }
 })

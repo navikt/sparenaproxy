@@ -15,7 +15,8 @@ import no.nav.syfo.log
 class SyfoSyketilfelleClient(
     private val syketilfelleEndpointURL: String,
     private val stsClient: StsOidcClient,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val cluster: String
 ) {
 
     suspend fun finnStartdato(aktorId: String, sykmeldingId: String, utbetaltEventId: UUID): LocalDate {
@@ -26,8 +27,11 @@ class SyfoSyketilfelleClient(
 
         if (aktueltSykeforloep == null) {
             log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", utbetaltEventId)
+            if (cluster == "dev-fss") {
+                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", utbetaltEventId)
+                return LocalDate.now().minusMonths(1)
+            }
             throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
-            // hvis dev: returner tilfeldig dato for å forenkle test..?
         } else {
             return aktueltSykeforloep.oppfolgingsdato
         }

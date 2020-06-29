@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 class StsOidcClient(
     username: String,
     password: String,
-    private val stsUrl: String = "http://security-token-service/rest/v1/sts/token"
+    private val stsUrl: String
 ) {
     private var tokenExpires: Long = 0
     private val oidcClient = HttpClient(Apache) {
