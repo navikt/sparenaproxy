@@ -26,16 +26,18 @@ class VedtakService(
             jsonNodesAsString.forEach {
                 val jsonNode = objectMapper.readTree(it)
                 if (jsonNode["@event_name"].asText() == "utbetalt") {
-                    handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode))
+                    val callid = jsonNode["@id"].asText()
+                    log.info("Mottatt melding med callid {}", callid)
+                    handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode), callid)
                 }
             }
             delay(1)
         }
     }
 
-    suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage) {
+    suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage, callid: String) {
         MOTTATT_VEDTAK.inc()
-        log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid}")
+        log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid} for callid $callid")
         val sykmeldingId = spokelseClient.finnSykmeldingId(utbetaltEventKafkaMessage.hendelser, utbetaltEventKafkaMessage.utbetalteventid)
         val startdato = syfoSyketilfelleClient.finnStartdato(utbetaltEventKafkaMessage.aktorid, sykmeldingId.toString(), utbetaltEventKafkaMessage.utbetalteventid)
         val utbetaltEvent = UtbetaltEvent(
