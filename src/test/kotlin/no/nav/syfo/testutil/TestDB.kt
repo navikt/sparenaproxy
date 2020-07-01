@@ -6,13 +6,13 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
-import no.nav.syfo.lagrevedtak.db.PlanlagtMeldingDbModel
+import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.flywaydb.core.Flyway
 
@@ -51,18 +51,6 @@ fun Connection.hentPlanlagtMelding(fnr: String, startdato: LocalDate): List<Plan
         it.setObject(2, startdato)
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }
     }
-
-fun ResultSet.toPlanlagtMeldingDbModel(): PlanlagtMeldingDbModel =
-    PlanlagtMeldingDbModel(
-        id = getObject("id", UUID::class.java),
-        fnr = getString("fnr"),
-        startdato = getObject("startdato", LocalDate::class.java),
-        type = getString("type"),
-        opprettet = getTimestamp("opprettet").toInstant().atOffset(ZoneOffset.UTC),
-        sendes = getTimestamp("sendes").toInstant().atOffset(ZoneOffset.UTC),
-        avbrutt = getTimestamp("avbrutt")?.toInstant()?.atOffset(ZoneOffset.UTC),
-        sendt = getTimestamp("sendt")?.toInstant()?.atOffset(ZoneOffset.UTC)
-    )
 
 fun Connection.hentUtbetaltEvent(fnr: String, startdato: LocalDate): List<UtbetaltEvent> =
     this.prepareStatement(

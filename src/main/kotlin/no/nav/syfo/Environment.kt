@@ -5,6 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import no.nav.syfo.kafka.KafkaConfig
 import no.nav.syfo.kafka.KafkaCredentials
+import no.nav.syfo.mq.MqConfig
 
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -15,18 +16,26 @@ data class Environment(
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
     val utbetaltEventTopic: String = getEnvVar("UTBETALTEVENT_TOPIC", "helse-rapid-v1"),
+    val aktiverMeldingTopic: String = getEnvVar("AKTIVER_MELDING_TOPIC", "privat-aktiver-planlagtmelding"),
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL", "http://syfosyketilfelle"),
     val spokelseEndpointURL: String = getEnvVar("SPOKELSE_ENDPOINT_URL", "http://spokelse.tbd.svc.nais.local"),
     val clientIdSpokelse: String = getEnvVar("SPOKELSE_CLIENTID"),
     val aadAccessTokenUrl: String = getEnvVar("AADACCESSTOKEN_URL"),
-    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token")
-) : KafkaConfig
+    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token"),
+    override val mqHostname: String = getEnvVar("MQ_HOST_NAME"),
+    override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
+    override val mqGatewayName: String = getEnvVar("MQ_GATEWAY_NAME"),
+    override val mqChannelName: String = getEnvVar("MQ_CHANNEL_NAME"),
+    val arenaQueueName: String = getEnvVar("MQ_ARENA_QUEUE_NAME")
+) : MqConfig, KafkaConfig
 
 data class VaultSecrets(
     val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
     val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password"),
     val clientId: String = getFileAsString("/secrets/azuread/sparenaproxy/client_id"),
-    val clientSecret: String = getFileAsString("/secrets/azuread/sparenaproxy/client_secret")
+    val clientSecret: String = getFileAsString("/secrets/azuread/sparenaproxy/client_secret"),
+    val mqUsername: String = getEnvVar("MQ_USERNAME"),
+    val mqPassword: String = getEnvVar("MQ_PASSWORD")
 ) : KafkaCredentials {
     override val kafkaUsername: String = serviceuserUsername
     override val kafkaPassword: String = serviceuserPassword

@@ -5,6 +5,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
+import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.postgresql.util.PGobject
 
