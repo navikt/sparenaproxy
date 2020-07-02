@@ -5,6 +5,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
 import java.util.UUID
@@ -13,7 +14,7 @@ import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SmregisterClient(
-    private val spokelseEndpointURL: String,
+    private val smregisterEndpointURL: String,
     private val accessTokenClient: AccessTokenClient,
     private val resourceId: String,
     private val httpClient: HttpClient
@@ -23,16 +24,17 @@ class SmregisterClient(
         log.info("Henter sykmeldingstatus for planlagtMelding {}", planlagtMeldingId)
         try {
             val sykmeldingstatus = hentSykmeldingstatus(fnr)
-            return !(!sykmeldingstatus.erSykmeldt || (sykmeldingstatus.grad != null && sykmeldingstatus.grad < 100))
+            return sykmeldingstatus.erSykmeldt && sykmeldingstatus.gradert == false
         } catch (e: Exception) {
             log.error("Feil ved henting av sykmeldingstatus for planlagtMelding $planlagtMeldingId {}", e.message)
             throw e
         }
     }
 
-    private suspend fun hentSykmeldingstatus(fnr: String): Sykmeldingstatus =
-        httpClient.post<Sykmeldingstatus>("$spokelseEndpointURL/dokumenter") {
+    private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
+        httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v1/sykmelding/sykmeldtStatus") {
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
             val accessToken = accessTokenClient.hentAccessToken(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
@@ -46,7 +48,7 @@ data class StatusRequest(
     val dato: LocalDate = LocalDate.now()
 )
 
-data class Sykmeldingstatus(
+data class SykmeldtStatus(
     val erSykmeldt: Boolean,
-    val grad: Int?
+    val gradert: Boolean? = null
 )

@@ -1,12 +1,15 @@
 package no.nav.syfo.aktivermelding
 
 import io.ktor.util.KtorExperimentalAPI
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.client.SmregisterClient
+import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
+import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
-import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.log
@@ -17,7 +20,7 @@ class AktiverMeldingService(
     private val aktiverMeldingConsumer: AktiverMeldingConsumer,
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,
-    private val arenaMqProducer: ArenaMqProducer
+    private val arenaMeldingService: ArenaMeldingService
 ) {
     suspend fun start() {
         while (applicationState.ready) {
@@ -35,12 +38,12 @@ class AktiverMeldingService(
         if (planlagtMelding != null) {
             val skalSendeMelding = smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
             if (skalSendeMelding) {
-                log.info("Oppretter melding til Arena... {}", aktiverMelding.id)
-                // opprett riktig melding
-                // send til arena
+                log.info("Sender melding med id {} til Arena", aktiverMelding.id)
+                arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
+                database.sendPlanlagtMelding(aktiverMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
             } else {
-                log.info("Avbryter melding.. {}", aktiverMelding.id)
-                // avbryt
+                log.info("Avbryter melding med id {}", aktiverMelding.id)
+                database.avbrytPlanlagtMelding(aktiverMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
             }
         } else {
             log.warn("Fant ikke planlagt melding for id ${aktiverMelding.id} som ikke er sendt eller avbrutt fra før")

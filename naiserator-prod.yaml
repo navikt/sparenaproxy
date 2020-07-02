@@ -56,6 +56,8 @@ spec:
       value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/token
     - name: SPOKELSE_CLIENTID
       value: 2cfc9652-f3c7-4b23-a43b-e8844f49aeca
+    - name: SMREGISTER_CLIENTID
+      value: 96a10e4e-4437-47a2-ae9c-2f1c1634340e
     - name: MQ_HOST_NAME
       value: a01apvl063.adeo.no
     - name: MQ_PORT
