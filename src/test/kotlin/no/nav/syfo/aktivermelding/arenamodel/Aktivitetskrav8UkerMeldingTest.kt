@@ -24,7 +24,7 @@ object Aktivitetskrav8UkerMeldingTest : Spek({
         it("N2810 får riktig tekstverdi") {
             val n2810SomTekst = n2810.tilTekst()
 
-            n2810SomTekst shouldEqual "N2810   SENDMELDINGIT00         0048219062020235157    12345678910  SPO "
+            n2810SomTekst shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO "
         }
         it("N2820 får riktig tekstverdi") {
             val n2820SomTekst = N2820().tilTekst()
@@ -39,15 +39,15 @@ object Aktivitetskrav8UkerMeldingTest : Spek({
         it("N2840 får riktig tekstverdi") {
             val n2840SomTekst = N2840().tilTekst()
 
-            n2840SomTekst shouldEqual "N2840   00001INF: Aktivitetskrav ved 8 uker 100% sykmeldt                                    " // lengde 93
+            n2840SomTekst shouldEqual "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 93
         }
         it("Aktivitetskravmelding får riktig tekstverdi") {
             val aktivitetskravMqMelding = aktivitetskrav8UkerMelding.tilMqMelding()
 
-            aktivitetskravMqMelding shouldEqual "N2810   SENDMELDINGIT00         0048219062020235157    12345678910  SPO " +
+            aktivitetskravMqMelding shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO " +
                     "N2820   00001                                                                                                                                                                                            " +
                     "N2830   00001M-RK68-1  00802052020                                                                                  " +
-                    "N2840   00001INF: Aktivitetskrav ved 8 uker 100% sykmeldt                                    " // lengde 482
+                    "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 482
         }
     }
 })
