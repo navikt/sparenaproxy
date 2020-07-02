@@ -36,7 +36,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = JacksonKafkaDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
-        val kafkaAktiverMeldingConsumer = KafkaConsumer<String, AktiverMelding>(properties)
+        val kafkaAktiverMeldingConsumer = KafkaConsumer<String, AktiverMelding>(properties, StringDeserializer(), JacksonKafkaDeserializer(AktiverMelding::class))
         kafkaAktiverMeldingConsumer.subscribe(listOf(env.aktiverMeldingTopic))
         return kafkaAktiverMeldingConsumer
     }
