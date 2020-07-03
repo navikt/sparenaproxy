@@ -7,12 +7,12 @@ import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KUN_LAGRET_VEDTAK
 import no.nav.syfo.application.metrics.OPPRETTET_PLANLAGT_MELDING
-import no.nav.syfo.lagrevedtak.db.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.lagrevedtak.db.PlanlagtMeldingDbModel
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEvent
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
 import no.nav.syfo.log
+import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.PlanlagtMeldingDbModel
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
 

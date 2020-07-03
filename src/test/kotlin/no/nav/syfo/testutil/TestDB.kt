@@ -4,15 +4,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
-import no.nav.syfo.lagrevedtak.db.PlanlagtMeldingDbModel
+import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.flywaydb.core.Flyway
 
@@ -41,6 +42,34 @@ fun Connection.dropData() {
     }
 }
 
+fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
+    this.prepareStatement(
+        """
+            INSERT INTO planlagt_melding(
+                id,
+                fnr,
+                startdato,
+                type,
+                opprettet,
+                sendes,
+                avbrutt,
+                sendt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             """
+    ).use {
+        it.setObject(1, planlagtMeldingDbModel.id)
+        it.setString(2, planlagtMeldingDbModel.fnr)
+        it.setObject(3, planlagtMeldingDbModel.startdato)
+        it.setString(4, planlagtMeldingDbModel.type)
+        it.setTimestamp(5, Timestamp.from(planlagtMeldingDbModel.opprettet.toInstant()))
+        it.setTimestamp(6, Timestamp.from(planlagtMeldingDbModel.sendes.toInstant()))
+        it.setTimestamp(7, if (planlagtMeldingDbModel.avbrutt != null) { Timestamp.from(planlagtMeldingDbModel.avbrutt?.toInstant()) } else { null })
+        it.setTimestamp(8, if (planlagtMeldingDbModel.sendt != null) { Timestamp.from(planlagtMeldingDbModel.sendt?.toInstant()) } else { null })
+        it.execute()
+    }
+    this.commit()
+}
+
 fun Connection.hentPlanlagtMelding(fnr: String, startdato: LocalDate): List<PlanlagtMeldingDbModel> =
     this.prepareStatement(
         """
@@ -51,18 +80,6 @@ fun Connection.hentPlanlagtMelding(fnr: String, startdato: LocalDate): List<Plan
         it.setObject(2, startdato)
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }
     }
-
-fun ResultSet.toPlanlagtMeldingDbModel(): PlanlagtMeldingDbModel =
-    PlanlagtMeldingDbModel(
-        id = getObject("id", UUID::class.java),
-        fnr = getString("fnr"),
-        startdato = getObject("startdato", LocalDate::class.java),
-        type = getString("type"),
-        opprettet = getTimestamp("opprettet").toInstant().atOffset(ZoneOffset.UTC),
-        sendes = getTimestamp("sendes").toInstant().atOffset(ZoneOffset.UTC),
-        avbrutt = getTimestamp("avbrutt")?.toInstant()?.atOffset(ZoneOffset.UTC),
-        sendt = getTimestamp("sendt")?.toInstant()?.atOffset(ZoneOffset.UTC)
-    )
 
 fun Connection.hentUtbetaltEvent(fnr: String, startdato: LocalDate): List<UtbetaltEvent> =
     this.prepareStatement(

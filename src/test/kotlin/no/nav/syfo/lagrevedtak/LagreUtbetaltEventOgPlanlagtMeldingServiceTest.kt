@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.syfo.lagrevedtak.db.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding

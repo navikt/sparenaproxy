@@ -14,10 +14,16 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import java.net.ProxySelector
+import javax.jms.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import no.nav.syfo.aktivermelding.AktiverMeldingService
+import no.nav.syfo.aktivermelding.ArenaMeldingService
+import no.nav.syfo.aktivermelding.client.SmregisterClient
+import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
+import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
@@ -31,6 +37,8 @@ import no.nav.syfo.lagrevedtak.VedtakService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
+import no.nav.syfo.mq.connectionFactory
+import no.nav.syfo.mq.producerForQueue
 import no.nav.syfo.util.KafkaClients
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
@@ -81,11 +89,23 @@ fun main() {
     val syfoSyketilfelleClient = SyfoSyketilfelleClient(env.syketilfelleEndpointURL, oidcClient, httpClient, env.cluster)
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
     val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClient, env.clientIdSpokelse, httpClient)
+    val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClient, env.clientIdSmregister, httpClient)
+
+    val connection = connectionFactory(env).createConnection(vaultSecrets.mqUsername, vaultSecrets.mqPassword)
+
+    connection.start()
+    val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
+    val arenaProducer = session.producerForQueue(env.arenaQueueName)
+    val arenaMqProducer = ArenaMqProducer(session, arenaProducer)
+    val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
 
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val utbetaltEventConsumer = UtbetaltEventConsumer(kafkaClients.kafkaUtbetaltEventConsumer)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val vedtakService = VedtakService(applicationState, utbetaltEventConsumer, spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService)
+
+    val aktiverMeldingConsumer = AktiverMeldingConsumer(kafkaClients.kafkaAktiverMeldingConsumer)
+    val aktiverMeldingService = AktiverMeldingService(applicationState, aktiverMeldingConsumer, database, smregisterClient, arenaMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -99,6 +119,9 @@ fun main() {
 
     createListener(applicationState) {
         vedtakService.start()
+    }
+    createListener(applicationState) {
+        aktiverMeldingService.start()
     }
 }
 
