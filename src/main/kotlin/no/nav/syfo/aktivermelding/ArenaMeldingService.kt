@@ -2,7 +2,7 @@ package no.nav.syfo.aktivermelding
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import no.nav.syfo.aktivermelding.arenamodel.Aktivitetskrav8UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.N2810
@@ -23,7 +23,7 @@ class ArenaMeldingService(
 
     fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
         if (planlagtMeldingDbModel.type == AKTIVITETSKRAV_8_UKER_TYPE) {
-            arenaMqProducer.sendTilArena(til8Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneOffset.UTC)).tilMqMelding())
+            arenaMqProducer.sendTilArena(til8Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
             log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
         } else {
             log.error("Planlagt melding {} har ukjent type: {}", planlagtMeldingDbModel.id, planlagtMeldingDbModel.type)
