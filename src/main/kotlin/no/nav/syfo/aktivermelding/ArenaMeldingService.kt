@@ -25,9 +25,10 @@ class ArenaMeldingService(
         if (planlagtMeldingDbModel.type == AKTIVITETSKRAV_8_UKER_TYPE) {
             arenaMqProducer.sendTilArena(til8Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneOffset.UTC)).tilMqMelding())
             log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+        } else {
+            log.error("Planlagt melding {} har ukjent type: {}", planlagtMeldingDbModel.id, planlagtMeldingDbModel.type)
+            throw IllegalStateException("Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}")
         }
-        log.error("Planlagt melding {} har ukjent type: {}", planlagtMeldingDbModel.id, planlagtMeldingDbModel.type)
-        throw IllegalStateException("Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}")
     }
 
     fun til8Ukersmelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel, now: OffsetDateTime): Aktivitetskrav8UkerMelding {
