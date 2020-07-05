@@ -14,12 +14,11 @@ import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
 import no.nav.syfo.testutil.lagrePlanlagtMelding
+import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
 import org.spekframework.spek2.Spek
@@ -68,7 +67,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
-        it("Sender og oppdaterer hvis bruker fortsatt er 100% sykmeldt") {
+        it("Sender, men oppdaterer ikke i db hvis bruker fortsatt er 100% sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
@@ -80,7 +79,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
-            planlagtMelding.sendt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
         it("Avbryter hvis bruker ikke lenger er sykmeldt") {
@@ -100,16 +99,3 @@ object AktiverMeldingServiceTest : Spek({
         }
     }
 })
-
-fun opprettPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime? = null, sendt: OffsetDateTime? = null): PlanlagtMeldingDbModel {
-    return PlanlagtMeldingDbModel(
-        id = id,
-        fnr = "fnr",
-        startdato = LocalDate.of(2020, 1, 14),
-        opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(1),
-        type = AKTIVITETSKRAV_8_UKER_TYPE,
-        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(30),
-        avbrutt = avbrutt,
-        sendt = sendt
-    )
-}

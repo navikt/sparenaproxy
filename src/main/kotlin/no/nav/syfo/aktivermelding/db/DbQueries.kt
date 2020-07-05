@@ -3,6 +3,7 @@ package no.nav.syfo.aktivermelding.db
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
@@ -29,7 +30,13 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
     }
 }
 
-fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
+fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? {
+    connection.use { connection ->
+        return connection.finnPlanlagtMeldingUnderSending(fnr)
+    }
+}
+
+private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
     this.prepareStatement(
         """
             SELECT * FROM planlagt_melding WHERE id=? AND sendt is null and avbrutt is null;
@@ -39,7 +46,7 @@ fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
     }
 
-fun Connection.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) =
+private fun Connection.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) =
     this.prepareStatement(
         """
             UPDATE planlagt_melding SET avbrutt=? WHERE id=?;
@@ -50,7 +57,7 @@ fun Connection.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) =
         it.execute()
     }
 
-fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
+private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
     this.prepareStatement(
         """
             UPDATE planlagt_melding SET sendt=? WHERE id=?;
@@ -59,4 +66,15 @@ fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
         it.setTimestamp(1, Timestamp.from(sendt.toInstant()))
         it.setObject(2, id)
         it.execute()
+    }
+
+private fun Connection.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? =
+    this.prepareStatement(
+        """
+            SELECT * FROM planlagt_melding WHERE fnr=? AND sendt is null and avbrutt is null AND sendes<?;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setTimestamp(2, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()))
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
     }
