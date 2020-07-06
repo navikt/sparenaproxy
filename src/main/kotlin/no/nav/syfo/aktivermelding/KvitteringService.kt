@@ -13,9 +13,6 @@ class KvitteringService(
     private val database: DatabaseInterface
 ) {
     fun behandleKvittering(kvitteringsmelding: String) {
-        // finn fnr fra melding, sjekk at status er ok
-        // sett sendt på melding på fnr som ikke er sendt/avbrutt. Hvis ingen treff: ok
-        // fjern setting av "sendt" fra meldingservicen
         val kvittering = tilKvittering(kvitteringsmelding)
 
         if (kvittering.statusOk == "J") {
