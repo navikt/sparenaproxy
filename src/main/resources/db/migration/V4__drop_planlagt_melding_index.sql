@@ -1,0 +1,2 @@
+DROP INDEX CONCURRENTLY planlagt_melding_fnrsd_idx;
+DROP INDEX CONCURRENTLY planlagt_melding_send_idx;
