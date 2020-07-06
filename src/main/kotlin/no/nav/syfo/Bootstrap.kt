@@ -21,9 +21,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.ArenaMeldingService
+import no.nav.syfo.aktivermelding.KvitteringService
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
+import no.nav.syfo.aktivermelding.mq.KvitteringListener
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
@@ -38,6 +40,7 @@ import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.mq.connectionFactory
+import no.nav.syfo.mq.consumerForQueue
 import no.nav.syfo.mq.producerForQueue
 import no.nav.syfo.util.KafkaClients
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
@@ -94,7 +97,9 @@ fun main() {
     val connection = connectionFactory(env).createConnection(vaultSecrets.mqUsername, vaultSecrets.mqPassword)
 
     connection.start()
-    val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
+    val session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE)
+    val kvitteringConsumer = session.consumerForQueue(env.kvitteringQueueName)
+    val backoutProducer = session.producerForQueue(env.backoutQueueName)
     val arenaProducer = session.producerForQueue(env.arenaQueueName)
     val arenaMqProducer = ArenaMqProducer(session, arenaProducer)
     val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
@@ -106,6 +111,9 @@ fun main() {
 
     val aktiverMeldingConsumer = AktiverMeldingConsumer(kafkaClients.kafkaAktiverMeldingConsumer)
     val aktiverMeldingService = AktiverMeldingService(applicationState, aktiverMeldingConsumer, database, smregisterClient, arenaMeldingService)
+
+    val kvitteringService = KvitteringService(database)
+    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, kvitteringService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -122,6 +130,9 @@ fun main() {
     }
     createListener(applicationState) {
         aktiverMeldingService.start()
+    }
+    createListener(applicationState) {
+        kvitteringListener.start()
     }
 }
 

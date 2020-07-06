@@ -28,7 +28,9 @@ data class Environment(
     override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
     override val mqGatewayName: String = getEnvVar("MQ_GATEWAY_NAME"),
     override val mqChannelName: String = getEnvVar("MQ_CHANNEL_NAME"),
-    val arenaQueueName: String = getEnvVar("MQ_ARENA_QUEUE_NAME")
+    val arenaQueueName: String = getEnvVar("MQ_ARENA_QUEUE_NAME"),
+    val kvitteringQueueName: String = getEnvVar("MQ_KVITTERING_QUEUE_NAME"),
+    val backoutQueueName: String = getEnvVar("MQ_KVITTERING_BQ_QUEUE_NAME")
 ) : MqConfig, KafkaConfig
 
 data class VaultSecrets(

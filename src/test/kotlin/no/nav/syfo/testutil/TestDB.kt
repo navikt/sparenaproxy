@@ -81,6 +81,16 @@ fun Connection.hentPlanlagtMelding(fnr: String, startdato: LocalDate): List<Plan
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }
     }
 
+fun Connection.hentPlanlagtMeldingMedId(id: UUID): PlanlagtMeldingDbModel? =
+    this.prepareStatement(
+        """
+            SELECT * FROM planlagt_melding WHERE id=?;
+            """
+    ).use {
+        it.setObject(1, id)
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
+    }
+
 fun Connection.hentUtbetaltEvent(fnr: String, startdato: LocalDate): List<UtbetaltEvent> =
     this.prepareStatement(
         """
