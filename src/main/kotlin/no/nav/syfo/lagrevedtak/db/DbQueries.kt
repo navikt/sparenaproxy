@@ -80,7 +80,7 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
     }
 }
 
-private fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
+fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
     this.prepareStatement(
         """
             INSERT INTO planlagt_melding(

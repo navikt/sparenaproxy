@@ -17,6 +17,8 @@ data class Environment(
     val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
     val utbetaltEventTopic: String = getEnvVar("UTBETALTEVENT_TOPIC", "helse-rapid-v1"),
     val aktiverMeldingTopic: String = getEnvVar("AKTIVER_MELDING_TOPIC", "privat-aktiver-planlagtmelding"),
+    val sykmeldingManuellBehandlingTopic: String = getEnvVar("KAFKA_SM2013_MANUAL_TOPIC", "privat-syfo-sm2013-manuellBehandling"),
+    val sykmeldingAutomatiskBehandlingTopic: String = getEnvVar("KAFKA_SM2013_AUTOMATIC_TOPIC", "privat-syfo-sm2013-automatiskBehandling"),
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL", "http://syfosyketilfelle"),
     val smregisterEndpointURL: String = getEnvVar("SMREGISTER_ENDPOINT_URL", "http://syfosmregister"),
     val spokelseEndpointURL: String = getEnvVar("SPOKELSE_ENDPOINT_URL", "http://spokelse.tbd.svc.nais.local"),

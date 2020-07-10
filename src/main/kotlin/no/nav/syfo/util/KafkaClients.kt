@@ -16,6 +16,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
 
     val kafkaUtbetaltEventConsumer = getKafkaUtbetaltEventConsumer(baseConfig, env)
     val kafkaAktiverMeldingConsumer = getKafkaAktiverMeldingConsumer(baseConfig, env)
+    val mottattSykmeldingKafkaConsumer = getMottattSykmeldingKafkaConsumer(baseConfig, env)
 
     private fun getBaseConfig(vaultSecrets: VaultSecrets, env: Environment): Properties {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
@@ -39,5 +40,14 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val kafkaAktiverMeldingConsumer = KafkaConsumer<String, AktiverMelding>(properties, StringDeserializer(), JacksonKafkaDeserializer(AktiverMelding::class))
         kafkaAktiverMeldingConsumer.subscribe(listOf(env.aktiverMeldingTopic))
         return kafkaAktiverMeldingConsumer
+    }
+
+    fun getMottattSykmeldingKafkaConsumer(kafkaBaseConfig: Properties, env: Environment): KafkaConsumer<String, String> {
+        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = StringDeserializer::class)
+        properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
+
+        val mottattSykmeldingKafkaConsumer = KafkaConsumer<String, String>(properties)
+        mottattSykmeldingKafkaConsumer.subscribe(listOf(env.sykmeldingAutomatiskBehandlingTopic, env.sykmeldingManuellBehandlingTopic))
+        return mottattSykmeldingKafkaConsumer
     }
 }

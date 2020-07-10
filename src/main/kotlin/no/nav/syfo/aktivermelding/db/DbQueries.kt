@@ -7,6 +7,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
+import no.nav.syfo.lagrevedtak.db.lagrePlanlagtMelding
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 
@@ -33,6 +34,21 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
 fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? {
     connection.use { connection ->
         return connection.finnPlanlagtMeldingUnderSending(fnr)
+    }
+}
+
+fun DatabaseInterface.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> {
+    connection.use { connection ->
+        return connection.finnAvbruttAktivitetskravmelding(fnr)
+    }
+}
+
+fun DatabaseInterface.lagrePlanlagtMelding(
+    planlagtMelding: PlanlagtMeldingDbModel
+) {
+    connection.use { connection ->
+        connection.lagrePlanlagtMelding(planlagtMelding)
+        connection.commit()
     }
 }
 
@@ -77,4 +93,14 @@ private fun Connection.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMel
         it.setString(1, fnr)
         it.setTimestamp(2, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()))
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
+    }
+
+private fun Connection.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> =
+    this.prepareStatement(
+        """
+            SELECT * FROM planlagt_melding WHERE fnr=? AND type='8UKER' AND avbrutt is not null;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }
     }

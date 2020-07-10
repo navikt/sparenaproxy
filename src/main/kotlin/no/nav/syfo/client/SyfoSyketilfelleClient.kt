@@ -1,4 +1,4 @@
-package no.nav.syfo.lagrevedtak.client
+package no.nav.syfo.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -19,16 +19,16 @@ class SyfoSyketilfelleClient(
     private val cluster: String
 ) {
 
-    suspend fun finnStartdato(aktorId: String, sykmeldingId: String, utbetaltEventId: UUID): LocalDate {
+    suspend fun finnStartdato(aktorId: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
         val sykeforloep = hentSykeforloep(aktorId)
         val aktueltSykeforloep = sykeforloep.firstOrNull {
             it.sykmeldinger.any { simpleSykmelding -> simpleSykmelding.id == sykmeldingId }
         }
 
         if (aktueltSykeforloep == null) {
-            log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", utbetaltEventId)
+            log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", sporingsId)
             if (cluster == "dev-fss") {
-                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", utbetaltEventId)
+                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", sporingsId)
                 return LocalDate.now().minusMonths(1)
             }
             throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
