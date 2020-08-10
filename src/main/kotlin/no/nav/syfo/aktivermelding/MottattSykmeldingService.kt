@@ -42,7 +42,6 @@ class MottattSykmeldingService(
     // riktig å sende melding hvis det kommer inn en ny sykmelding som ikke er gradert hvis det finnes avbrutt melding
     // for samme sykeforløp (samme startdato).
     suspend fun behandleMottattSykmelding(receivedSykmelding: ReceivedSykmelding) {
-        // hva med flere arbeidsgivere?
         val sykmeldingId = receivedSykmelding.sykmelding.id
         if (inneholderGradertPeriode(receivedSykmelding.sykmelding.perioder)) {
             log.info("Ignorerer gradert sykmelding med id {}", sykmeldingId)
@@ -79,7 +78,6 @@ class MottattSykmeldingService(
             log.info("Ignorerer sykmelding med id {} som det ikke finnes avbrutte meldinger for", sykmeldingId)
             return null
         }
-        // vil syfosyketilfelle være oppdatert med dette..?
         val startdato = syfoSyketilfelleClient.finnStartdato(aktorId, sykmeldingId, UUID.fromString(sykmeldingId))
         return avbrutteAktivitetskravMeldinger.firstOrNull { it.startdato == startdato }
     }
