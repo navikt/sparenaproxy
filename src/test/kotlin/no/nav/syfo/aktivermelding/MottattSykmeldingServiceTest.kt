@@ -11,6 +11,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.SyfoSyketilfelleClient
@@ -101,7 +102,7 @@ object MottattSykmeldingServiceTest : Spek({
             coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
-        it("Oppretter og sender ny melding hvis avbrutt melding for samme sykeforløp og sykmelding ikke er gradert") {
+        it("Oppdaterer og sender tidligere avbrutt melding for samme sykeforløp hvis sykmelding ikke er gradert") {
             coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910", listOf(
@@ -124,7 +125,36 @@ object MottattSykmeldingServiceTest : Spek({
             coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
-            meldinger.size shouldEqual 2
+            meldinger.size shouldEqual 1
+            meldinger[0].avbrutt shouldEqual null
+        }
+        it("Skal ikke sende ny melding hvis melding er sent før") {
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
+            val receivedSykmelding = opprettReceivedSykmelding(
+                "12345678910", listOf(
+                    Periode(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusWeeks(3),
+                        aktivitetIkkeMulig = AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, emptyList()), arbeidsrelatertArsak = null),
+                        avventendeInnspillTilArbeidsgiver = null,
+                        behandlingsdager = null,
+                        gradert = null,
+                        reisetilskudd = false
+                    )
+                )
+            )
+
+            runBlocking {
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+                testDb.sendPlanlagtMelding(idAvbrutt, OffsetDateTime.now(ZoneOffset.UTC))
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+            }
+
+            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+            coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
+            meldinger.size shouldEqual 1
+            meldinger[0].avbrutt shouldEqual null
         }
     }
 

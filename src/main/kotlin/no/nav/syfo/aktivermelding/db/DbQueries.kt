@@ -7,7 +7,6 @@ import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
-import no.nav.syfo.lagrevedtak.db.lagrePlanlagtMelding
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 
@@ -31,6 +30,13 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
     }
 }
 
+fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
+    connection.use { connection ->
+        connection.resendAvbruttMelding(id)
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? {
     connection.use { connection ->
         return connection.finnPlanlagtMeldingUnderSending(fnr)
@@ -40,15 +46,6 @@ fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeld
 fun DatabaseInterface.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> {
     connection.use { connection ->
         return connection.finnAvbruttAktivitetskravmelding(fnr)
-    }
-}
-
-fun DatabaseInterface.lagrePlanlagtMelding(
-    planlagtMelding: PlanlagtMeldingDbModel
-) {
-    connection.use { connection ->
-        connection.lagrePlanlagtMelding(planlagtMelding)
-        connection.commit()
     }
 }
 
@@ -81,6 +78,16 @@ private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
     ).use {
         it.setTimestamp(1, Timestamp.from(sendt.toInstant()))
         it.setObject(2, id)
+        it.execute()
+    }
+
+private fun Connection.resendAvbruttMelding(id: UUID) =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET avbrutt=null WHERE id=?;
+            """
+    ).use {
+        it.setObject(1, id)
         it.execute()
     }
 

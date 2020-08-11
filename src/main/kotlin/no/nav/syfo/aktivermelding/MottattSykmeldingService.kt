@@ -2,12 +2,10 @@ package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.util.KtorExperimentalAPI
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
-import no.nav.syfo.aktivermelding.db.lagrePlanlagtMelding
+import no.nav.syfo.aktivermelding.db.resendAvbruttMelding
 import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
@@ -54,16 +52,9 @@ class MottattSykmeldingService(
         if (avbruttMelding == null) {
             log.info("Fant ingen matchende avbrutte meldinger, ignorerer sykmelding med id {}", sykmeldingId)
         } else {
-            val id = UUID.randomUUID()
-            val planlagtMelding = avbruttMelding.copy(
-                id = id,
-                opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-                sendes = OffsetDateTime.now(ZoneOffset.UTC),
-                avbrutt = null
-            )
-            log.info("Lagrer og sender melding med id {} for sykmeldingid {}", id, sykmeldingId)
-            database.lagrePlanlagtMelding(planlagtMelding)
-            arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
+            log.info("Sender melding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
+            database.resendAvbruttMelding(avbruttMelding.id)
+            arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
             SENDT_AVBRUTT_MELDING.inc()
         }
     }
