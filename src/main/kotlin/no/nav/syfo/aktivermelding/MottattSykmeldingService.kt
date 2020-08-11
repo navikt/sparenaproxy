@@ -23,7 +23,8 @@ class MottattSykmeldingService(
     private val mottattSykmeldingConsumer: MottattSykmeldingConsumer,
     private val database: DatabaseInterface,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
-    private val arenaMeldingService: ArenaMeldingService
+    private val arenaMeldingService: ArenaMeldingService,
+    private val skalVenteLitt: Boolean = true
 ) {
     suspend fun start() {
         while (applicationState.ready) {
@@ -68,6 +69,9 @@ class MottattSykmeldingService(
         if (avbrutteAktivitetskravMeldinger.isEmpty()) {
             log.info("Ignorerer sykmelding med id {} som det ikke finnes avbrutte meldinger for", sykmeldingId)
             return null
+        }
+        if (skalVenteLitt) {
+            delay(5000) // Venter slik at sykmeldingen kommer inn i syfosyketilfelle...
         }
         val startdato = syfoSyketilfelleClient.finnStartdato(aktorId, sykmeldingId, UUID.fromString(sykmeldingId))
         return avbrutteAktivitetskravMeldinger.firstOrNull { it.startdato == startdato }

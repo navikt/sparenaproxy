@@ -36,7 +36,7 @@ object MottattSykmeldingServiceTest : Spek({
     val mottattSykmeldingConsumer = mockk<MottattSykmeldingConsumer>()
     val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
     val syfoSyketilfelleClient = mockk<SyfoSyketilfelleClient>()
-    val mottattSykmeldingService = MottattSykmeldingService(ApplicationState(alive = true, ready = true), mottattSykmeldingConsumer, testDb, syfoSyketilfelleClient, arenaMeldingService)
+    val mottattSykmeldingService = MottattSykmeldingService(ApplicationState(alive = true, ready = true), mottattSykmeldingConsumer, testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
     val idAvbrutt = UUID.randomUUID()
     val idAvbrutt2 = UUID.randomUUID()
     val idIkkeAvbrutt = UUID.randomUUID()
