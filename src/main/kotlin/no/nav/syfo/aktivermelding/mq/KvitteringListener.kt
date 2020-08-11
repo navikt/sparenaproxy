@@ -30,7 +30,7 @@ class KvitteringListener(
                 log.info("Mottatt kvittering")
                 kvitteringService.behandleKvittering(inputMessageText)
             } catch (e: Exception) {
-                log.error("Noe gikk galt ved håndtering av kvitteringsmelding, sender medling til backout", e.message)
+                log.error("Noe gikk galt ved håndtering av kvitteringsmelding, sender melding til backout", e.message)
                 backoutProducer.send(message)
                 KVITTERING_FEILET.inc()
             } finally {

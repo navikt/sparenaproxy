@@ -30,9 +30,22 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
     }
 }
 
+fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
+    connection.use { connection ->
+        connection.resendAvbruttMelding(id)
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? {
     connection.use { connection ->
         return connection.finnPlanlagtMeldingUnderSending(fnr)
+    }
+}
+
+fun DatabaseInterface.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> {
+    connection.use { connection ->
+        return connection.finnAvbruttAktivitetskravmelding(fnr)
     }
 }
 
@@ -68,6 +81,16 @@ private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
         it.execute()
     }
 
+private fun Connection.resendAvbruttMelding(id: UUID) =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET avbrutt=null WHERE id=?;
+            """
+    ).use {
+        it.setObject(1, id)
+        it.execute()
+    }
+
 private fun Connection.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? =
     this.prepareStatement(
         """
@@ -77,4 +100,14 @@ private fun Connection.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMel
         it.setString(1, fnr)
         it.setTimestamp(2, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()))
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
+    }
+
+private fun Connection.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> =
+    this.prepareStatement(
+        """
+            SELECT * FROM planlagt_melding WHERE fnr=? AND type='8UKER' AND avbrutt is not null;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }
     }

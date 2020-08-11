@@ -22,8 +22,10 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.ArenaMeldingService
 import no.nav.syfo.aktivermelding.KvitteringService
+import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
+import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.aktivermelding.mq.KvitteringListener
 import no.nav.syfo.application.ApplicationServer
@@ -33,11 +35,11 @@ import no.nav.syfo.application.db.Database
 import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClient
+import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.VedtakService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
-import no.nav.syfo.lagrevedtak.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
@@ -89,7 +91,12 @@ fun main() {
     val httpClient = HttpClient(Apache, config)
 
     val oidcClient = StsOidcClient(username = vaultSecrets.serviceuserUsername, password = vaultSecrets.serviceuserPassword, stsUrl = env.stsUrl)
-    val syfoSyketilfelleClient = SyfoSyketilfelleClient(env.syketilfelleEndpointURL, oidcClient, httpClient, env.cluster)
+    val syfoSyketilfelleClient = SyfoSyketilfelleClient(
+        env.syketilfelleEndpointURL,
+        oidcClient,
+        httpClient,
+        env.cluster
+    )
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
     val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClient, env.clientIdSpokelse, httpClient)
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClient, env.clientIdSmregister, httpClient)
@@ -115,6 +122,9 @@ fun main() {
     val kvitteringService = KvitteringService(database)
     val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, kvitteringService)
 
+    val mottattSykmeldingConsumer = MottattSykmeldingConsumer(kafkaClients.mottattSykmeldingKafkaConsumer)
+    val mottattSykmeldingService = MottattSykmeldingService(applicationState, mottattSykmeldingConsumer, database, syfoSyketilfelleClient, arenaMeldingService)
+
     val applicationEngine = createApplicationEngine(
         env,
         applicationState
@@ -133,6 +143,9 @@ fun main() {
     }
     createListener(applicationState) {
         kvitteringListener.start()
+    }
+    createListener(applicationState) {
+        mottattSykmeldingService.start()
     }
 }
 

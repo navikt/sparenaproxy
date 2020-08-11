@@ -81,6 +81,7 @@ dependencies {
 
     implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
     implementation("no.nav.helse:syfosm-common-mq:$smCommonVersion")
+    implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")

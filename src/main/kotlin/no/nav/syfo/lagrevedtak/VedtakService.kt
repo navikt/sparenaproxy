@@ -4,8 +4,8 @@ import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
+import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
-import no.nav.syfo.lagrevedtak.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
