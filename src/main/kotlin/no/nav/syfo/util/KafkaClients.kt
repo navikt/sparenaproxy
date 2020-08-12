@@ -55,7 +55,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
     }
 
     private fun getPersonhendelserKafkaConsumer(kafkaBaseConfig: Properties, env: Environment): KafkaConsumer<String, GenericRecord> {
-        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class, keyDeserializer = KafkaAvroDeserializer::class)
+        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
         val personhendelserKafkaConsumer = KafkaConsumer<String, GenericRecord>(properties)
