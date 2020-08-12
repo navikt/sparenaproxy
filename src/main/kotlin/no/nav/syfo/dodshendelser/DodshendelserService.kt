@@ -21,7 +21,6 @@ class DodshendelserService(
         while (applicationState.ready) {
             val personhendelse = personhendelserConsumer.poll()
             personhendelse.forEach {
-                log.info("Debug: Leser melding")
                 if (it.hendelseGjelderDodsfall()) {
                     handleDodsfall(it.hentPersonidenter())
                 }
@@ -32,11 +31,14 @@ class DodshendelserService(
 
     fun handleDodsfall(personidenter: List<String>) {
         log.info("Avbryter eventuelle planlagte meldinger for avdød bruker")
-        database.avbrytPlanlagteMeldingerVedDodsfall(personidenter, OffsetDateTime.now(ZoneOffset.UTC))
-        AVBRUTT_MELDING_DODSFALL.inc()
+        val antallAvbrutteMeldinger = database.avbrytPlanlagteMeldingerVedDodsfall(personidenter, OffsetDateTime.now(ZoneOffset.UTC))
+        if (antallAvbrutteMeldinger > 0) {
+            log.info("Avbrøt $antallAvbrutteMeldinger melding(er) pga dødsfall")
+            AVBRUTT_MELDING_DODSFALL.inc()
+        }
     }
 
-    fun GenericRecord.hendelseGjelderDodsfall() =
+    private fun GenericRecord.hendelseGjelderDodsfall() =
         erDodsfall() && (hentEndringstype() == "OPPRETTET" || hentEndringstype() == "KORRIGERT")
 
     private fun GenericRecord.hentOpplysningstype() =
