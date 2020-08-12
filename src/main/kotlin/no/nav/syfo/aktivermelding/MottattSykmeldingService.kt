@@ -67,7 +67,6 @@ class MottattSykmeldingService(
     suspend fun finnAvbruttMeldingForSykeforloep(fnr: String, aktorId: String, sykmeldingId: String): PlanlagtMeldingDbModel? {
         val avbrutteAktivitetskravMeldinger = database.finnAvbruttAktivitetskravmelding(fnr)
         if (avbrutteAktivitetskravMeldinger.isEmpty()) {
-            log.info("Ignorerer sykmelding med id {} som det ikke finnes avbrutte meldinger for", sykmeldingId)
             return null
         }
         if (skalVenteLitt) {

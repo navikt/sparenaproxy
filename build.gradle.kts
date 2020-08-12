@@ -23,6 +23,7 @@ val flywayVersion = "5.2.4"
 val hikariVersion = "3.3.0"
 val vaultJavaDriveVersion = "3.1.0"
 val postgresEmbeddedVersion = "0.13.1"
+val confluentVersion = "5.0.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -95,6 +96,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion") 
     testImplementation("io.mockk:mockk:$mockkVersion")
