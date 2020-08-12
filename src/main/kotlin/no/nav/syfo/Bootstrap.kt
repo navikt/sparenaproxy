@@ -37,6 +37,8 @@ import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClient
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
+import no.nav.syfo.dodshendelser.DodshendelserService
+import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.VedtakService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
@@ -125,6 +127,9 @@ fun main() {
     val mottattSykmeldingConsumer = MottattSykmeldingConsumer(kafkaClients.mottattSykmeldingKafkaConsumer)
     val mottattSykmeldingService = MottattSykmeldingService(applicationState, mottattSykmeldingConsumer, database, syfoSyketilfelleClient, arenaMeldingService)
 
+    val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
+    val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
+
     val applicationEngine = createApplicationEngine(
         env,
         applicationState
@@ -146,6 +151,9 @@ fun main() {
     }
     createListener(applicationState) {
         mottattSykmeldingService.start()
+    }
+    createListener(applicationState) {
+        dodshendelserService.start()
     }
 }
 
