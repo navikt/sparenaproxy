@@ -6,6 +6,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
@@ -38,17 +39,25 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
 
             val planlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", startdato)
             val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
-            planlagtMeldingFraDbListe.size shouldEqual 1
+            planlagtMeldingFraDbListe.size shouldEqual 2
             utbetaltEventFraDbListe.size shouldEqual 1
-            val planlagtMeldingFraDb = planlagtMeldingFraDbListe.first()
+            val planlagtMelding8uker = planlagtMeldingFraDbListe.find { it.type == AKTIVITETSKRAV_8_UKER_TYPE }
+            val planlagtMelding39uker = planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
             val utbetaltEventFraDb = utbetaltEventFraDbListe.first()
 
-            planlagtMeldingFraDb.fnr shouldEqual "fnr"
-            planlagtMeldingFraDb.startdato shouldEqual startdato
-            planlagtMeldingFraDb.type shouldEqual AKTIVITETSKRAV_8_UKER_TYPE
-            planlagtMeldingFraDb.sendes shouldEqual startdato.plusWeeks(8).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
-            planlagtMeldingFraDb.sendt shouldEqual null
-            planlagtMeldingFraDb.avbrutt shouldEqual null
+            planlagtMelding8uker?.fnr shouldEqual "fnr"
+            planlagtMelding8uker?.startdato shouldEqual startdato
+            planlagtMelding8uker?.type shouldEqual AKTIVITETSKRAV_8_UKER_TYPE
+            planlagtMelding8uker?.sendes shouldEqual startdato.plusWeeks(8).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            planlagtMelding8uker?.sendt shouldEqual null
+            planlagtMelding8uker?.avbrutt shouldEqual null
+
+            planlagtMelding39uker?.fnr shouldEqual "fnr"
+            planlagtMelding39uker?.startdato shouldEqual startdato
+            planlagtMelding39uker?.type shouldEqual BREV_39_UKER_TYPE
+            planlagtMelding39uker?.sendes shouldEqual startdato.plusWeeks(39).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            planlagtMelding39uker?.sendt shouldEqual null
+            planlagtMelding39uker?.avbrutt shouldEqual null
 
             utbetaltEventFraDb shouldEqual utbetaltEvent
         }
@@ -61,7 +70,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
 
             val planlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", startdato)
             val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
-            planlagtMeldingFraDbListe.size shouldEqual 1
+            planlagtMeldingFraDbListe.size shouldEqual 2
             utbetaltEventFraDbListe.size shouldEqual 2
         }
         it("Lagrer vedtak og melding hvis planlagt melding finnes for tidligere syketilfelle for samme bruker") {
@@ -76,8 +85,8 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             val nestePlanlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", nesteStartdato)
             val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
             val nesteUtbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", nesteStartdato)
-            planlagtMeldingFraDbListe.size shouldEqual 1
-            nestePlanlagtMeldingFraDbListe.size shouldEqual 1
+            planlagtMeldingFraDbListe.size shouldEqual 2
+            nestePlanlagtMeldingFraDbListe.size shouldEqual 2
             utbetaltEventFraDbListe.size shouldEqual 1
             nesteUtbetaltEventFraDbListe.size shouldEqual 1
         }

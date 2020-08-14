@@ -16,6 +16,8 @@ import no.nav.syfo.application.metrics.IKKE_FUNNET_MELDING
 import no.nav.syfo.application.metrics.MOTTATT_AKTIVERMELDING
 import no.nav.syfo.application.metrics.SENDT_MELDING
 import no.nav.syfo.log
+import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 
 @KtorExperimentalAPI
 class AktiverMeldingService(
@@ -40,7 +42,18 @@ class AktiverMeldingService(
     suspend fun behandleAktiverMelding(aktiverMelding: AktiverMelding) {
         val planlagtMelding = database.hentPlanlagtMelding(aktiverMelding.id)
         if (planlagtMelding != null) {
-            val skalSendeMelding = smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+            val skalSendeMelding = when (planlagtMelding.type) {
+                AKTIVITETSKRAV_8_UKER_TYPE -> {
+                    smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                }
+                BREV_39_UKER_TYPE -> {
+                    smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                }
+                else -> {
+                    log.error("Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}")
+                    throw IllegalStateException("Planlagt melding har ukjent type")
+                }
+            }
             if (skalSendeMelding) {
                 log.info("Sender melding med id {} til Arena", aktiverMelding.id)
                 arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)

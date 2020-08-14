@@ -107,4 +107,31 @@ object SmregisterClientTest : Spek({
             erSykmeldt shouldEqual false
         }
     }
+
+    describe("Test av SmRegisterClient - sykmeldt uavhengig av grad") {
+        it("Er sykmeldt hvis sykmeldt og ikke gradert") {
+            var erSykmeldt: Boolean? = null
+            runBlocking {
+                erSykmeldt = smregisterClient.erSykmeldt("fnr", UUID.randomUUID())
+            }
+
+            erSykmeldt shouldEqual true
+        }
+        it("Er sykmeldt hvis sykmeldt, men gradert") {
+            var erSykmeldt: Boolean? = null
+            runBlocking {
+                erSykmeldt = smregisterClient.erSykmeldt("fnr-gradert", UUID.randomUUID())
+            }
+
+            erSykmeldt shouldEqual true
+        }
+        it("Er ikke sykmeldt hvis ikke lenger sykmeldt") {
+            var erSykmeldt: Boolean? = null
+            runBlocking {
+                erSykmeldt = smregisterClient.erSykmeldt("fnr-ikkesyk", UUID.randomUUID())
+            }
+
+            erSykmeldt shouldEqual false
+        }
+    }
 })

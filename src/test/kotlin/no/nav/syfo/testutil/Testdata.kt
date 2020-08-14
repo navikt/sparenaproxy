@@ -22,6 +22,7 @@ fun opprettPlanlagtMelding(
     id: UUID,
     fnr: String = "fnr",
     sendes: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(30),
+    type: String = AKTIVITETSKRAV_8_UKER_TYPE,
     avbrutt: OffsetDateTime? = null,
     sendt: OffsetDateTime? = null,
     startdato: LocalDate = LocalDate.of(2020, 1, 14)
@@ -31,7 +32,7 @@ fun opprettPlanlagtMelding(
         fnr = fnr,
         startdato = startdato,
         opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(1),
-        type = AKTIVITETSKRAV_8_UKER_TYPE,
+        type = type,
         sendes = sendes,
         avbrutt = avbrutt,
         sendt = sendt

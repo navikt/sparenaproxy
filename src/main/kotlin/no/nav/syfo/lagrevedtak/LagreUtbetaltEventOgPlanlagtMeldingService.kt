@@ -12,6 +12,7 @@ import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
@@ -24,14 +25,21 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
         } else {
             log.info("Lagrer utbetalingsevent {} og planlagte meldinger", utbetaltEvent.utbetalteventid)
             OPPRETTET_PLANLAGT_MELDING.labels(AKTIVITETSKRAV_8_UKER_TYPE).inc()
+            OPPRETTET_PLANLAGT_MELDING.labels(BREV_39_UKER_TYPE).inc()
             database.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
-                listOf(lagPlanlagtMeldingDbModelForUtbetaling(
-                    utbetaltEvent,
-                    AKTIVITETSKRAV_8_UKER_TYPE,
-                    utbetaltEvent.startdato.plusWeeks(8).atStartOfDay()
-                        .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
-                ))
+                listOf(
+                    lagPlanlagtMeldingDbModelForUtbetaling(
+                        utbetaltEvent,
+                        AKTIVITETSKRAV_8_UKER_TYPE,
+                        utbetaltEvent.startdato.plusWeeks(8).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+                    ),
+                    lagPlanlagtMeldingDbModelForUtbetaling(
+                        utbetaltEvent,
+                        BREV_39_UKER_TYPE,
+                        utbetaltEvent.startdato.plusWeeks(39).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+                    )
+                )
             )
         }
     }

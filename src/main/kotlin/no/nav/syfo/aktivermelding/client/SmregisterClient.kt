@@ -31,6 +31,17 @@ class SmregisterClient(
         }
     }
 
+    suspend fun erSykmeldt(fnr: String, planlagtMeldingId: UUID): Boolean {
+        log.info("Henter sykmeldingstatus uavhengig av grad for planlagtMelding {}", planlagtMeldingId)
+        try {
+            val sykmeldingstatus = hentSykmeldingstatus(fnr)
+            return sykmeldingstatus.erSykmeldt
+        } catch (e: Exception) {
+            log.error("Feil ved henting av sykmeldingstatus uavhengig av grad for planlagtMelding $planlagtMeldingId {}", e.message)
+            throw e
+        }
+    }
+
     private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
         httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v1/sykmelding/sykmeldtStatus") {
             accept(ContentType.Application.Json)
