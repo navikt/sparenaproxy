@@ -5,6 +5,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import no.nav.syfo.aktivermelding.arenamodel.Aktivitetskrav8UkerMelding
+import no.nav.syfo.aktivermelding.arenamodel.Brev39UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.N2810
 import no.nav.syfo.aktivermelding.arenamodel.N2820
 import no.nav.syfo.aktivermelding.arenamodel.N2830
@@ -13,6 +14,7 @@ import no.nav.syfo.aktivermelding.arenamodel.tilMqMelding
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 
 class ArenaMeldingService(
@@ -22,12 +24,19 @@ class ArenaMeldingService(
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
 
     fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
-        if (planlagtMeldingDbModel.type == AKTIVITETSKRAV_8_UKER_TYPE) {
-            arenaMqProducer.sendTilArena(til8Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
-            log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
-        } else {
-            log.error("Planlagt melding {} har ukjent type: {}", planlagtMeldingDbModel.id, planlagtMeldingDbModel.type)
-            throw IllegalStateException("Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}")
+        when (planlagtMeldingDbModel.type) {
+            AKTIVITETSKRAV_8_UKER_TYPE -> {
+                arenaMqProducer.sendTilArena(til8Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
+                log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+            }
+            BREV_39_UKER_TYPE -> {
+                arenaMqProducer.sendTilArena(til39Ukersmelding(planlagtMeldingDbModel, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
+                log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+            }
+            else -> {
+                log.error("Planlagt melding {} har ukjent type: {}", planlagtMeldingDbModel.id, planlagtMeldingDbModel.type)
+                throw IllegalStateException("Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}")
+            }
         }
     }
 
@@ -37,13 +46,39 @@ class ArenaMeldingService(
             n2810 = N2810(
                 dato = nowFormatted.split(',')[0],
                 klokke = nowFormatted.split(',')[1],
-                fnr = planlagtMeldingDbModel.fnr
+                fnr = planlagtMeldingDbModel.fnr,
+                meldKode = "O"
             ),
             n2820 = N2820(),
             n2830 = N2830(
+                meldingId = "M-RK68-1".padEnd(10, ' '),
+                versjon = "008",
                 meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
             ),
-            n2840 = N2840()
+            n2840 = N2840(
+                taglinje = "SP: Aktivitetskrav ved 8 uker 100% sykmeldt".padEnd(80, ' ')
+            )
+        )
+    }
+
+    fun til39Ukersmelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel, now: OffsetDateTime): Brev39UkerMelding {
+        val nowFormatted = formatDateTime(now)
+        return Brev39UkerMelding(
+            n2810 = N2810(
+                dato = nowFormatted.split(',')[0],
+                klokke = nowFormatted.split(',')[1],
+                fnr = planlagtMeldingDbModel.fnr,
+                meldKode = "I"
+            ),
+            n2820 = N2820(),
+            n2830 = N2830(
+                meldingId = "M-F226-1".padEnd(10, ' '),
+                versjon = "015",
+                meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
+            ),
+            n2840 = N2840(
+                taglinje = "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).".padEnd(80, ' ')
+            )
         )
     }
 

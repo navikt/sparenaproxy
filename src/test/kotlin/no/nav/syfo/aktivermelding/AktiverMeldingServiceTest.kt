@@ -14,6 +14,7 @@ import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
 import no.nav.syfo.application.ApplicationState
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
@@ -54,6 +55,7 @@ object AktiverMeldingServiceTest : Spek({
             }
 
             coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
         it("Ignorerer melding som er sendt") {
@@ -65,9 +67,10 @@ object AktiverMeldingServiceTest : Spek({
             }
 
             coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
-        it("Sender, men oppdaterer ikke i db hvis bruker fortsatt er 100% sykmeldt") {
+        it("Sender 8-ukersmelding, men oppdaterer ikke i db hvis bruker fortsatt er 100% sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
@@ -77,12 +80,13 @@ object AktiverMeldingServiceTest : Spek({
             }
 
             coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
-        it("Avbryter hvis bruker ikke lenger er sykmeldt") {
+        it("Avbryter 8-ukersmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns false
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
@@ -92,6 +96,39 @@ object AktiverMeldingServiceTest : Spek({
             }
 
             coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
+            planlagtMelding.avbrutt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
+        }
+        it("Sender 39-ukersmelding, men oppdaterer ikke i db hvis bruker fortsatt er sykmeldt") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.erSykmeldt("fnr", id) } returns true
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = BREV_39_UKER_TYPE))
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
+            planlagtMelding.sendt shouldEqual null
+            planlagtMelding.avbrutt shouldEqual null
+        }
+        it("Avbryter 39-ukersmelding hvis bruker ikke lenger er sykmeldt") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.erSykmeldt("fnr", id) } returns false
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = BREV_39_UKER_TYPE))
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.avbrutt shouldNotEqual null

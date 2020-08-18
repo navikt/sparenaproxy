@@ -7,6 +7,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 const val AKTIVITETSKRAV_8_UKER_TYPE = "8UKER"
+const val BREV_39_UKER_TYPE = "39UKER"
 
 data class PlanlagtMeldingDbModel(
     val id: UUID,
