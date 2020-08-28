@@ -7,6 +7,6 @@ class MottattSykmeldingConsumer(
     private val kafkaMottattSykmeldingConsumer: KafkaConsumer<String, String>
 ) {
     fun poll(): List<String> {
-        return kafkaMottattSykmeldingConsumer.poll(Duration.ofMillis(0)).map { it.value() }
+        return kafkaMottattSykmeldingConsumer.poll(Duration.ofMillis(0)).mapNotNull { it.value() }
     }
 }
