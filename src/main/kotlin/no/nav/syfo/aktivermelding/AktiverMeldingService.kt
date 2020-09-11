@@ -18,6 +18,7 @@ import no.nav.syfo.application.metrics.SENDT_MELDING
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
+import no.nav.syfo.model.BREV_4_UKER_TYPE
 
 @KtorExperimentalAPI
 class AktiverMeldingService(
@@ -43,6 +44,9 @@ class AktiverMeldingService(
         val planlagtMelding = database.hentPlanlagtMelding(aktiverMelding.id)
         if (planlagtMelding != null) {
             val skalSendeMelding = when (planlagtMelding.type) {
+                BREV_4_UKER_TYPE -> {
+                    smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                }
                 AKTIVITETSKRAV_8_UKER_TYPE -> {
                     smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
                 }

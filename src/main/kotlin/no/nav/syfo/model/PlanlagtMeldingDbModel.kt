@@ -6,6 +6,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
+const val BREV_4_UKER_TYPE = "4UKER"
 const val AKTIVITETSKRAV_8_UKER_TYPE = "8UKER"
 const val BREV_39_UKER_TYPE = "39UKER"
 

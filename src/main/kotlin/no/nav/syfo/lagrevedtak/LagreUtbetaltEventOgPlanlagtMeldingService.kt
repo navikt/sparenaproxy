@@ -13,6 +13,7 @@ import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
+import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
@@ -24,11 +25,17 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
             database.lagreUtbetaltEvent(utbetaltEvent)
         } else {
             log.info("Lagrer utbetalingsevent {} og planlagte meldinger", utbetaltEvent.utbetalteventid)
+            OPPRETTET_PLANLAGT_MELDING.labels(BREV_4_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(AKTIVITETSKRAV_8_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(BREV_39_UKER_TYPE).inc()
             database.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
                 listOf(
+                    lagPlanlagtMeldingDbModelForUtbetaling(
+                        utbetaltEvent,
+                        BREV_4_UKER_TYPE,
+                        utbetaltEvent.startdato.plusWeeks(4).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+                    ),
                     lagPlanlagtMeldingDbModelForUtbetaling(
                         utbetaltEvent,
                         AKTIVITETSKRAV_8_UKER_TYPE,
