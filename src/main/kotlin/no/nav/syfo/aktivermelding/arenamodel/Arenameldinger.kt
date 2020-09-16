@@ -2,6 +2,13 @@ package no.nav.syfo.aktivermelding.arenamodel
 
 import no.nav.syfo.log
 
+data class Brev4UkerMelding(
+    val n2810: N2810,
+    val n2820: N2820,
+    val n2830: N2830,
+    val n2840: N2840
+)
+
 data class Aktivitetskrav8UkerMelding(
     val n2810: N2810,
     val n2820: N2820,
@@ -59,6 +66,21 @@ data class N2840(
     val antall: String = "00001", // lengde 5
     val taglinje: String // lengde 80
 )
+
+fun Brev4UkerMelding.tilMqMelding(): String {
+    val sb = StringBuilder()
+    sb.append(n2810.tilTekst())
+    sb.append(n2820.tilTekst())
+    sb.append(n2830.tilTekst())
+    sb.append(n2840.tilTekst())
+
+    val brev4ukermeldingSomTekst = sb.toString()
+    if (brev4ukermeldingSomTekst.length != 482) {
+        log.error("4-ukersmelding har feil lengde: ${brev4ukermeldingSomTekst.length}")
+        throw IllegalStateException("4-ukersmelding har feil lengde")
+    }
+    return brev4ukermeldingSomTekst
+}
 
 fun Aktivitetskrav8UkerMelding.tilMqMelding(): String {
     val sb = StringBuilder()
