@@ -1,13 +1,10 @@
 package no.nav.syfo.dodshendelser
 
 import io.mockk.clearAllMocks
-import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
@@ -19,9 +16,8 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 object DodshendelserServiceTest : Spek({
-    val personhendelserConsumer = mockk<PersonhendelserConsumer>()
     val testDb = TestDB()
-    val dodshendelserService = DodshendelserService(ApplicationState(alive = true, ready = true), personhendelserConsumer, testDb)
+    val dodshendelserService = DodshendelserService(testDb)
     val avbruttTidspunkt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(3)
 
     beforeEachTest {

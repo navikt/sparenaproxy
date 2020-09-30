@@ -11,9 +11,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.client.SmregisterClient
-import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
-import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
@@ -28,10 +26,9 @@ import org.spekframework.spek2.style.specification.describe
 @KtorExperimentalAPI
 object AktiverMeldingServiceTest : Spek({
     val testDb = TestDB()
-    val aktiverMeldingConsumer = mockk<AktiverMeldingConsumer>()
     val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
     val smregisterClient = mockk<SmregisterClient>()
-    val aktiverMeldingService = AktiverMeldingService(ApplicationState(alive = true, ready = true), aktiverMeldingConsumer, testDb, smregisterClient, arenaMeldingService)
+    val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService)
 
     beforeEachTest {
         clearAllMocks()

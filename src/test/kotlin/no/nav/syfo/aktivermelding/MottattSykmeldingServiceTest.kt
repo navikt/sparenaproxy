@@ -12,8 +12,6 @@ import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
-import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
-import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.Gradert
@@ -33,10 +31,9 @@ import org.spekframework.spek2.style.specification.describe
 @KtorExperimentalAPI
 object MottattSykmeldingServiceTest : Spek({
     val testDb = TestDB()
-    val mottattSykmeldingConsumer = mockk<MottattSykmeldingConsumer>()
     val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
     val syfoSyketilfelleClient = mockk<SyfoSyketilfelleClient>()
-    val mottattSykmeldingService = MottattSykmeldingService(ApplicationState(alive = true, ready = true), mottattSykmeldingConsumer, testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
+    val mottattSykmeldingService = MottattSykmeldingService(testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
     val idAvbrutt = UUID.randomUUID()
     val idAvbrutt2 = UUID.randomUUID()
     val idIkkeAvbrutt = UUID.randomUUID()
