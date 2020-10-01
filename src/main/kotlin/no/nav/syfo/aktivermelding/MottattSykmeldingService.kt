@@ -22,7 +22,7 @@ class MottattSykmeldingService(
     private val arenaMeldingService: ArenaMeldingService,
     private val skalVenteLitt: Boolean = true
 ) {
-    suspend fun handleMottattSykmelding(record: String) {
+    suspend fun mottaNySykmelding(record: String) {
         val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
         behandleMottattSykmelding(receivedSykmelding)
     }

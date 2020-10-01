@@ -15,14 +15,17 @@ class VedtakService(
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService
 ) {
-    suspend fun handleVedtak(record: String) {
-        val jsonNode = objectMapper.readTree(record)
+    suspend fun mottaUtbetaltEvent(record: String) {
+        val jsonNode = tilJsonNode(record)
         if (jsonNode["@event_name"].asText() == "utbetalt") {
             val callid = jsonNode["@id"].asText()
             log.info("Mottatt melding med callid {}", callid)
             handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode), callid)
         }
     }
+
+    private fun tilJsonNode(record: String) =
+        objectMapper.readTree(record)
 
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage, callid: String) {
         MOTTATT_VEDTAK.inc()

@@ -27,10 +27,10 @@ class CommonKafkaService(
             records.forEach {
                 if (it.value() != null) {
                     when (it.topic()) {
-                        env.utbetaltEventTopic -> vedtakService.handleVedtak(it.value())
-                        env.aktiverMeldingTopic -> aktiverMeldingService.handleAktiverMelding(it.value())
-                        env.sykmeldingAutomatiskBehandlingTopic -> mottattSykmeldingService.handleMottattSykmelding(it.value())
-                        env.sykmeldingManuellBehandlingTopic -> mottattSykmeldingService.handleMottattSykmelding(it.value())
+                        env.utbetaltEventTopic -> vedtakService.mottaUtbetaltEvent(it.value())
+                        env.aktiverMeldingTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())
+                        env.sykmeldingAutomatiskBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
+                        env.sykmeldingManuellBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.pdlTopic -> dodshendelserService.handlePersonhendelse(it.value())
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
                     }

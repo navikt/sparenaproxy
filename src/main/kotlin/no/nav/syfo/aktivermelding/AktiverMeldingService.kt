@@ -25,7 +25,7 @@ class AktiverMeldingService(
     private val smregisterClient: SmregisterClient,
     private val arenaMeldingService: ArenaMeldingService
 ) {
-    suspend fun handleAktiverMelding(record: String) {
+    suspend fun mottaAktiverMelding(record: String) {
         val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
         log.info("Behandler melding med id {}", aktiverMelding.id)
         MOTTATT_AKTIVERMELDING.inc()
