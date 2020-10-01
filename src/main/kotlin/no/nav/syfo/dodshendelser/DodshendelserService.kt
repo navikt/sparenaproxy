@@ -1,6 +1,7 @@
 package no.nav.syfo.dodshendelser
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.syfo.application.db.DatabaseInterface
@@ -14,8 +15,10 @@ import org.apache.avro.generic.GenericRecord
 class DodshendelserService(
     private val database: DatabaseInterface
 ) {
+    private val kafkaAvroDeserializer = KafkaAvroDeserializer()
+
     fun handlePersonhendelse(record: String) {
-        val genericRecord: GenericRecord = objectMapper.readValue(record)
+        val genericRecord: GenericRecord = objectMapper.readValue(kafkaAvroDeserializer.deserialize("", record.toByteArray()).toString())
         if (genericRecord.hendelseGjelderDodsfall()) {
             handleDodsfall(genericRecord.hentPersonidenter())
         }
