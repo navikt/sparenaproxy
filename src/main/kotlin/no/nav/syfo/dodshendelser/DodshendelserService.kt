@@ -17,6 +17,7 @@ class DodshendelserService(
     private val personhendelserConsumer: PersonhendelserConsumer,
     private val database: DatabaseInterface
 ) {
+
     suspend fun start() {
         while (applicationState.ready) {
             val personhendelse = personhendelserConsumer.poll()

@@ -6,8 +6,6 @@ import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
 import no.nav.syfo.aktivermelding.db.resendAvbruttMelding
-import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
-import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.SENDT_AVBRUTT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
@@ -19,22 +17,14 @@ import no.nav.syfo.objectMapper
 
 @KtorExperimentalAPI
 class MottattSykmeldingService(
-    private val applicationState: ApplicationState,
-    private val mottattSykmeldingConsumer: MottattSykmeldingConsumer,
     private val database: DatabaseInterface,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val arenaMeldingService: ArenaMeldingService,
     private val skalVenteLitt: Boolean = true
 ) {
-    suspend fun start() {
-        while (applicationState.ready) {
-            val mottatteSykmeldinger = mottattSykmeldingConsumer.poll()
-            mottatteSykmeldinger.forEach {
-                val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(it)
-                behandleMottattSykmelding(receivedSykmelding)
-            }
-            delay(1)
-        }
+    suspend fun mottaNySykmelding(record: String) {
+        val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
+        behandleMottattSykmelding(receivedSykmelding)
     }
 
     // En melding avbrytes kun hvis bruker enten er frisk eller har gradert sykmelding ved 8 uker. Derfor blir det

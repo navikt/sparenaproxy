@@ -24,8 +24,6 @@ import no.nav.syfo.aktivermelding.ArenaMeldingService
 import no.nav.syfo.aktivermelding.KvitteringService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.aktivermelding.client.SmregisterClient
-import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
-import no.nav.syfo.aktivermelding.kafka.MottattSykmeldingConsumer
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.aktivermelding.mq.KvitteringListener
 import no.nav.syfo.application.ApplicationServer
@@ -39,14 +37,14 @@ import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
 import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
+import no.nav.syfo.kafka.CommonKafkaService
+import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.VedtakService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
-import no.nav.syfo.lagrevedtak.kafka.UtbetaltEventConsumer
 import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
 import no.nav.syfo.mq.producerForQueue
-import no.nav.syfo.util.KafkaClients
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -114,21 +112,20 @@ fun main() {
     val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
 
     val kafkaClients = KafkaClients(env, vaultSecrets)
-    val utbetaltEventConsumer = UtbetaltEventConsumer(kafkaClients.kafkaUtbetaltEventConsumer)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
-    val vedtakService = VedtakService(applicationState, utbetaltEventConsumer, spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService)
+    val vedtakService = VedtakService(spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService)
 
-    val aktiverMeldingConsumer = AktiverMeldingConsumer(kafkaClients.kafkaAktiverMeldingConsumer)
-    val aktiverMeldingService = AktiverMeldingService(applicationState, aktiverMeldingConsumer, database, smregisterClient, arenaMeldingService)
+    val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService)
 
     val kvitteringService = KvitteringService(database)
     val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, kvitteringService)
 
-    val mottattSykmeldingConsumer = MottattSykmeldingConsumer(kafkaClients.mottattSykmeldingKafkaConsumer)
-    val mottattSykmeldingService = MottattSykmeldingService(applicationState, mottattSykmeldingConsumer, database, syfoSyketilfelleClient, arenaMeldingService)
+    val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
 
     val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
     val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
+
+    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, vedtakService, mottattSykmeldingService, aktiverMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -141,19 +138,13 @@ fun main() {
     RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
 
     createListener(applicationState) {
-        vedtakService.start()
-    }
-    createListener(applicationState) {
-        aktiverMeldingService.start()
-    }
-    createListener(applicationState) {
-        kvitteringListener.start()
-    }
-    createListener(applicationState) {
-        mottattSykmeldingService.start()
+        commonKafkaService.start()
     }
     createListener(applicationState) {
         dodshendelserService.start()
+    }
+    createListener(applicationState) {
+        kvitteringListener.start()
     }
 }
 

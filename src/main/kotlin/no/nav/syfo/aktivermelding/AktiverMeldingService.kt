@@ -1,15 +1,13 @@
 package no.nav.syfo.aktivermelding
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.util.KtorExperimentalAPI
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
-import no.nav.syfo.aktivermelding.kafka.AktiverMeldingConsumer
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
-import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.AVBRUTT_MELDING
 import no.nav.syfo.application.metrics.IKKE_FUNNET_MELDING
@@ -19,25 +17,19 @@ import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
+import no.nav.syfo.objectMapper
 
 @KtorExperimentalAPI
 class AktiverMeldingService(
-    private val applicationState: ApplicationState,
-    private val aktiverMeldingConsumer: AktiverMeldingConsumer,
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,
     private val arenaMeldingService: ArenaMeldingService
 ) {
-    suspend fun start() {
-        while (applicationState.ready) {
-            val aktiverMeldinger = aktiverMeldingConsumer.poll()
-            aktiverMeldinger.forEach {
-                log.info("Behandler melding med id {}", it.id)
-                MOTTATT_AKTIVERMELDING.inc()
-                behandleAktiverMelding(it)
-            }
-            delay(1)
-        }
+    suspend fun mottaAktiverMelding(record: String) {
+        val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
+        log.info("Behandler melding med id {}", aktiverMelding.id)
+        MOTTATT_AKTIVERMELDING.inc()
+        behandleAktiverMelding(aktiverMelding)
     }
 
     suspend fun behandleAktiverMelding(aktiverMelding: AktiverMelding) {
