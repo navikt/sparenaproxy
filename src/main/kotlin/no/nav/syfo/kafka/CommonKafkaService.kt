@@ -7,7 +7,6 @@ import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.dodshendelser.DodshendelserService
 import no.nav.syfo.lagrevedtak.VedtakService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
@@ -18,8 +17,7 @@ class CommonKafkaService(
     private val env: Environment,
     private val vedtakService: VedtakService,
     private val mottattSykmeldingService: MottattSykmeldingService,
-    private val aktiverMeldingService: AktiverMeldingService,
-    private val dodshendelserService: DodshendelserService
+    private val aktiverMeldingService: AktiverMeldingService
 ) {
     suspend fun start() {
         while (applicationState.ready) {
@@ -31,7 +29,6 @@ class CommonKafkaService(
                         env.aktiverMeldingTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())
                         env.sykmeldingAutomatiskBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.sykmeldingManuellBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
-                        env.pdlTopic -> dodshendelserService.handlePersonhendelse(it.value())
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
                     }
                 }

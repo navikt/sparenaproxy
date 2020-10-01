@@ -36,6 +36,7 @@ import no.nav.syfo.client.AccessTokenClient
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
+import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.kafka.CommonKafkaService
 import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
@@ -121,9 +122,10 @@ fun main() {
 
     val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
 
-    val dodshendelserService = DodshendelserService(database)
+    val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
+    val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
 
-    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, vedtakService, mottattSykmeldingService, aktiverMeldingService, dodshendelserService)
+    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, vedtakService, mottattSykmeldingService, aktiverMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -137,6 +139,9 @@ fun main() {
 
     createListener(applicationState) {
         commonKafkaService.start()
+    }
+    createListener(applicationState) {
+        dodshendelserService.start()
     }
     createListener(applicationState) {
         kvitteringListener.start()

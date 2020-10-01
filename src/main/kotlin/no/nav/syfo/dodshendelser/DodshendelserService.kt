@@ -1,26 +1,32 @@
 package no.nav.syfo.dodshendelser
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlinx.coroutines.delay
+import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.AVBRUTT_MELDING_DODSFALL
 import no.nav.syfo.dodshendelser.db.avbrytPlanlagteMeldingerVedDodsfall
+import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.log
-import no.nav.syfo.objectMapper
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
 
 class DodshendelserService(
+    private val applicationState: ApplicationState,
+    private val personhendelserConsumer: PersonhendelserConsumer,
     private val database: DatabaseInterface
 ) {
-    private val kafkaAvroDeserializer = KafkaAvroDeserializer()
 
-    fun handlePersonhendelse(record: String) {
-        val genericRecord: GenericRecord = objectMapper.readValue(kafkaAvroDeserializer.deserialize("", record.toByteArray()).toString())
-        if (genericRecord.hendelseGjelderDodsfall()) {
-            handleDodsfall(genericRecord.hentPersonidenter())
+    suspend fun start() {
+        while (applicationState.ready) {
+            val personhendelse = personhendelserConsumer.poll()
+            personhendelse.forEach {
+                if (it.hendelseGjelderDodsfall()) {
+                    handleDodsfall(it.hentPersonidenter())
+                }
+            }
+            delay(1)
         }
     }
 
