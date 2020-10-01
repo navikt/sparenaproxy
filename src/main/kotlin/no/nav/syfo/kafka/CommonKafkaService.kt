@@ -20,6 +20,15 @@ class CommonKafkaService(
     private val aktiverMeldingService: AktiverMeldingService
 ) {
     suspend fun start() {
+        kafkaConsumer.subscribe(
+            listOf(
+                env.utbetaltEventTopic,
+                env.aktiverMeldingTopic,
+                env.sykmeldingAutomatiskBehandlingTopic,
+                env.sykmeldingManuellBehandlingTopic
+            )
+        )
+        
         while (applicationState.ready) {
             val records = kafkaConsumer.poll(Duration.ofMillis(0))
             records.forEach {

@@ -26,16 +26,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = StringDeserializer::class)
         properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
 
-        val kafkaConsumer = KafkaConsumer<String, String>(properties)
-        kafkaConsumer.subscribe(
-            listOf(
-                env.utbetaltEventTopic,
-                env.aktiverMeldingTopic,
-                env.sykmeldingAutomatiskBehandlingTopic,
-                env.sykmeldingManuellBehandlingTopic
-            )
-        )
-        return kafkaConsumer
+        return KafkaConsumer(properties)
     }
 
     private fun getPersonhendelserKafkaConsumer(kafkaBaseConfig: Properties, env: Environment): KafkaConsumer<String, GenericRecord> {

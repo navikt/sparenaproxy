@@ -16,7 +16,7 @@ class VedtakService(
     private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService
 ) {
     suspend fun mottaUtbetaltEvent(record: String) {
-        val jsonNode = tilJsonNode(record)
+        val jsonNode = toJsonNode(record)
         if (jsonNode["@event_name"].asText() == "utbetalt") {
             val callid = jsonNode["@id"].asText()
             log.info("Mottatt melding med callid {}", callid)
@@ -24,7 +24,7 @@ class VedtakService(
         }
     }
 
-    private fun tilJsonNode(record: String) =
+    private fun toJsonNode(record: String) =
         objectMapper.readTree(record)
 
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage, callid: String) {
