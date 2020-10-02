@@ -119,8 +119,7 @@ fun main() {
 
     val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService)
 
-    val kvitteringService = KvitteringService(database)
-    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, kvitteringService)
+    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, KvitteringService())
 
     val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
 

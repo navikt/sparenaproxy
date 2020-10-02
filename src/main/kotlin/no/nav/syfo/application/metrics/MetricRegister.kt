@@ -60,6 +60,12 @@ val KVITTERING_FEILET: Counter = Counter.build()
     .help("Antall kvitteringer som har feilet")
     .register()
 
+val KVITTERING_MED_FEIL: Counter = Counter.build()
+    .namespace(METRICS_NS)
+    .name("kvittering_med_feil_counter")
+    .help("Antall kvitteringer med funksjonelle feil")
+    .register()
+
 val KVITTERING_SENDT: Counter = Counter.build()
     .namespace(METRICS_NS)
     .name("kvittering_sendt_counter")

@@ -7,6 +7,7 @@ import java.time.ZoneOffset
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
+import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.AVBRUTT_MELDING
@@ -53,6 +54,7 @@ class AktiverMeldingService(
             if (skalSendeMelding) {
                 log.info("Sender melding med id {} til Arena", aktiverMelding.id)
                 arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
+                database.sendPlanlagtMelding(aktiverMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
                 SENDT_MELDING.inc()
             } else {
                 log.info("Avbryter melding med id {}", aktiverMelding.id)
