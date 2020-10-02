@@ -17,9 +17,7 @@ class KvitteringService(
 
         if (kvittering.statusOk == "J") {
             val planlagtMeldingDbModel = database.finnPlanlagtMeldingUnderSending(kvittering.fnr)
-            if (planlagtMeldingDbModel == null) {
-                log.warn("Mottatt kvittering, men finner ikke tilhørende melding, ignorerer kvittering..")
-            } else {
+            if (planlagtMeldingDbModel != null) {
                 database.sendPlanlagtMelding(planlagtMeldingDbModel.id, OffsetDateTime.now(ZoneOffset.UTC))
                 log.info("Planlagt melding med id ${planlagtMeldingDbModel.id} registrert sendt")
                 KVITTERING_SENDT.inc()
