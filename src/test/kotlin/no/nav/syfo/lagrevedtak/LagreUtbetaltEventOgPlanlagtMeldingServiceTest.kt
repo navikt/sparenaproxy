@@ -1,7 +1,6 @@
 package no.nav.syfo.lagrevedtak
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
@@ -12,6 +11,7 @@ import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
 import no.nav.syfo.testutil.hentUtbetaltEvent
+import no.nav.syfo.testutil.lagUtbetaltEvent
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -101,45 +101,3 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
         }
     }
 })
-
-fun lagUtbetaltEvent(id: UUID, sykmeldingId: UUID, startdato: LocalDate, fnr: String): UtbetaltEvent =
-    UtbetaltEvent(
-        utbetalteventid = id,
-        startdato = startdato,
-        sykmeldingid = sykmeldingId,
-        aktorid = "aktorid",
-        fnr = fnr,
-        organisasjonsnummer = "orgnummer",
-        hendelser = listOf(UUID.randomUUID(), UUID.randomUUID()).toSet(),
-        oppdrag = lagOppdragsliste(),
-        fom = startdato,
-        tom = LocalDate.of(2020, 6, 29),
-        forbrukteSykedager = 0,
-        gjenstaendeSykedager = 300,
-        opprettet = LocalDateTime.now()
-    )
-
-fun lagOppdragsliste(): List<Utbetalt> {
-    return listOf(
-        Utbetalt(
-            mottaker = "mottaker",
-            fagomrade = "sykepenger",
-            fagsystemId = "id",
-            totalbelop = 6000,
-            utbetalingslinjer = lagUbetalingslinjeliste()
-        )
-    )
-}
-
-fun lagUbetalingslinjeliste(): List<Utbetalingslinje> {
-    return listOf(
-        Utbetalingslinje(
-            fom = LocalDate.of(2020, 6, 1),
-            tom = LocalDate.of(2020, 6, 29),
-            dagsats = 500,
-            belop = 2000,
-            grad = 70.0,
-            sykedager = 20
-        )
-    )
-}

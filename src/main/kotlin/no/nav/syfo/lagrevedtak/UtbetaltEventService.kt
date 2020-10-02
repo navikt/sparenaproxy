@@ -6,14 +6,16 @@ import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
+import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.log
 import no.nav.syfo.objectMapper
 
 @KtorExperimentalAPI
-class VedtakService(
+class UtbetaltEventService(
     private val spokelseClient: SpokelseClient,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
-    private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService
+    private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService,
+    private val maksdatoService: MaksdatoService
 ) {
     suspend fun mottaUtbetaltEvent(record: String) {
         val jsonNode = toJsonNode(record)
@@ -56,5 +58,6 @@ class VedtakService(
         )
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
+        maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
     }
 }
