@@ -93,7 +93,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
     )
 }
 
-fun lagUtbetaltEvent(id: UUID, sykmeldingId: UUID, startdato: LocalDate, fnr: String, gjenstaendeSykedager: Int = 300, opprettet: LocalDateTime = LocalDateTime.now()): UtbetaltEvent =
+fun lagUtbetaltEvent(id: UUID, sykmeldingId: UUID, startdato: LocalDate, fnr: String, tom: LocalDate = LocalDate.of(2020, 6, 29), gjenstaendeSykedager: Int = 300): UtbetaltEvent =
     UtbetaltEvent(
         utbetalteventid = id,
         startdato = startdato,
@@ -104,10 +104,10 @@ fun lagUtbetaltEvent(id: UUID, sykmeldingId: UUID, startdato: LocalDate, fnr: St
         hendelser = listOf(UUID.randomUUID(), UUID.randomUUID()).toSet(),
         oppdrag = lagOppdragsliste(),
         fom = startdato,
-        tom = LocalDate.of(2020, 6, 29),
+        tom = tom,
         forbrukteSykedager = 0,
         gjenstaendeSykedager = gjenstaendeSykedager,
-        opprettet = opprettet
+        opprettet = LocalDateTime.now()
     )
 
 fun lagOppdragsliste(): List<Utbetalt> {

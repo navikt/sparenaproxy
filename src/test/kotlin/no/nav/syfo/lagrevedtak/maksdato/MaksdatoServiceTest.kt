@@ -2,7 +2,6 @@ package no.nav.syfo.lagrevedtak.maksdato
 
 import io.mockk.mockk
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
@@ -25,7 +24,7 @@ object MaksdatoServiceTest : Spek({
                 startdato = LocalDate.of(2020, 5, 2),
                 sykmeldingId = UUID.randomUUID(),
                 gjenstaendeSykedager = 50,
-                opprettet = LocalDateTime.of(2020, 9, 9, 16, 0, 0)
+                tom = LocalDate.of(2020, 9, 9)
             )
 
             val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)
@@ -34,23 +33,30 @@ object MaksdatoServiceTest : Spek({
             maksdatoMelding.k278M810.klokke shouldEqual "152000"
             maksdatoMelding.k278M810.fnr shouldEqual "12345678910"
             maksdatoMelding.k278M830.startdato shouldEqual "02052020"
-            maksdatoMelding.k278M830.maksdato shouldEqual "29102020"
+            maksdatoMelding.k278M830.maksdato shouldEqual "18112020"
             maksdatoMelding.k278M830.orgnummer shouldEqual "orgnummer"
         }
     }
 
     describe("Test av finnMaksdato") {
-        it("Finner riktig maksdato") {
-            val utbetaltEvent = lagUtbetaltEvent(
-                id = UUID.randomUUID(),
-                fnr = "12345678910",
-                startdato = LocalDate.of(2020, 5, 2),
-                sykmeldingId = UUID.randomUUID(),
-                gjenstaendeSykedager = 3,
-                opprettet = LocalDateTime.of(2020, 10, 10, 16, 0, 0)
-            )
+        it("Finner maksdato == fredag for tom = mandag og 4 gjenstående dager") {
+            val tom = LocalDate.of(2020, 10, 5)
+            val gjenstaendeSykedager = 4
+            val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
-            val maksdato = maksdatoService.finnMaksdato(utbetaltEvent)
+            maksdato shouldEqual LocalDate.of(2020, 10, 9)
+        }
+        it("Finner maksdato == mandag for tom = mandag og 5 gjenstående dager") {
+            val tom = LocalDate.of(2020, 10, 5)
+            val gjenstaendeSykedager = 5
+            val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
+
+            maksdato shouldEqual LocalDate.of(2020, 10, 12)
+        }
+        it("Finner maksdato == tirsdag for tom = mandag og 6 gjenstående dager") {
+            val tom = LocalDate.of(2020, 10, 5)
+            val gjenstaendeSykedager = 6
+            val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
             maksdato shouldEqual LocalDate.of(2020, 10, 13)
         }
