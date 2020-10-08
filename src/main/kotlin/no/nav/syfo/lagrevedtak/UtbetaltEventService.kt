@@ -1,7 +1,9 @@
 package no.nav.syfo.lagrevedtak
 
 import io.ktor.util.KtorExperimentalAPI
+import no.nav.syfo.Filter
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
+import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
@@ -9,6 +11,7 @@ import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.log
 import no.nav.syfo.objectMapper
+import no.nav.syfo.trefferAldersfilter
 
 @KtorExperimentalAPI
 class UtbetaltEventService(
@@ -58,6 +61,11 @@ class UtbetaltEventService(
         )
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
-        maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
+
+        if (trefferAldersfilter(utbetaltEvent.fnr, Filter.ETTER1990)) {
+            maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
+            log.info("Sendt maksdatomelding for utbetalteventid ${utbetaltEventKafkaMessage.utbetalteventid}")
+            SENDT_MAKSDATOMELDING.inc()
+        }
     }
 }
