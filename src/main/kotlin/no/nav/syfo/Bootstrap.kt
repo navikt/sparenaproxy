@@ -40,8 +40,9 @@ import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.kafka.CommonKafkaService
 import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
-import no.nav.syfo.lagrevedtak.VedtakService
+import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
+import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
 import no.nav.syfo.mq.producerForQueue
@@ -113,19 +114,19 @@ fun main() {
 
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
-    val vedtakService = VedtakService(spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService)
+    val maksdatoService = MaksdatoService(arenaMqProducer)
+    val utbetaltEventService = UtbetaltEventService(spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
 
     val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService)
 
-    val kvitteringService = KvitteringService(database)
-    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, kvitteringService)
+    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, KvitteringService())
 
     val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
 
     val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
     val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
 
-    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, vedtakService, mottattSykmeldingService, aktiverMeldingService)
+    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, utbetaltEventService, mottattSykmeldingService, aktiverMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,

@@ -7,7 +7,7 @@ import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.lagrevedtak.VedtakService
+import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
 @KtorExperimentalAPI
@@ -15,7 +15,7 @@ class CommonKafkaService(
     private val applicationState: ApplicationState,
     private val kafkaConsumer: KafkaConsumer<String, String>,
     private val env: Environment,
-    private val vedtakService: VedtakService,
+    private val utbetaltEventService: UtbetaltEventService,
     private val mottattSykmeldingService: MottattSykmeldingService,
     private val aktiverMeldingService: AktiverMeldingService
 ) {
@@ -28,13 +28,13 @@ class CommonKafkaService(
                 env.sykmeldingManuellBehandlingTopic
             )
         )
-        
+
         while (applicationState.ready) {
             val records = kafkaConsumer.poll(Duration.ofMillis(0))
             records.forEach {
                 if (it.value() != null) {
                     when (it.topic()) {
-                        env.utbetaltEventTopic -> vedtakService.mottaUtbetaltEvent(it.value())
+                        env.utbetaltEventTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
                         env.aktiverMeldingTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())
                         env.sykmeldingAutomatiskBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.sykmeldingManuellBehandlingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())

@@ -2,10 +2,13 @@ package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.util.KtorExperimentalAPI
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
 import no.nav.syfo.aktivermelding.db.resendAvbruttMelding
+import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.SENDT_AVBRUTT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
@@ -46,6 +49,7 @@ class MottattSykmeldingService(
             log.info("Sender melding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
             database.resendAvbruttMelding(avbruttMelding.id)
             arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
+            database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
             SENDT_AVBRUTT_MELDING.inc()
         }
     }

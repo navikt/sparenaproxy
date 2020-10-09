@@ -5,6 +5,9 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.syfo.lagrevedtak.Utbetalingslinje
+import no.nav.syfo.lagrevedtak.Utbetalt
+import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.Adresse
 import no.nav.syfo.model.Arbeidsgiver
@@ -87,5 +90,47 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         rulesetVersion = null,
         tlfPasient = null,
         tssid = null
+    )
+}
+
+fun lagUtbetaltEvent(id: UUID, sykmeldingId: UUID, startdato: LocalDate, fnr: String, tom: LocalDate = LocalDate.of(2020, 6, 29), gjenstaendeSykedager: Int = 300): UtbetaltEvent =
+    UtbetaltEvent(
+        utbetalteventid = id,
+        startdato = startdato,
+        sykmeldingid = sykmeldingId,
+        aktorid = "aktorid",
+        fnr = fnr,
+        organisasjonsnummer = "orgnummer",
+        hendelser = listOf(UUID.randomUUID(), UUID.randomUUID()).toSet(),
+        oppdrag = lagOppdragsliste(),
+        fom = startdato,
+        tom = tom,
+        forbrukteSykedager = 0,
+        gjenstaendeSykedager = gjenstaendeSykedager,
+        opprettet = LocalDateTime.now()
+    )
+
+fun lagOppdragsliste(): List<Utbetalt> {
+    return listOf(
+        Utbetalt(
+            mottaker = "mottaker",
+            fagomrade = "sykepenger",
+            fagsystemId = "id",
+            totalbelop = 6000,
+            utbetalingslinjer = lagUbetalingslinjeliste()
+        )
+    )
+}
+
+fun lagUbetalingslinjeliste(): List<Utbetalingslinje> {
+    return listOf(
+        Utbetalingslinje(
+            fom = LocalDate.of(2020, 6, 1),
+            tom = LocalDate.of(2020, 6, 29),
+            dagsats = 500,
+            belop = 2000,
+            grad = 70.0,
+            sykedager = 20
+        )
     )
 }

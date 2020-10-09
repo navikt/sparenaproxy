@@ -67,7 +67,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
-        it("Sender 8-ukersmelding, men oppdaterer ikke i db hvis bruker fortsatt er 100% sykmeldt") {
+        it("Sender 8-ukersmelding og oppdaterer i db hvis bruker fortsatt er 100% sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
@@ -80,7 +80,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
-            planlagtMelding.sendt shouldEqual null
+            planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
         it("Avbryter 8-ukersmelding hvis bruker ikke lenger er sykmeldt") {
@@ -99,7 +99,7 @@ object AktiverMeldingServiceTest : Spek({
             planlagtMelding.avbrutt shouldNotEqual null
             planlagtMelding.sendt shouldEqual null
         }
-        it("Sender 39-ukersmelding, men oppdaterer ikke i db hvis bruker fortsatt er sykmeldt") {
+        it("Sender 39-ukersmelding og oppdaterer i db hvis bruker fortsatt er sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.erSykmeldt("fnr", id) } returns true
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = BREV_39_UKER_TYPE))
@@ -112,7 +112,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
-            planlagtMelding.sendt shouldEqual null
+            planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
         it("Avbryter 39-ukersmelding hvis bruker ikke lenger er sykmeldt") {
