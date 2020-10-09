@@ -62,7 +62,7 @@ class UtbetaltEventService(
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
 
-        if (trefferAldersfilter(utbetaltEvent.fnr, Filter.ETTER1990)) {
+        if (trefferAldersfilter(utbetaltEvent.fnr, Filter.ETTER1995)) {
             maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
             log.info("Sendt maksdatomelding for utbetalteventid ${utbetaltEventKafkaMessage.utbetalteventid}")
             SENDT_MAKSDATOMELDING.inc()
