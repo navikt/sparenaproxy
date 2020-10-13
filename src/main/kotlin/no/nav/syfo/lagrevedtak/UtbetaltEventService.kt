@@ -4,7 +4,6 @@ import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
 import no.nav.syfo.Filter
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
-import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
@@ -63,11 +62,11 @@ class UtbetaltEventService(
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
 
-        if (skalSendeMaksdatomelding(utbetaltEvent.fnr, startdato)) {
+        /*if (skalSendeMaksdatomelding(utbetaltEvent.fnr, startdato)) {
             maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
             log.info("Sendt maksdatomelding for utbetalteventid ${utbetaltEventKafkaMessage.utbetalteventid}")
             SENDT_MAKSDATOMELDING.inc()
-        }
+        }*/
     }
 
     fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate): Boolean {
