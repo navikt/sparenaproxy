@@ -3,7 +3,6 @@ package no.nav.syfo.aktivermelding.db
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
@@ -34,12 +33,6 @@ fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
     connection.use { connection ->
         connection.resendAvbruttMelding(id)
         connection.commit()
-    }
-}
-
-fun DatabaseInterface.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? {
-    connection.use { connection ->
-        return connection.finnPlanlagtMeldingUnderSending(fnr)
     }
 }
 
@@ -89,17 +82,6 @@ private fun Connection.resendAvbruttMelding(id: UUID) =
     ).use {
         it.setObject(1, id)
         it.execute()
-    }
-
-private fun Connection.finnPlanlagtMeldingUnderSending(fnr: String): PlanlagtMeldingDbModel? =
-    this.prepareStatement(
-        """
-            SELECT * FROM planlagt_melding WHERE fnr=? AND sendt is null and avbrutt is null AND sendes<?;
-            """
-    ).use {
-        it.setString(1, fnr)
-        it.setTimestamp(2, Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant()))
-        it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
     }
 
 private fun Connection.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> =
