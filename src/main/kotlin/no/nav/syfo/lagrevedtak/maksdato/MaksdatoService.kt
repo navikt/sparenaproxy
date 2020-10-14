@@ -5,19 +5,39 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import no.nav.syfo.Filter
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
+import no.nav.syfo.application.db.DatabaseInterface
+import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
+import no.nav.syfo.trefferAldersfilter
 
 class MaksdatoService(
-    private val arenaMqProducer: ArenaMqProducer
+    private val arenaMqProducer: ArenaMqProducer,
+    private val database: DatabaseInterface
 ) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
 
     fun sendMaksdatomeldingTilArena(utbetaltEvent: UtbetaltEvent) {
-        arenaMqProducer.sendTilArena(tilMaksdatoMelding(utbetaltEvent, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
-        log.info("Har sendt maksdatomelding for utbetaltevent {}", utbetaltEvent.utbetalteventid)
+        if (skalSendeMaksdatomelding(utbetaltEvent.fnr, utbetaltEvent.startdato)) {
+            arenaMqProducer.sendTilArena(tilMaksdatoMelding(utbetaltEvent, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
+            log.info("Har sendt maksdatomelding for utbetaltevent {}", utbetaltEvent.utbetalteventid)
+            SENDT_MAKSDATOMELDING.inc()
+        }
+    }
+
+    fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate): Boolean {
+        if (trefferAldersfilter(fnr, Filter.ETTER1995)) {
+            return if (database.fireukersmeldingErSendt(fnr, startdato)) {
+                true
+            } else {
+                log.info("Utbetaling gjelder sykefravær det ikke har blitt sendt 4-ukersmelding for, sender ikke maksdatomelding")
+                false
+            }
+        }
+        return false
     }
 
     fun tilMaksdatoMelding(utbetaltEvent: UtbetaltEvent, now: OffsetDateTime): MaksdatoMelding {

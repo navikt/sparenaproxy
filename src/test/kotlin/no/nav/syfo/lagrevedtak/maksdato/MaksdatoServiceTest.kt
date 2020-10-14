@@ -6,14 +6,27 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
+import no.nav.syfo.model.BREV_4_UKER_TYPE
+import no.nav.syfo.testutil.TestDB
+import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.lagUtbetaltEvent
+import no.nav.syfo.testutil.lagrePlanlagtMelding
+import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 object MaksdatoServiceTest : Spek({
     val arenaMqProducer = mockk<ArenaMqProducer>(relaxed = true)
-    val maksdatoService = MaksdatoService(arenaMqProducer)
+    val testDb = TestDB()
+    val maksdatoService = MaksdatoService(arenaMqProducer, testDb)
+
+    afterEachTest {
+        testDb.connection.dropData()
+    }
+    afterGroup {
+        testDb.stop()
+    }
 
     describe("Test av oppretting av maksdatomelding") {
         it("Oppretter riktig maksdatomelding") {
@@ -59,6 +72,39 @@ object MaksdatoServiceTest : Spek({
             val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
             maksdato shouldEqual LocalDate.of(2020, 10, 13)
+        }
+    }
+
+    describe("Test av logikk for om det skal sendes maksdato") {
+        val fnr = "15060188888"
+        it("Skal sende maksdatomelding hvis det er sendt 4-ukersmelding for sykefraværet") {
+            val startdato = LocalDate.now().minusWeeks(4).minusDays(1)
+            testDb.connection.lagrePlanlagtMelding(
+                opprettPlanlagtMelding(
+                    id = UUID.randomUUID(),
+                    sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                    fnr = fnr,
+                    type = BREV_4_UKER_TYPE,
+                    startdato = startdato
+                )
+            )
+
+            maksdatoService.skalSendeMaksdatomelding(fnr, startdato) shouldEqual true
+        }
+        it("Skal ikke sende maksdatomelding hvis det ikke er sendt 4-ukersmelding for sykefraværet") {
+            val startdato = LocalDate.now().minusWeeks(3).minusDays(6)
+            testDb.connection.lagrePlanlagtMelding(
+                opprettPlanlagtMelding(
+                    id = UUID.randomUUID(),
+                    avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                    sendt = null,
+                    fnr = fnr,
+                    type = BREV_4_UKER_TYPE,
+                    startdato = startdato
+                )
+            )
+
+            maksdatoService.skalSendeMaksdatomelding(fnr, startdato) shouldEqual false
         }
     }
 })
