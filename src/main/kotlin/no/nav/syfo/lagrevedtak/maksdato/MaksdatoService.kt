@@ -29,7 +29,7 @@ class MaksdatoService(
     }
 
     fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate): Boolean {
-        if (trefferAldersfilter(fnr, Filter.ETTER1990)) {
+        if (trefferAldersfilter(fnr, Filter.ETTER1980)) {
             return if (database.fireukersmeldingErSendt(fnr, startdato)) {
                 true
             } else {
