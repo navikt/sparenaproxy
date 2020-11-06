@@ -17,7 +17,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
 
     private fun getBaseConfig(vaultSecrets: VaultSecrets, env: Environment): Properties {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
-        kafkaBaseConfig["auto.offset.reset"] = "latest"
+        kafkaBaseConfig["auto.offset.reset"] = "none"
         kafkaBaseConfig["specific.avro.reader"] = false
         return kafkaBaseConfig
     }
