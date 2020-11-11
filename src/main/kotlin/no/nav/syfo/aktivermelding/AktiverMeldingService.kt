@@ -6,6 +6,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
+import no.nav.syfo.aktivermelding.db.finnesPlanlagtMeldingMedNyereStartdato
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
@@ -36,20 +37,26 @@ class AktiverMeldingService(
     suspend fun behandleAktiverMelding(aktiverMelding: AktiverMelding) {
         val planlagtMelding = database.hentPlanlagtMelding(aktiverMelding.id)
         if (planlagtMelding != null) {
-            val skalSendeMelding = when (planlagtMelding.type) {
-                BREV_4_UKER_TYPE -> {
-                    smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+            val finnesPlanlagtMeldingMedNyereStartdato = database.finnesPlanlagtMeldingMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato)
+            val skalSendeMelding = if (!finnesPlanlagtMeldingMedNyereStartdato) {
+                when (planlagtMelding.type) {
+                    BREV_4_UKER_TYPE -> {
+                        smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                    }
+                    AKTIVITETSKRAV_8_UKER_TYPE -> {
+                        smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                    }
+                    BREV_39_UKER_TYPE -> {
+                        smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                    }
+                    else -> {
+                        log.error("Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}")
+                        throw IllegalStateException("Planlagt melding har ukjent type")
+                    }
                 }
-                AKTIVITETSKRAV_8_UKER_TYPE -> {
-                    smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
-                }
-                BREV_39_UKER_TYPE -> {
-                    smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
-                }
-                else -> {
-                    log.error("Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}")
-                    throw IllegalStateException("Planlagt melding har ukjent type")
-                }
+            } else {
+                log.info("Det finnes planlagte meldinger for sykefravær med nyere startdato, avbryter melding med id ${planlagtMelding.id}")
+                false
             }
             if (skalSendeMelding) {
                 log.info("Sender melding med id {} til Arena", aktiverMelding.id)
