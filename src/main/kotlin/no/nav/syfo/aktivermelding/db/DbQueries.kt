@@ -2,6 +2,7 @@ package no.nav.syfo.aktivermelding.db
 
 import java.sql.Connection
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
@@ -12,6 +13,12 @@ import no.nav.syfo.model.toPlanlagtMeldingDbModel
 fun DatabaseInterface.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? {
     connection.use { connection ->
         return connection.hentPlanlagtMelding(id)
+    }
+}
+
+fun DatabaseInterface.finnesPlanlagtMeldingMedNyereStartdato(fnr: String, startdato: LocalDate): Boolean {
+    connection.use { connection ->
+        return connection.finnesPlanlagtMeldingMedNyereStartdato(fnr, startdato)
     }
 }
 
@@ -50,6 +57,17 @@ private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
     ).use {
         it.setObject(1, id)
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
+    }
+
+private fun Connection.finnesPlanlagtMeldingMedNyereStartdato(fnr: String, startdato: LocalDate): Boolean =
+    this.prepareStatement(
+        """
+            SELECT 1 FROM planlagt_melding WHERE fnr=? AND startdato>?;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setObject(2, startdato)
+        it.executeQuery().next()
     }
 
 private fun Connection.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) =
