@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KUN_LAGRET_VEDTAK
 import no.nav.syfo.application.metrics.OPPRETTET_PLANLAGT_MELDING
-import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEvent
+import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgOppdaterStansmelding
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
 import no.nav.syfo.log
@@ -15,19 +15,26 @@ import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.STANS_TYPE
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
 
     fun lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent: UtbetaltEvent) {
+        val planlagtStansmelding = lagPlanlagtMeldingDbModelForUtbetaling(
+            utbetaltEvent,
+            STANS_TYPE,
+            utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+        )
         if (database.planlagtMeldingFinnes(utbetaltEvent.fnr, utbetaltEvent.startdato)) {
             log.info("Meldinger er allerede opprettet, lagrer nytt utbetalingsevent {}", utbetaltEvent.utbetalteventid)
             KUN_LAGRET_VEDTAK.inc()
-            database.lagreUtbetaltEvent(utbetaltEvent)
+            database.lagreUtbetaltEventOgOppdaterStansmelding(utbetaltEvent, planlagtStansmelding)
         } else {
             log.info("Lagrer utbetalingsevent {} og planlagte meldinger", utbetaltEvent.utbetalteventid)
             OPPRETTET_PLANLAGT_MELDING.labels(BREV_4_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(AKTIVITETSKRAV_8_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(BREV_39_UKER_TYPE).inc()
+            OPPRETTET_PLANLAGT_MELDING.labels(STANS_TYPE).inc()
             database.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
                 listOf(
@@ -45,7 +52,8 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                         utbetaltEvent,
                         BREV_39_UKER_TYPE,
                         utbetaltEvent.startdato.plusWeeks(39).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
-                    )
+                    ),
+                    planlagtStansmelding
                 )
             )
         }
