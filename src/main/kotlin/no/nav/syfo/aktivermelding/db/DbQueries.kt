@@ -29,6 +29,13 @@ fun DatabaseInterface.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) {
     }
 }
 
+fun DatabaseInterface.utsettPlanlagtMelding(id: UUID, sendes: OffsetDateTime) {
+    connection.use { connection ->
+        connection.utsettPlanlagtMelding(id, sendes)
+        connection.commit()
+    }
+}
+
 fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
     connection.use { connection ->
         connection.sendPlanlagtMelding(id, sendt)
@@ -77,6 +84,17 @@ private fun Connection.avbrytPlanlagtMelding(id: UUID, avbrutt: OffsetDateTime) 
             """
     ).use {
         it.setTimestamp(1, Timestamp.from(avbrutt.toInstant()))
+        it.setObject(2, id)
+        it.execute()
+    }
+
+private fun Connection.utsettPlanlagtMelding(id: UUID, sendes: OffsetDateTime) =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET sendes=? WHERE id=?;
+            """
+    ).use {
+        it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
         it.setObject(2, id)
         it.execute()
     }

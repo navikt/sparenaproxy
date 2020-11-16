@@ -25,8 +25,10 @@ import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
 import java.net.ServerSocket
+import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.client.AccessTokenClient
 import org.amshove.kluent.shouldEqual
@@ -35,6 +37,8 @@ import org.spekframework.spek2.style.specification.describe
 
 @KtorExperimentalAPI
 object SmregisterClientTest : Spek({
+    val fom = LocalDate.of(2020, 3, 15)
+    val tom = LocalDate.of(2020, 4, 12)
     val accessTokenClientMock = mockk<AccessTokenClient>()
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
@@ -62,9 +66,10 @@ object SmregisterClientTest : Spek({
             accept(ContentType.Application.Json) {
                 post("/api/v1/sykmelding/sykmeldtStatus") {
                     when (call.receive<StatusRequest>().fnr) {
-                        "fnr" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = false))
+                        "fnr" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = false, fom = fom, tom = tom))
                         "fnr-ikkesyk" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = false))
-                        "fnr-gradert" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = true))
+                        "fnr-gradert" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = true, fom = fom, tom = tom))
+                        "fnr-sykmeldtutentom" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = true, fom = fom, tom = null))
                     }
                 }
             }
@@ -132,6 +137,32 @@ object SmregisterClientTest : Spek({
             }
 
             erSykmeldt shouldEqual false
+        }
+    }
+
+    describe("Test av SmRegisterClient - sykmeldt til og med-dato") {
+        it("Henter tom-dato hvis bruker er sykmeldt") {
+            var sykmeldtTom: LocalDate? = null
+            runBlocking {
+                sykmeldtTom = smregisterClient.erSykmeldtTilOgMed("fnr", UUID.randomUUID())
+            }
+
+            sykmeldtTom shouldEqual tom
+        }
+        it("Tom-dato er null hvis ikke lenger sykmeldt") {
+            var sykmeldtTom: LocalDate? = null
+            runBlocking {
+                sykmeldtTom = smregisterClient.erSykmeldtTilOgMed("fnr-ikkesyk", UUID.randomUUID())
+            }
+
+            sykmeldtTom shouldEqual null
+        }
+        it("Feiler hvis bruker er sykmeldt, men tom-dato mangler") {
+            assertFailsWith<IllegalStateException> {
+                runBlocking {
+                    smregisterClient.erSykmeldtTilOgMed("fnr-sykmeldtutentom", UUID.randomUUID())
+                }
+            }
         }
     }
 })

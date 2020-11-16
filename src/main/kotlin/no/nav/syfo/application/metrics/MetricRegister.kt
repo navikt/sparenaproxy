@@ -48,6 +48,12 @@ val SENDT_MELDING: Counter = Counter.build()
     .help("Antall sendte meldinger")
     .register()
 
+val UTSATT_MELDING: Counter = Counter.build()
+    .namespace(METRICS_NS)
+    .name("utsatt_melding_counter")
+    .help("Antall utsatte stansmeldinger")
+    .register()
+
 val SENDT_MAKSDATOMELDING: Counter = Counter.build()
     .namespace(METRICS_NS)
     .name("sendt_maksdato_counter")
