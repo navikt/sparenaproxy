@@ -189,11 +189,12 @@ object AktiverMeldingServiceTest : Spek({
     }
 
     describe("Aktivering stansmelding") {
+        val fnr = "15060188888"
         it("Avbryter stansmelding hvis bruker har et nyere sykefravær") {
             val id = UUID.randomUUID()
             val id2 = UUID.randomUUID()
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = "fnr", startdato = LocalDate.of(2020, 1, 10), type = STANS_TYPE))
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id2, fnr = "fnr", startdato = LocalDate.of(2020, 5, 10), type = BREV_4_UKER_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, startdato = LocalDate.of(2020, 1, 10), type = STANS_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id2, fnr = fnr, startdato = LocalDate.of(2020, 5, 10), type = BREV_4_UKER_TYPE))
 
             runBlocking {
                 aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -203,14 +204,14 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 10)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 10)).first()
             planlagtMelding.avbrutt shouldNotEqual null
             planlagtMelding.sendt shouldEqual null
         }
         it("Sender stansmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
-            coEvery { smregisterClient.erSykmeldtTilOgMed("fnr", id) } returns null
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = STANS_TYPE))
+            coEvery { smregisterClient.erSykmeldtTilOgMed(fnr, id) } returns null
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, type = STANS_TYPE))
 
             runBlocking {
                 aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -220,15 +221,15 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
         it("Utsetter stansmelding hvis bruker fortsatt er sykmeldt") {
             val id = UUID.randomUUID()
             val tom = LocalDate.of(2020, 3, 10)
-            coEvery { smregisterClient.erSykmeldtTilOgMed("fnr", id) } returns tom
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = STANS_TYPE))
+            coEvery { smregisterClient.erSykmeldtTilOgMed(fnr, id) } returns tom
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, type = STANS_TYPE))
 
             runBlocking {
                 aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -238,7 +239,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldEqual null
             planlagtMelding.avbrutt shouldEqual null
             planlagtMelding.sendes shouldEqual tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
