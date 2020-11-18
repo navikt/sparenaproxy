@@ -1,18 +1,34 @@
 package no.nav.syfo.lagrevedtak.db
 
 import java.sql.Connection
+import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
+import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.postgresql.util.PGobject
 
-fun DatabaseInterface.lagreUtbetaltEvent(
-    utbetaltEvent: UtbetaltEvent
+fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
+    utbetaltEvent: UtbetaltEvent,
+    planlagtStansmelding: PlanlagtMeldingDbModel
 ) {
     connection.use { connection ->
+        val meldingId = connection.hentPlanlagtStansmelding(planlagtStansmelding.fnr, planlagtStansmelding.startdato)
+        if (meldingId == null) {
+            connection.lagrePlanlagtMelding(planlagtStansmelding)
+        } else {
+            connection.oppdaterStansmelding(
+                meldingId,
+                utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            )
+        }
         connection.lagreUtbetaltEvent(utbetaltEvent)
         connection.commit()
     }
@@ -79,6 +95,31 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
         it.execute()
     }
 }
+
+private fun Connection.hentPlanlagtStansmelding(fnr: String, startdato: LocalDate): UUID? =
+    this.prepareStatement(
+        """
+            SELECT id FROM planlagt_melding WHERE fnr=? AND startdato=? AND type='STANS' AND sendt is null AND avbrutt is null;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setObject(2, startdato)
+        it.executeQuery().toList { toUuid() }.firstOrNull()
+    }
+
+private fun ResultSet.toUuid(): UUID =
+    getObject("id", UUID::class.java)
+
+private fun Connection.oppdaterStansmelding(id: UUID, sendes: OffsetDateTime) =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET sendes=? WHERE id=?;
+            """
+    ).use {
+        it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
+        it.setObject(2, id)
+        it.execute()
+    }
 
 private fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
     this.prepareStatement(

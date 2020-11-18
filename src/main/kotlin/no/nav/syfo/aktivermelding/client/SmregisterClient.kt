@@ -42,6 +42,21 @@ class SmregisterClient(
         }
     }
 
+    suspend fun erSykmeldtTilOgMed(fnr: String, planlagtMeldingId: UUID): LocalDate? {
+        log.info("Henter sykmeldingstatus uavhengig av grad for stansmelding {}", planlagtMeldingId)
+        try {
+            val sykmeldingstatus = hentSykmeldingstatus(fnr)
+            if (sykmeldingstatus.erSykmeldt && sykmeldingstatus.tom == null) {
+                log.error("Bruker er sykmeldt, men sykmelding mangler tom: $planlagtMeldingId")
+                throw IllegalStateException("Bruker er sykmeldt, men sykmelding mangler tom")
+            }
+            return sykmeldingstatus.tom
+        } catch (e: Exception) {
+            log.error("Feil ved henting av sykmeldingstatus uavhengig av grad for stansmelding $planlagtMeldingId {}", e.message)
+            throw e
+        }
+    }
+
     private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
         httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v1/sykmelding/sykmeldtStatus") {
             accept(ContentType.Application.Json)
@@ -61,5 +76,7 @@ data class StatusRequest(
 
 data class SykmeldtStatus(
     val erSykmeldt: Boolean,
-    val gradert: Boolean? = null
+    val gradert: Boolean? = null,
+    val fom: LocalDate? = null,
+    val tom: LocalDate? = null
 )

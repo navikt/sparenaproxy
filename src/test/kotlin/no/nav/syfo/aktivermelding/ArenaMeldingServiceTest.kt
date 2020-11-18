@@ -10,6 +10,7 @@ import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.STANS_TYPE
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -86,6 +87,25 @@ object ArenaMeldingServiceTest : Spek({
         brev39Ukersmelding.n2830.versjon shouldEqual "015"
         brev39Ukersmelding.n2830.meldingsdata shouldEqual "02052020                                                                                  " // lengde 90
         brev39Ukersmelding.n2840.taglinje shouldEqual "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 80
+    }
+
+    describe("Test av oppretting av stansmelding") {
+        val now = OffsetDateTime.of(LocalDate.of(2020, 7, 2).atTime(15, 20), ZoneOffset.UTC)
+        val planlagtMeldingDbModel = PlanlagtMeldingDbModel(
+            id = UUID.randomUUID(),
+            fnr = "12345678910",
+            startdato = LocalDate.of(2020, 5, 2),
+            type = STANS_TYPE,
+            opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
+            sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
+        )
+
+        val stansmelding = arenaMeldingService.tilStansmelding(planlagtMeldingDbModel, now)
+
+        stansmelding.k278M810.dato shouldEqual "02072020"
+        stansmelding.k278M810.klokke shouldEqual "152000"
+        stansmelding.k278M810.fnr shouldEqual "12345678910"
+        stansmelding.k278M830.startdato shouldEqual "02052020"
     }
 
     describe("Test av datoformattering") {
