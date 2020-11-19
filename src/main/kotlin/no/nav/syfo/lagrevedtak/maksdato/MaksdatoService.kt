@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
+import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
 

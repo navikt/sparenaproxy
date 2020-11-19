@@ -1,4 +1,4 @@
-package no.nav.syfo.lagrevedtak.maksdato
+package no.nav.syfo.db
 
 import java.sql.Connection
 import java.time.LocalDate

@@ -193,6 +193,7 @@ object AktiverMeldingServiceTest : Spek({
         it("Avbryter stansmelding hvis bruker har et nyere sykefravær") {
             val id = UUID.randomUUID()
             val id2 = UUID.randomUUID()
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = fnr, startdato = LocalDate.of(2020, 1, 10), type = BREV_4_UKER_TYPE, sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20)))
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, startdato = LocalDate.of(2020, 1, 10), type = STANS_TYPE))
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id2, fnr = fnr, startdato = LocalDate.of(2020, 5, 10), type = BREV_4_UKER_TYPE))
 
@@ -211,7 +212,8 @@ object AktiverMeldingServiceTest : Spek({
         it("Sender stansmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.erSykmeldtTilOgMed(fnr, id) } returns null
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, type = STANS_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = fnr, startdato = LocalDate.of(2020, 1, 14), type = BREV_4_UKER_TYPE, sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20)))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, startdato = LocalDate.of(2020, 1, 14), type = STANS_TYPE))
 
             runBlocking {
                 aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -225,11 +227,29 @@ object AktiverMeldingServiceTest : Spek({
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
         }
+        it("Avbryter stansmelding hvis bruker ikke lenger er sykmeldt og det ikke er sendt 4-ukersmelding") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.erSykmeldtTilOgMed(fnr, id) } returns null
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = fnr, startdato = LocalDate.of(2020, 1, 14), type = BREV_4_UKER_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, startdato = LocalDate.of(2020, 1, 14), type = STANS_TYPE))
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
+            planlagtMelding.avbrutt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
+        }
         it("Utsetter stansmelding hvis bruker fortsatt er sykmeldt") {
             val id = UUID.randomUUID()
             val tom = LocalDate.of(2020, 3, 10)
             coEvery { smregisterClient.erSykmeldtTilOgMed(fnr, id) } returns tom
-            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, type = STANS_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = fnr, startdato = LocalDate.of(2020, 1, 14), type = STANS_TYPE))
 
             runBlocking {
                 aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))

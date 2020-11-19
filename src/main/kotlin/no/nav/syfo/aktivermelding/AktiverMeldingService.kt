@@ -19,6 +19,7 @@ import no.nav.syfo.application.metrics.IKKE_FUNNET_MELDING
 import no.nav.syfo.application.metrics.MOTTATT_AKTIVERMELDING
 import no.nav.syfo.application.metrics.SENDT_MELDING
 import no.nav.syfo.application.metrics.UTSATT_MELDING
+import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
@@ -82,11 +83,11 @@ class AktiverMeldingService(
     private suspend fun sendEllerUtsettStansmelding(planlagtMelding: PlanlagtMeldingDbModel) {
         val sykmeldtTom = smregisterClient.erSykmeldtTilOgMed(planlagtMelding.fnr, planlagtMelding.id)
         if (sykmeldtTom == null) {
-            if (trefferAldersfilter(planlagtMelding.fnr, Filter.ETTER1995)) {
+            if (trefferAldersfilter(planlagtMelding.fnr, Filter.ETTER1995) && database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
                 log.info("Bruker er ikke lenger sykmeldt, aktiverer stansmelding ${planlagtMelding.id}")
                 sendTilArena(planlagtMelding)
             } else {
-                log.info("Bruker er ikke lenger sykmeldt, men treffer ikke filter, stansmelding ${planlagtMelding.id}")
+                log.info("Bruker er ikke lenger sykmeldt, men var sykmeldt mindre enn 4 uker/treffer ikke filter, stansmelding ${planlagtMelding.id}")
                 avbrytMelding(AktiverMelding(planlagtMelding.id))
             }
         } else {
