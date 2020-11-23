@@ -83,7 +83,7 @@ class AktiverMeldingService(
     private suspend fun sendEllerUtsettStansmelding(planlagtMelding: PlanlagtMeldingDbModel) {
         val sykmeldtTom = smregisterClient.erSykmeldtTilOgMed(planlagtMelding.fnr, planlagtMelding.id)
         if (sykmeldtTom == null) {
-            if (trefferAldersfilter(planlagtMelding.fnr, Filter.ETTER1995) && database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
+            if (trefferAldersfilter(planlagtMelding.fnr, Filter.ETTER1990) && database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
                 log.info("Bruker er ikke lenger sykmeldt, aktiverer stansmelding ${planlagtMelding.id}")
                 sendTilArena(planlagtMelding)
             } else {
