@@ -1,7 +1,6 @@
 package no.nav.syfo.lagrevedtak.db
 
 import java.sql.Connection
-import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -12,6 +11,7 @@ import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.postgresql.util.PGobject
 
@@ -20,14 +20,18 @@ fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
     planlagtStansmelding: PlanlagtMeldingDbModel
 ) {
     connection.use { connection ->
-        val meldingId = connection.hentPlanlagtStansmelding(planlagtStansmelding.fnr, planlagtStansmelding.startdato)
-        if (meldingId == null) {
+        val melding = connection.hentPlanlagtStansmelding(planlagtStansmelding.fnr, planlagtStansmelding.startdato)
+        if (melding == null) {
             connection.lagrePlanlagtMelding(planlagtStansmelding)
         } else {
-            connection.oppdaterStansmelding(
-                meldingId,
-                utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
-            )
+            val oppdatertSendes = utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            if (oppdatertSendes.isAfter(melding.sendes)) {
+                connection.oppdaterStansmelding(
+                    melding.id,
+                    utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault())
+                        .withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+                )
+            }
         }
         connection.lagreUtbetaltEvent(utbetaltEvent)
         connection.commit()
@@ -96,24 +100,21 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
     }
 }
 
-private fun Connection.hentPlanlagtStansmelding(fnr: String, startdato: LocalDate): UUID? =
+private fun Connection.hentPlanlagtStansmelding(fnr: String, startdato: LocalDate): PlanlagtMeldingDbModel? =
     this.prepareStatement(
         """
-            SELECT id FROM planlagt_melding WHERE fnr=? AND startdato=? AND type='STANS' AND sendt is null AND avbrutt is null;
+            SELECT * FROM planlagt_melding WHERE fnr=? AND startdato=? AND type='STANS' AND sendt is null AND avbrutt is null;
             """
     ).use {
         it.setString(1, fnr)
         it.setObject(2, startdato)
-        it.executeQuery().toList { toUuid() }.firstOrNull()
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
     }
-
-private fun ResultSet.toUuid(): UUID =
-    getObject("id", UUID::class.java)
 
 private fun Connection.oppdaterStansmelding(id: UUID, sendes: OffsetDateTime) =
     this.prepareStatement(
         """
-            UPDATE planlagt_melding SET sendes=? WHERE id=?;
+            UPDATE planlagt_melding SET sendes=?, avbrutt=null  WHERE id=?;
             """
     ).use {
         it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
