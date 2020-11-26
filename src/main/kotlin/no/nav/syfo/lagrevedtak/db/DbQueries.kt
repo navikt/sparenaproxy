@@ -114,7 +114,7 @@ private fun Connection.hentPlanlagtStansmelding(fnr: String, startdato: LocalDat
 private fun Connection.oppdaterStansmelding(id: UUID, sendes: OffsetDateTime) =
     this.prepareStatement(
         """
-            UPDATE planlagt_melding SET sendes=? WHERE id=?;
+            UPDATE planlagt_melding SET sendes=?, avbrutt=null  WHERE id=?;
             """
     ).use {
         it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
