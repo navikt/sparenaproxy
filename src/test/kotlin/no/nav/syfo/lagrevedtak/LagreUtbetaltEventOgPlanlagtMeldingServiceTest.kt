@@ -96,6 +96,18 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
             planlagtStansmelding?.sendes shouldEqual tom.plusWeeks(1).plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
+        it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val nesteUtbetaltEvent = lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), startdato, "fnr", tom.minusWeeks(1))
+
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(nesteUtbetaltEvent)
+
+            val planlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", startdato)
+            planlagtMeldingFraDbListe.size shouldEqual 4
+            val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
+            planlagtStansmelding?.sendes shouldEqual tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+        }
         it("Oppretter stansmelding hvis det ikke finnes fra før") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "fnr", startdato = startdato))
