@@ -8,7 +8,7 @@ import java.time.ZoneOffset
 import no.nav.syfo.Filter
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
-import no.nav.syfo.aktivermelding.db.finnesPlanlagtMeldingMedNyereStartdato
+import no.nav.syfo.aktivermelding.db.finnesNyerePlanlagtMeldingMedAnnenStartdato
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.utsettPlanlagtMelding
@@ -45,10 +45,10 @@ class AktiverMeldingService(
     suspend fun behandleAktiverMelding(aktiverMelding: AktiverMelding) {
         val planlagtMelding = database.hentPlanlagtMelding(aktiverMelding.id)
         if (planlagtMelding != null) {
-            val finnesPlanlagtMeldingMedNyereStartdato =
-                database.finnesPlanlagtMeldingMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato)
-            if (finnesPlanlagtMeldingMedNyereStartdato) {
-                log.info("Det finnes planlagte meldinger for sykefravær med nyere startdato, avbryter melding med id ${planlagtMelding.id}")
+            val finnesNyerePlanlagtMeldingMedAnnenStartdato =
+                database.finnesNyerePlanlagtMeldingMedAnnenStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.opprettet)
+            if (finnesNyerePlanlagtMeldingMedAnnenStartdato) {
+                log.info("Det finnes nyere planlagte meldinger for sykefravær med annen startdato, avbryter melding med id ${planlagtMelding.id}")
                 avbrytMelding(aktiverMelding)
             } else if (planlagtMelding.type == STANS_TYPE) {
                 sendEllerUtsettStansmelding(planlagtMelding)

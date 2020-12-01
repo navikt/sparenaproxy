@@ -16,9 +16,9 @@ fun DatabaseInterface.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? {
     }
 }
 
-fun DatabaseInterface.finnesPlanlagtMeldingMedNyereStartdato(fnr: String, startdato: LocalDate): Boolean {
+fun DatabaseInterface.finnesNyerePlanlagtMeldingMedAnnenStartdato(fnr: String, startdato: LocalDate, opprettet: OffsetDateTime): Boolean {
     connection.use { connection ->
-        return connection.finnesPlanlagtMeldingMedNyereStartdato(fnr, startdato)
+        return connection.finnesNyerePlanlagtMeldingMedAnnenStartdato(fnr, startdato, opprettet)
     }
 }
 
@@ -72,14 +72,15 @@ private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
     }
 
-private fun Connection.finnesPlanlagtMeldingMedNyereStartdato(fnr: String, startdato: LocalDate): Boolean =
+private fun Connection.finnesNyerePlanlagtMeldingMedAnnenStartdato(fnr: String, startdato: LocalDate, opprettet: OffsetDateTime): Boolean =
     this.prepareStatement(
         """
-            SELECT 1 FROM planlagt_melding WHERE fnr=? AND startdato>?;
+            SELECT 1 FROM planlagt_melding WHERE fnr=? AND startdato!=? AND opprettet>?;
             """
     ).use {
         it.setString(1, fnr)
         it.setObject(2, startdato)
+        it.setTimestamp(3, Timestamp.from(opprettet.toInstant()))
         it.executeQuery().next()
     }
 
