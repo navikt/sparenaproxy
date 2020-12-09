@@ -5,7 +5,6 @@ import io.ktor.util.KtorExperimentalAPI
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import no.nav.syfo.Filter
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.finnesNyerePlanlagtMeldingMedAnnenStartdato
@@ -27,7 +26,6 @@ import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
 import no.nav.syfo.objectMapper
-import no.nav.syfo.trefferAldersfilter
 
 @KtorExperimentalAPI
 class AktiverMeldingService(
@@ -83,7 +81,7 @@ class AktiverMeldingService(
     private suspend fun sendEllerUtsettStansmelding(planlagtMelding: PlanlagtMeldingDbModel) {
         val sykmeldtTom = smregisterClient.erSykmeldtTilOgMed(planlagtMelding.fnr, planlagtMelding.id)
         if (sykmeldtTom == null) {
-            if (trefferAldersfilter(planlagtMelding.fnr, Filter.ETTER1980) && database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
+            if (database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
                 log.info("Bruker er ikke lenger sykmeldt, aktiverer stansmelding ${planlagtMelding.id}")
                 sendTilArena(planlagtMelding)
             } else {
