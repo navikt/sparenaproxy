@@ -37,7 +37,7 @@ object PdlPersonServiceTest : Spek({
             )
 
             runBlocking {
-                pdlService.erPersonDod("123", UUID.randomUUID()) shouldEqual true
+                pdlService.isAlive("123", UUID.randomUUID()) shouldEqual false
             }
         }
         it("Returnerer false hvis dødsfall-liste er tom") {
@@ -47,7 +47,7 @@ object PdlPersonServiceTest : Spek({
             )
 
             runBlocking {
-                pdlService.erPersonDod("123", UUID.randomUUID()) shouldEqual false
+                pdlService.isAlive("123", UUID.randomUUID()) shouldEqual true
             }
         }
         it("Kaster feil hvis person ikke finnes i PDL") {
@@ -55,7 +55,7 @@ object PdlPersonServiceTest : Spek({
 
             assertFailsWith<IllegalStateException> {
                 runBlocking {
-                    pdlService.erPersonDod("123", UUID.randomUUID())
+                    pdlService.isAlive("123", UUID.randomUUID())
                 }
             }
         }

@@ -30,7 +30,7 @@ object MaksdatoServiceTest : Spek({
 
     beforeEachTest {
         clearAllMocks()
-        coEvery { pdlPersonService.erPersonDod(any(), any()) } returns false
+        coEvery { pdlPersonService.isAlive(any(), any()) } returns true
     }
 
     afterEachTest {
@@ -124,7 +124,7 @@ object MaksdatoServiceTest : Spek({
             }
         }
         it("Skal ikke sende maksdatomelding hvis bruker er død") {
-            coEvery { pdlPersonService.erPersonDod(fnr, id) } returns true
+            coEvery { pdlPersonService.isAlive(fnr, id) } returns false
             val startdato = LocalDate.now().minusWeeks(4).minusDays(1)
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(

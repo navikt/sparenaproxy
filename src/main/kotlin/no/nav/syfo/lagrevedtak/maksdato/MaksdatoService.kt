@@ -34,11 +34,11 @@ class MaksdatoService(
 
     suspend fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate, utbetalteventid: UUID): Boolean {
         return if (database.fireukersmeldingErSendt(fnr, startdato)) {
-            if (pdlPersonService.erPersonDod(fnr, utbetalteventid)) {
+            if (pdlPersonService.isAlive(fnr, utbetalteventid)) {
+                true
+            } else {
                 log.info("Person er død, sender ikke maksdatomelding for $utbetalteventid")
                 return false
-            } else {
-                true
             }
         } else {
             log.info("Utbetaling gjelder sykefravær det ikke har blitt sendt 4-ukersmelding for, sender ikke maksdatomelding")

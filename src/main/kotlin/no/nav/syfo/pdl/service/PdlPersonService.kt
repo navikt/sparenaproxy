@@ -9,7 +9,7 @@ import no.nav.syfo.pdl.client.PdlClient
 @KtorExperimentalAPI
 class PdlPersonService(private val pdlClient: PdlClient, private val stsOidcClient: StsOidcClient) {
 
-    suspend fun erPersonDod(ident: String, meldingId: UUID): Boolean {
+    suspend fun isAlive(ident: String, meldingId: UUID): Boolean {
         val stsToken = stsOidcClient.oidcToken().access_token
         val pdlResponse = pdlClient.getPerson(ident, stsToken)
 
@@ -25,8 +25,8 @@ class PdlPersonService(private val pdlClient: PdlClient, private val stsOidcClie
         }
 
         if (pdlResponse.data.hentPerson.doedsfall.isNotEmpty()) {
-            return true
+            return false
         }
-        return false
+        return true
     }
 }

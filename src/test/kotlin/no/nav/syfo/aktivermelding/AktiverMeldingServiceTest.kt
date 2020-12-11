@@ -37,7 +37,7 @@ object AktiverMeldingServiceTest : Spek({
 
     beforeEachTest {
         clearAllMocks()
-        coEvery { pdlPersonService.erPersonDod(any(), any()) } returns false
+        coEvery { pdlPersonService.isAlive(any(), any()) } returns true
     }
 
     afterEachTest {
@@ -86,7 +86,7 @@ object AktiverMeldingServiceTest : Spek({
         it("Avbryter melding hvis bruker er død") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
-            coEvery { pdlPersonService.erPersonDod("fnr", any()) } returns true
+            coEvery { pdlPersonService.isAlive("fnr", any()) } returns false
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
 
             runBlocking {
