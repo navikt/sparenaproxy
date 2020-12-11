@@ -16,6 +16,7 @@ import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.STANS_TYPE
+import no.nav.syfo.pdl.service.PdlPersonService
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
@@ -31,10 +32,12 @@ object AktiverMeldingServiceTest : Spek({
     val testDb = TestDB()
     val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
     val smregisterClient = mockk<SmregisterClient>()
-    val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService)
+    val pdlPersonService = mockk<PdlPersonService>()
+    val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService, pdlPersonService)
 
     beforeEachTest {
         clearAllMocks()
+        coEvery { pdlPersonService.erPersonDod(any(), any()) } returns false
     }
 
     afterEachTest {
@@ -79,6 +82,23 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+        }
+        it("Avbryter melding hvis bruker er død") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
+            coEvery { pdlPersonService.erPersonDod("fnr", any()) } returns true
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
+            planlagtMelding.avbrutt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
         }
     }
 

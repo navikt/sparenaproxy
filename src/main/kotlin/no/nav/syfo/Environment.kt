@@ -33,7 +33,8 @@ data class Environment(
     override val mqChannelName: String = getEnvVar("MQ_CHANNEL_NAME"),
     val arenaQueueName: String = getEnvVar("MQ_ARENA_QUEUE_NAME"),
     val kvitteringQueueName: String = getEnvVar("MQ_KVITTERING_QUEUE_NAME"),
-    val backoutQueueName: String = getEnvVar("MQ_KVITTERING_BQ_QUEUE_NAME")
+    val backoutQueueName: String = getEnvVar("MQ_KVITTERING_BQ_QUEUE_NAME"),
+    val pdlGraphqlPath: String = getEnvVar("PDL_GRAPHQL_PATH")
 ) : MqConfig, KafkaConfig
 
 data class VaultSecrets(
