@@ -1,12 +1,17 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
+import io.ktor.util.KtorExperimentalAPI
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.model.BREV_4_UKER_TYPE
+import no.nav.syfo.pdl.service.PdlPersonService
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.lagUtbetaltEvent
@@ -16,10 +21,17 @@ import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
+@KtorExperimentalAPI
 object MaksdatoServiceTest : Spek({
     val arenaMqProducer = mockk<ArenaMqProducer>(relaxed = true)
     val testDb = TestDB()
-    val maksdatoService = MaksdatoService(arenaMqProducer, testDb)
+    val pdlPersonService = mockk<PdlPersonService>()
+    val maksdatoService = MaksdatoService(arenaMqProducer, testDb, pdlPersonService)
+
+    beforeEachTest {
+        clearAllMocks()
+        coEvery { pdlPersonService.isAlive(any(), any()) } returns true
+    }
 
     afterEachTest {
         testDb.connection.dropData()
@@ -77,11 +89,12 @@ object MaksdatoServiceTest : Spek({
 
     describe("Test av logikk for om det skal sendes maksdato") {
         val fnr = "15060188888"
+        val id = UUID.randomUUID()
         it("Skal sende maksdatomelding hvis det er sendt 4-ukersmelding for sykefraværet") {
             val startdato = LocalDate.now().minusWeeks(4).minusDays(1)
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
-                    id = UUID.randomUUID(),
+                    id = id,
                     sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
                     fnr = fnr,
                     type = BREV_4_UKER_TYPE,
@@ -89,13 +102,15 @@ object MaksdatoServiceTest : Spek({
                 )
             )
 
-            maksdatoService.skalSendeMaksdatomelding(fnr, startdato) shouldEqual true
+            runBlocking {
+                maksdatoService.skalSendeMaksdatomelding(fnr, startdato, id) shouldEqual true
+            }
         }
         it("Skal ikke sende maksdatomelding hvis det ikke er sendt 4-ukersmelding for sykefraværet") {
             val startdato = LocalDate.now().minusWeeks(3).minusDays(6)
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
-                    id = UUID.randomUUID(),
+                    id = id,
                     avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
                     sendt = null,
                     fnr = fnr,
@@ -104,7 +119,26 @@ object MaksdatoServiceTest : Spek({
                 )
             )
 
-            maksdatoService.skalSendeMaksdatomelding(fnr, startdato) shouldEqual false
+            runBlocking {
+                maksdatoService.skalSendeMaksdatomelding(fnr, startdato, id) shouldEqual false
+            }
+        }
+        it("Skal ikke sende maksdatomelding hvis bruker er død") {
+            coEvery { pdlPersonService.isAlive(fnr, id) } returns false
+            val startdato = LocalDate.now().minusWeeks(4).minusDays(1)
+            testDb.connection.lagrePlanlagtMelding(
+                opprettPlanlagtMelding(
+                    id = id,
+                    sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                    fnr = fnr,
+                    type = BREV_4_UKER_TYPE,
+                    startdato = startdato
+                )
+            )
+
+            runBlocking {
+                maksdatoService.skalSendeMaksdatomelding(fnr, startdato, id) shouldEqual false
+            }
         }
     }
 })

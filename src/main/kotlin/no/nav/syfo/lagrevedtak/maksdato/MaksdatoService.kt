@@ -1,35 +1,45 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
+import io.ktor.util.KtorExperimentalAPI
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
+import no.nav.syfo.pdl.service.PdlPersonService
 
+@KtorExperimentalAPI
 class MaksdatoService(
     private val arenaMqProducer: ArenaMqProducer,
-    private val database: DatabaseInterface
+    private val database: DatabaseInterface,
+    private val pdlPersonService: PdlPersonService
 ) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
 
-    fun sendMaksdatomeldingTilArena(utbetaltEvent: UtbetaltEvent) {
-        if (skalSendeMaksdatomelding(utbetaltEvent.fnr, utbetaltEvent.startdato)) {
+    suspend fun sendMaksdatomeldingTilArena(utbetaltEvent: UtbetaltEvent) {
+        if (skalSendeMaksdatomelding(utbetaltEvent.fnr, utbetaltEvent.startdato, utbetaltEvent.utbetalteventid)) {
             arenaMqProducer.sendTilArena(tilMaksdatoMelding(utbetaltEvent, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
             log.info("Har sendt maksdatomelding for utbetaltevent {}", utbetaltEvent.utbetalteventid)
             SENDT_MAKSDATOMELDING.inc()
         }
     }
 
-    fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate): Boolean {
+    suspend fun skalSendeMaksdatomelding(fnr: String, startdato: LocalDate, utbetalteventid: UUID): Boolean {
         return if (database.fireukersmeldingErSendt(fnr, startdato)) {
-            true
+            if (pdlPersonService.isAlive(fnr, utbetalteventid)) {
+                true
+            } else {
+                log.info("Person er død, sender ikke maksdatomelding for $utbetalteventid")
+                return false
+            }
         } else {
             log.info("Utbetaling gjelder sykefravær det ikke har blitt sendt 4-ukersmelding for, sender ikke maksdatomelding")
             false

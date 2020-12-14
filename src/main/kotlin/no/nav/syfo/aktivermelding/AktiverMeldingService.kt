@@ -5,6 +5,7 @@ import io.ktor.util.KtorExperimentalAPI
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.finnesNyerePlanlagtMeldingMedAnnenStartdato
@@ -19,6 +20,7 @@ import no.nav.syfo.application.metrics.MOTTATT_AKTIVERMELDING
 import no.nav.syfo.application.metrics.SENDT_MELDING
 import no.nav.syfo.application.metrics.UTSATT_MELDING
 import no.nav.syfo.db.fireukersmeldingErSendt
+import no.nav.syfo.dodshendelser.db.avbrytPlanlagteMeldingerVedDodsfall
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
@@ -26,12 +28,14 @@ import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
 import no.nav.syfo.objectMapper
+import no.nav.syfo.pdl.service.PdlPersonService
 
 @KtorExperimentalAPI
 class AktiverMeldingService(
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,
-    private val arenaMeldingService: ArenaMeldingService
+    private val arenaMeldingService: ArenaMeldingService,
+    private val pdlPersonService: PdlPersonService
 ) {
     suspend fun mottaAktiverMelding(record: String) {
         val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
@@ -95,16 +99,29 @@ class AktiverMeldingService(
         }
     }
 
-    private fun sendTilArena(planlagtMelding: PlanlagtMeldingDbModel) {
-        log.info("Sender melding med id {} til Arena", planlagtMelding.id)
-        arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
-        database.sendPlanlagtMelding(planlagtMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
-        SENDT_MELDING.inc()
+    private suspend fun sendTilArena(planlagtMelding: PlanlagtMeldingDbModel) {
+        if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {
+            log.info("Sender melding med id {} til Arena", planlagtMelding.id)
+            arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
+            database.sendPlanlagtMelding(planlagtMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
+            SENDT_MELDING.inc()
+        } else {
+            log.info("Person er død, avbryter alle planlagte meldinger ${planlagtMelding.id}")
+            avbrytPgaDodsfall(planlagtMelding.fnr, planlagtMelding.id)
+        }
     }
 
     private fun avbrytMelding(aktiverMelding: AktiverMelding) {
         log.info("Avbryter melding med id {}", aktiverMelding.id)
         database.avbrytPlanlagtMelding(aktiverMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
         AVBRUTT_MELDING.inc()
+    }
+
+    private fun avbrytPgaDodsfall(fnr: String, meldingId: UUID) {
+        val antallAvbrutteMeldinger = database.avbrytPlanlagteMeldingerVedDodsfall(listOf(fnr), OffsetDateTime.now(ZoneOffset.UTC))
+        if (antallAvbrutteMeldinger > 0) {
+            log.info("Avbrøt $antallAvbrutteMeldinger melding(er) fordi bruker er død, $meldingId")
+            AVBRUTT_MELDING.inc(antallAvbrutteMeldinger.toDouble())
+        }
     }
 }

@@ -72,3 +72,5 @@ spec:
       value: QA.P_SPARENAPROXY.MELD_KVITT_FRA_ARENA
     - name: MQ_KVITTERING_BQ_QUEUE_NAME
       value: QA.P_SPARENAPROXY.MELD_KVITT_FRA_ARENA_BOQ
+    - name: PDL_GRAPHQL_PATH
+      value: https://pdl-api.nais.adeo.no/graphql
