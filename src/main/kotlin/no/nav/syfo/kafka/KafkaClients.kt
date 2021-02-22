@@ -4,6 +4,7 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import java.util.Properties
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
+import no.nav.syfo.kafka.aiven.KafkaUtils
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -14,6 +15,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
 
     val kafkaConsumer = getKafkaConsumer(baseConfig, env)
     val personhendelserKafkaConsumer = getPersonhendelserKafkaConsumer(baseConfig, env)
+    val aivenKafkaConsumer = getAivenKafkaConsumer(env)
 
     private fun getBaseConfig(vaultSecrets: VaultSecrets, env: Environment): Properties {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
@@ -36,5 +38,13 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         val personhendelserKafkaConsumer = KafkaConsumer<String, GenericRecord>(properties)
         personhendelserKafkaConsumer.subscribe(listOf(env.pdlTopic))
         return personhendelserKafkaConsumer
+    }
+
+    private fun getAivenKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
+        val properties = KafkaUtils.getAivenKafkaConfig()
+            .toConsumerConfig("${env.applicationName}-consumer",
+                valueDeserializer = StringDeserializer::class)
+
+        return KafkaConsumer(properties)
     }
 }

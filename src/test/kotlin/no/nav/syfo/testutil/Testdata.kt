@@ -89,7 +89,8 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         personNrPasient = fnr,
         rulesetVersion = null,
         tlfPasient = null,
-        tssid = null
+        tssid = null,
+        merknader = null
     )
 }
 
