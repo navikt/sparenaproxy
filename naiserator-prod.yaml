@@ -76,3 +76,5 @@ spec:
       value: QA.P_SPARENAPROXY.MELD_KVITT_FRA_ARENA_BOQ
     - name: PDL_GRAPHQL_PATH
       value: https://pdl-api.nais.adeo.no/graphql
+    - name: KAFKA_CLIENT_ID
+      value: "sparenaproxy"
