@@ -37,6 +37,7 @@ import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
 import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
+import no.nav.syfo.kafka.CommonAivenKafkaService
 import no.nav.syfo.kafka.CommonKafkaService
 import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
@@ -129,6 +130,7 @@ fun main() {
     val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
 
     val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, utbetaltEventService, mottattSykmeldingService, aktiverMeldingService)
+    val commonAivenKafkaService = CommonAivenKafkaService(applicationState, kafkaClients.aivenKafkaConsumer, env, utbetaltEventService)
 
     val applicationEngine = createApplicationEngine(
         env,
@@ -148,6 +150,9 @@ fun main() {
     }
     createListener(applicationState) {
         kvitteringListener.start()
+    }
+    createListener(applicationState) {
+        commonAivenKafkaService.start()
     }
 }
 
