@@ -30,7 +30,6 @@ class CommonAivenKafkaService(
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetaltEventAivenTopic -> {
-                            log.info("Mottatt melding på kafka aiven for offset: {} partition: {} key: {}", it.offset(), it.partition(), it.key())
                             utbetaltEventService.mottaUtbetaltEvent(it.value())
                         }
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
