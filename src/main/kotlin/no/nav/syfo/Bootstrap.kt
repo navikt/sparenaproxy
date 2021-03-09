@@ -117,7 +117,7 @@ fun main() {
 
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
-    val maksdatoService = MaksdatoService(arenaMqProducer, database, pdlPersonService)
+    val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
     val utbetaltEventService = UtbetaltEventService(spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
 
     val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService, pdlPersonService)
