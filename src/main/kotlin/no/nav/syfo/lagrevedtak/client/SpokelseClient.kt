@@ -8,13 +8,13 @@ import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.util.KtorExperimentalAPI
 import java.util.UUID
-import no.nav.syfo.client.AccessTokenClient
+import no.nav.syfo.client.SpokelseAccessTokenClient
 import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SpokelseClient(
     private val spokelseEndpointURL: String,
-    private val accessTokenClient: AccessTokenClient,
+    private val accessTokenClient: SpokelseAccessTokenClient,
     private val resourceId: String,
     private val httpClient: HttpClient
 ) {

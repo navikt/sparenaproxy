@@ -37,7 +37,11 @@ data class Environment(
     val backoutQueueName: String = getEnvVar("MQ_KVITTERING_BQ_QUEUE_NAME"),
     val pdlGraphqlPath: String = getEnvVar("PDL_GRAPHQL_PATH"),
     override val truststore: String? = getEnvVar("NAV_TRUSTSTORE_PATH"),
-    override val truststorePassword: String? = getEnvVar("NAV_TRUSTSTORE_PASSWORD")
+    override val truststorePassword: String? = getEnvVar("NAV_TRUSTSTORE_PASSWORD"),
+    val azureOpenidUrl: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"), // erstatter på sikt aadAccessTokenUrl
+    val clientId: String = getEnvVar("AZURE_APP_CLIENT_ID"),
+    val clientSecret: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
+    val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE")
 ) : MqConfig, KafkaConfig
 
 data class VaultSecrets(

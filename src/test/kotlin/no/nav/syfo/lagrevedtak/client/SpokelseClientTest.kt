@@ -24,7 +24,7 @@ import java.net.ServerSocket
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.client.AccessTokenClient
+import no.nav.syfo.client.SpokelseAccessTokenClient
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -35,7 +35,7 @@ object SpokelseClientTest : Spek({
     val hendelseId2 = UUID.randomUUID()
     val sykmeldingUUID = UUID.randomUUID()
     val soknadUUD = UUID.randomUUID()
-    val accessTokenClientMock = mockk<AccessTokenClient>()
+    val accessTokenClientMock = mockk<SpokelseAccessTokenClient>()
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
             serializer = JacksonSerializer {
