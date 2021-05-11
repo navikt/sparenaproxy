@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: sparenaproxy
-  namespace: default
+  namespace: teamsykmelding
   labels:
     team: teamsykmelding
 spec:
@@ -42,7 +42,7 @@ spec:
         mountPath: /secrets/azuread/sparenaproxy
       - kvPath: serviceuser/data/dev/srvsparenaproxy
         mountPath: /secrets/serviceuser
-      - kvPath: /kv/preprod/fss/sparenaproxy/default
+      - kvPath: /kv/preprod/fss/sparenaproxy/teamsykmelding
         mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://sparenaproxy.nais.preprod.local"
