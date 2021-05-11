@@ -27,7 +27,7 @@ data class Environment(
     val clientIdSpokelse: String = getEnvVar("SPOKELSE_CLIENTID"),
     val clientIdSmregister: String = getEnvVar("SMREGISTER_CLIENTID"),
     val aadAccessTokenUrl: String = getEnvVar("AADACCESSTOKEN_URL"),
-    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service/rest/v1/sts/token"),
+    val stsUrl: String = getEnvVar("STS_URL", "http://security-token-service.default/rest/v1/sts/token"),
     override val mqHostname: String = getEnvVar("MQ_HOST_NAME"),
     override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
     override val mqGatewayName: String = getEnvVar("MQ_GATEWAY_NAME"),
