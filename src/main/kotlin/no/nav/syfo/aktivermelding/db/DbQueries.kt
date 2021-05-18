@@ -43,6 +43,14 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
     }
 }
 
+fun DatabaseInterface.resendPlanlagtMelding(id: UUID): Int {
+    connection.use { connection ->
+        val antallResendteMeldinger = connection.resendMelding(id)
+        connection.commit()
+        return antallResendteMeldinger
+    }
+}
+
 fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
     connection.use { connection ->
         connection.resendAvbruttMelding(id)
@@ -115,6 +123,16 @@ private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
         it.setTimestamp(1, Timestamp.from(sendt.toInstant()))
         it.setObject(2, id)
         it.execute()
+    }
+
+private fun Connection.resendMelding(id: UUID): Int =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET sendt=null WHERE id=?;
+            """
+    ).use {
+        it.setObject(1, id)
+        it.executeUpdate()
     }
 
 private fun Connection.resendAvbruttMelding(id: UUID) =

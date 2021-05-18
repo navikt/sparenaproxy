@@ -23,7 +23,7 @@ class MaksdatoService(
 
     suspend fun sendMaksdatomeldingTilArena(utbetaltEvent: UtbetaltEvent) {
         if (skalSendeMaksdatomelding(utbetaltEvent.fnr, utbetaltEvent.forbrukteSykedager, utbetaltEvent.utbetalteventid)) {
-            arenaMqProducer.sendTilArena(tilMaksdatoMelding(utbetaltEvent, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding())
+            arenaMqProducer.sendTilArena(tilMaksdatoMelding(utbetaltEvent, OffsetDateTime.now(ZoneId.of("Europe/Oslo"))).tilMqMelding(), utbetaltEvent.utbetalteventid)
             log.info("Har sendt maksdatomelding for utbetaltevent {}", utbetaltEvent.utbetalteventid)
             SENDT_MAKSDATOMELDING.inc()
         }

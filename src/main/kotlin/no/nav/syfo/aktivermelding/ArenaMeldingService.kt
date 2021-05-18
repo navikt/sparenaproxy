@@ -38,7 +38,8 @@ class ArenaMeldingService(
                     til4Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
+                    ).tilMqMelding(),
+                    planlagtMeldingDbModel.id
                 )
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
@@ -46,7 +47,8 @@ class ArenaMeldingService(
                     til8Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
+                    ).tilMqMelding(),
+                    planlagtMeldingDbModel.id
                 )
                 log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
             }
@@ -55,7 +57,8 @@ class ArenaMeldingService(
                     til39Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
+                    ).tilMqMelding(),
+                    planlagtMeldingDbModel.id
                 )
                 log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
             }
@@ -64,7 +67,8 @@ class ArenaMeldingService(
                     tilStansmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
+                    ).tilMqMelding(),
+                    planlagtMeldingDbModel.id
                 )
                 log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
             }
