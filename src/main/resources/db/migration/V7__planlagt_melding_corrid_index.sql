@@ -1,0 +1,1 @@
+create index concurrently planlagt_melding_correlationid_idx on planlagt_melding(jmscorrelationid);
