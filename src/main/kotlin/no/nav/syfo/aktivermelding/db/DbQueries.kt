@@ -43,6 +43,14 @@ fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime, corre
     }
 }
 
+fun DatabaseInterface.resendPlanlagtMelding(correlationId: String): Int {
+    connection.use { connection ->
+        val antallResendteMeldinger = connection.resendMelding(correlationId)
+        connection.commit()
+        return antallResendteMeldinger
+    }
+}
+
 fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
     connection.use { connection ->
         connection.resendAvbruttMelding(id)
@@ -116,6 +124,16 @@ private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime, corr
         it.setString(2, correlationId)
         it.setObject(3, id)
         it.execute()
+    }
+
+private fun Connection.resendMelding(correlationId: String): Int =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET sendt=null, jmscorrelationid=null WHERE jmscorrelationid=?;
+            """
+    ).use {
+        it.setObject(1, correlationId)
+        it.executeUpdate()
     }
 
 private fun Connection.resendAvbruttMelding(id: UUID) =
