@@ -19,7 +19,8 @@ data class PlanlagtMeldingDbModel(
     val opprettet: OffsetDateTime,
     val sendes: OffsetDateTime,
     val avbrutt: OffsetDateTime? = null,
-    val sendt: OffsetDateTime? = null
+    val sendt: OffsetDateTime? = null,
+    val jmsCorrelationId: String? = null
 )
 
 fun ResultSet.toPlanlagtMeldingDbModel(): PlanlagtMeldingDbModel =
@@ -31,5 +32,6 @@ fun ResultSet.toPlanlagtMeldingDbModel(): PlanlagtMeldingDbModel =
         opprettet = getTimestamp("opprettet").toInstant().atOffset(ZoneOffset.UTC),
         sendes = getTimestamp("sendes").toInstant().atOffset(ZoneOffset.UTC),
         avbrutt = getTimestamp("avbrutt")?.toInstant()?.atOffset(ZoneOffset.UTC),
-        sendt = getTimestamp("sendt")?.toInstant()?.atOffset(ZoneOffset.UTC)
+        sendt = getTimestamp("sendt")?.toInstant()?.atOffset(ZoneOffset.UTC),
+        jmsCorrelationId = getString("jmscorrelationid")
     )

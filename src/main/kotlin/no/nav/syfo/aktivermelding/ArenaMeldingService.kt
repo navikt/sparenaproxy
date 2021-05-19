@@ -31,10 +31,10 @@ class ArenaMeldingService(
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
 
-    fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel) {
+    fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel): String {
         when (planlagtMeldingDbModel.type) {
             BREV_4_UKER_TYPE -> {
-                arenaMqProducer.sendTilArena(
+                return arenaMqProducer.sendTilArena(
                     til4Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
@@ -42,31 +42,28 @@ class ArenaMeldingService(
                 )
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
-                arenaMqProducer.sendTilArena(
+                return arenaMqProducer.sendTilArena(
                     til8Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
                     ).tilMqMelding()
-                )
-                log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
             }
             BREV_39_UKER_TYPE -> {
-                arenaMqProducer.sendTilArena(
+                return arenaMqProducer.sendTilArena(
                     til39Ukersmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
                     ).tilMqMelding()
-                )
-                log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
             }
             STANS_TYPE -> {
-                arenaMqProducer.sendTilArena(
+                return arenaMqProducer.sendTilArena(
                     tilStansmelding(
                         planlagtMeldingDbModel,
                         OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
                     ).tilMqMelding()
-                )
-                log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}")
+                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
             }
             else -> {
                 log.error(

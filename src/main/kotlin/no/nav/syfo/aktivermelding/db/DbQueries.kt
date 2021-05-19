@@ -36,9 +36,9 @@ fun DatabaseInterface.utsettPlanlagtMelding(id: UUID, sendes: OffsetDateTime) {
     }
 }
 
-fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) {
+fun DatabaseInterface.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime, correlationId: String) {
     connection.use { connection ->
-        connection.sendPlanlagtMelding(id, sendt)
+        connection.sendPlanlagtMelding(id, sendt, correlationId)
         connection.commit()
     }
 }
@@ -106,14 +106,15 @@ private fun Connection.utsettPlanlagtMelding(id: UUID, sendes: OffsetDateTime) =
         it.execute()
     }
 
-private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime) =
+private fun Connection.sendPlanlagtMelding(id: UUID, sendt: OffsetDateTime, correlationId: String) =
     this.prepareStatement(
         """
-            UPDATE planlagt_melding SET sendt=? WHERE id=?;
+            UPDATE planlagt_melding SET sendt=?, jmscorrelationid=? WHERE id=?;
             """
     ).use {
         it.setTimestamp(1, Timestamp.from(sendt.toInstant()))
-        it.setObject(2, id)
+        it.setString(2, correlationId)
+        it.setObject(3, id)
         it.execute()
     }
 
