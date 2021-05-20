@@ -53,8 +53,9 @@ fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbMod
                 opprettet,
                 sendes,
                 avbrutt,
-                sendt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                sendt,
+                jmscorrelationid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
     ).use {
         it.setObject(1, planlagtMeldingDbModel.id)
@@ -65,6 +66,7 @@ fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbMod
         it.setTimestamp(6, Timestamp.from(planlagtMeldingDbModel.sendes.toInstant()))
         it.setTimestamp(7, if (planlagtMeldingDbModel.avbrutt != null) { Timestamp.from(planlagtMeldingDbModel.avbrutt?.toInstant()) } else { null })
         it.setTimestamp(8, if (planlagtMeldingDbModel.sendt != null) { Timestamp.from(planlagtMeldingDbModel.sendt?.toInstant()) } else { null })
+        it.setString(9, planlagtMeldingDbModel.jmsCorrelationId)
         it.execute()
     }
     this.commit()

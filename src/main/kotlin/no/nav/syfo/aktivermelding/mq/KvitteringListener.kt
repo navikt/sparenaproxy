@@ -27,8 +27,9 @@ class KvitteringListener(
                     is TextMessage -> message.text
                     else -> throw RuntimeException("Innkommende melding må være bytes eller tekst")
                 }
-                log.info("Mottatt kvittering")
-                kvitteringService.behandleKvittering(inputMessageText)
+                val correlationId = message.jmsCorrelationID
+                log.info("Mottatt kvittering med correlationId $correlationId")
+                kvitteringService.behandleKvittering(inputMessageText, correlationId)
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved håndtering av kvitteringsmelding, sender melding til backout", e.message)
                 backoutProducer.send(message)

@@ -102,8 +102,8 @@ class AktiverMeldingService(
     private suspend fun sendTilArena(planlagtMelding: PlanlagtMeldingDbModel) {
         if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {
             log.info("Sender melding med id {} til Arena", planlagtMelding.id)
-            arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
-            database.sendPlanlagtMelding(planlagtMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
+            val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
+            database.sendPlanlagtMelding(planlagtMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)
             SENDT_MELDING.inc()
         } else {
             log.info("Person er død, avbryter alle planlagte meldinger ${planlagtMelding.id}")
