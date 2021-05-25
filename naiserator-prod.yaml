@@ -35,6 +35,10 @@ spec:
       memory: 768Mi
   kafka:
     pool: nav-prod
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
   vault:
     enabled: true
     paths:
@@ -78,3 +82,5 @@ spec:
       value: https://pdl-api.nais.adeo.no/graphql
     - name: KAFKA_CLIENT_ID
       value: "sparenaproxy"
+    - name: SPOKELSE_SCOPE
+      value: "api://prod-fss.tbd.spokelse/.default"
