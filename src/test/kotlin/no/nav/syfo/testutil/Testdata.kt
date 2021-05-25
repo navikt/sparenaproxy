@@ -28,7 +28,8 @@ fun opprettPlanlagtMelding(
     type: String = AKTIVITETSKRAV_8_UKER_TYPE,
     avbrutt: OffsetDateTime? = null,
     sendt: OffsetDateTime? = null,
-    startdato: LocalDate = LocalDate.of(2020, 1, 14)
+    startdato: LocalDate = LocalDate.of(2020, 1, 14),
+    jmsCorrelationId: String? = null
 ): PlanlagtMeldingDbModel {
     return PlanlagtMeldingDbModel(
         id = id,
@@ -38,7 +39,8 @@ fun opprettPlanlagtMelding(
         type = type,
         sendes = sendes,
         avbrutt = avbrutt,
-        sendt = sendt
+        sendt = sendt,
+        jmsCorrelationId = jmsCorrelationId
     )
 }
 

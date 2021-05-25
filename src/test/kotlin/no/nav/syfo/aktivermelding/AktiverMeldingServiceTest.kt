@@ -4,6 +4,7 @@ import io.ktor.util.KtorExperimentalAPI
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -30,7 +31,7 @@ import org.spekframework.spek2.style.specification.describe
 @KtorExperimentalAPI
 object AktiverMeldingServiceTest : Spek({
     val testDb = TestDB()
-    val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
+    val arenaMeldingService = mockk<ArenaMeldingService>()
     val smregisterClient = mockk<SmregisterClient>()
     val pdlPersonService = mockk<PdlPersonService>()
     val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService, pdlPersonService)
@@ -38,6 +39,7 @@ object AktiverMeldingServiceTest : Spek({
     beforeEachTest {
         clearAllMocks()
         coEvery { pdlPersonService.isAlive(any(), any()) } returns true
+        every { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) } returns "correlationId"
     }
 
     afterEachTest {
@@ -118,6 +120,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual "correlationId"
         }
         it("Avbryter 8-ukersmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
@@ -134,6 +137,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.avbrutt shouldNotEqual null
             planlagtMelding.sendt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual null
         }
     }
 
@@ -153,6 +157,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual "correlationId"
         }
         it("Avbryter 39-ukersmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
@@ -169,6 +174,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.avbrutt shouldNotEqual null
             planlagtMelding.sendt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual null
         }
         it("Avbryter 39-ukersmelding hvis bruker har et nyere sykefravær") {
             val id = UUID.randomUUID()
@@ -205,6 +211,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr2", LocalDate.of(2020, 5, 10)).first()
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual "correlationId"
         }
     }
 
@@ -246,6 +253,7 @@ object AktiverMeldingServiceTest : Spek({
             val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
+            planlagtMelding.jmsCorrelationId shouldEqual "correlationId"
         }
         it("Avbryter stansmelding hvis bruker ikke lenger er sykmeldt og det ikke er sendt 4-ukersmelding") {
             val id = UUID.randomUUID()
@@ -283,6 +291,7 @@ object AktiverMeldingServiceTest : Spek({
             planlagtMelding.sendt shouldEqual null
             planlagtMelding.avbrutt shouldEqual null
             planlagtMelding.sendes shouldEqual tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            planlagtMelding.jmsCorrelationId shouldEqual null
         }
     }
 })

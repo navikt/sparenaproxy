@@ -68,8 +68,8 @@ class MottattSykmeldingService(
         } else {
             log.info("Sender melding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
             database.resendAvbruttMelding(avbruttMelding.id)
-            arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
-            database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC))
+            val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
+            database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)
             SENDT_AVBRUTT_MELDING.inc()
         }
     }

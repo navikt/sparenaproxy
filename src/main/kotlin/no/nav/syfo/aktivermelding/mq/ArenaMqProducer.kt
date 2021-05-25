@@ -9,8 +9,10 @@ class ArenaMqProducer(
     private val messageProducer: MessageProducer
 ) {
 
-    fun sendTilArena(melding: String) {
-        messageProducer.send(session.createTextMessage().apply(createMessage(melding)))
+    fun sendTilArena(melding: String): String {
+        val message = session.createTextMessage().apply(createMessage(melding))
+        messageProducer.send(message)
+        return message.jmsMessageID
     }
 
     private fun createMessage(melding: String): TextMessage.() -> Unit {

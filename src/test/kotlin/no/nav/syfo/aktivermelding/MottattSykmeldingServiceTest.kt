@@ -4,6 +4,7 @@ import io.ktor.util.KtorExperimentalAPI
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -33,7 +34,7 @@ import org.spekframework.spek2.style.specification.describe
 @KtorExperimentalAPI
 object MottattSykmeldingServiceTest : Spek({
     val testDb = TestDB()
-    val arenaMeldingService = mockk<ArenaMeldingService>(relaxed = true)
+    val arenaMeldingService = mockk<ArenaMeldingService>()
     val syfoSyketilfelleClient = mockk<SyfoSyketilfelleClient>()
     val mottattSykmeldingService = MottattSykmeldingService(testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
     val idAvbrutt = UUID.randomUUID()
@@ -50,6 +51,7 @@ object MottattSykmeldingServiceTest : Spek({
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt2, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idIkkeAvbrutt, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbruttStansmelding, type = STANS_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC)))
+        every { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) } returns "correlationId"
     }
 
     afterEachTest {
@@ -186,6 +188,7 @@ object MottattSykmeldingServiceTest : Spek({
             val planlagtStansmelding = meldinger.find { it.type == STANS_TYPE }
             planlagtMelding8uker!!.avbrutt shouldEqual null
             planlagtStansmelding?.sendes shouldEqual LocalDate.now().plusWeeks(3).plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            planlagtMelding8uker.jmsCorrelationId shouldEqual "correlationId"
         }
         it("Skal ikke sende ny 8-ukersmelding hvis melding er sent før") {
             coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
@@ -205,7 +208,7 @@ object MottattSykmeldingServiceTest : Spek({
 
             runBlocking {
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
-                testDb.sendPlanlagtMelding(idAvbrutt, OffsetDateTime.now(ZoneOffset.UTC))
+                testDb.sendPlanlagtMelding(idAvbrutt, OffsetDateTime.now(ZoneOffset.UTC), "correlationId")
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
