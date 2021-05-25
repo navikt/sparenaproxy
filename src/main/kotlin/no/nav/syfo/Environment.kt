@@ -39,8 +39,8 @@ data class Environment(
         override val truststore: String? = getEnvVar("NAV_TRUSTSTORE_PATH"),
         override val truststorePassword: String? = getEnvVar("NAV_TRUSTSTORE_PASSWORD"),
         val aadAccessTokenV2Url: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"), // erstatter på sikt aadAccessTokenUrl
-        val clientId: String = getEnvVar("AZURE_APP_CLIENT_ID"),
-        val clientSecret: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
+        val clientIdV2: String = getEnvVar("AZURE_APP_CLIENT_ID"),
+        val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
         val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE")
 ) : MqConfig, KafkaConfig
 
