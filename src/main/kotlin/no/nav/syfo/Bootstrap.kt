@@ -103,7 +103,7 @@ fun main() {
     )
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
     val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClientWithProxy)
-    val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.clientIdSpokelse, httpClient)
+    val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.spokelseScope, httpClient)
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClient, env.clientIdSmregister, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, oidcClient, httpClient)
 
