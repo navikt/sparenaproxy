@@ -8,15 +8,15 @@ import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.util.KtorExperimentalAPI
 import java.util.UUID
-import no.nav.syfo.client.SpokelseAccessTokenClient
+import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SpokelseClient(
-    private val spokelseEndpointURL: String,
-    private val accessTokenClient: SpokelseAccessTokenClient,
-    private val resourceId: String,
-    private val httpClient: HttpClient
+        private val spokelseEndpointURL: String,
+        private val accessTokenClientV2: AccessTokenClientV2,
+        private val resourceId: String,
+        private val httpClient: HttpClient
 ) {
 
     suspend fun finnSykmeldingId(dokumenter: Set<UUID>, utbetaltEventId: UUID): UUID {
@@ -35,7 +35,7 @@ class SpokelseClient(
         httpClient.get<List<Hendelse>>("$spokelseEndpointURL/dokumenter") {
             accept(ContentType.Application.Json)
             dokumenter.forEach { parameter("hendelseId", it) }
-            val accessToken = accessTokenClient.hentAccessToken(resourceId)
+            val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
             }

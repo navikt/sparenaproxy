@@ -33,7 +33,7 @@ import no.nav.syfo.application.db.Database
 import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClient
-import no.nav.syfo.client.SpokelseAccessTokenClient
+import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
@@ -102,8 +102,8 @@ fun main() {
         env.cluster
     )
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
-    val spokelseAccessTokenClient = SpokelseAccessTokenClient(env.azureOpenidUrl, clientId = env.clientId, clientSecret = env.clientSecret, httpClient = httpClientWithProxy)
-    val spokelseClient = SpokelseClient(env.spokelseEndpointURL, spokelseAccessTokenClient, env.clientIdSpokelse, httpClient)
+    val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientId, clientSecret = env.clientSecret, httpClient = httpClientWithProxy)
+    val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.clientIdSpokelse, httpClient)
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClient, env.clientIdSmregister, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, oidcClient, httpClient)
 
