@@ -32,7 +32,6 @@ import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.db.Database
 import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.vault.RenewVaultService
-import no.nav.syfo.client.AccessTokenClient
 import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.sts.StsOidcClient
@@ -101,10 +100,9 @@ fun main() {
         httpClient,
         env.cluster
     )
-    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, vaultSecrets.clientId, vaultSecrets.clientSecret, httpClientWithProxy)
     val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClientWithProxy)
     val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.spokelseScope, httpClient)
-    val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClient, env.clientIdSmregister, httpClient)
+    val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClientV2, env.smregisterScope, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, oidcClient, httpClient)
 
     val connection = connectionFactory(env).createConnection(vaultSecrets.mqUsername, vaultSecrets.mqPassword)

@@ -9,13 +9,13 @@ import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.syfo.client.AccessTokenClient
+import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SmregisterClient(
     private val smregisterEndpointURL: String,
-    private val accessTokenClient: AccessTokenClient,
+    private val accessTokenClientV2: AccessTokenClientV2,
     private val resourceId: String,
     private val httpClient: HttpClient
 ) {
@@ -58,10 +58,10 @@ class SmregisterClient(
     }
 
     private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
-        httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v1/sykmelding/sykmeldtStatus") {
+        httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v2/sykmelding/sykmeldtStatus") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            val accessToken = accessTokenClient.hentAccessToken(resourceId)
+            val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
             }

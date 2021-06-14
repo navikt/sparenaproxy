@@ -15,10 +15,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class AccessTokenClientV2(
-        private val aadAccessTokenUrl: String,
-        private val clientId: String,
-        private val clientSecret: String,
-        private val httpClient: HttpClient
+    private val aadAccessTokenUrl: String,
+    private val clientId: String,
+    private val clientSecret: String,
+    private val httpClient: HttpClient
 ) {
     private val log: Logger = LoggerFactory.getLogger("azureadtokenclient")
     private val mutex = Mutex()
@@ -56,15 +56,14 @@ class AccessTokenClientV2(
     }
 }
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AadAccessTokenV2(
-        val access_token: String,
-        val expires_in: Int
+    val access_token: String,
+    val expires_in: Int
 )
 
 data class AadAccessTokenMedExpiry(
-        val access_token: String,
-        val expires_in: Int,
-        val expiresOn: Instant
+    val access_token: String,
+    val expires_in: Int,
+    val expiresOn: Instant
 )
