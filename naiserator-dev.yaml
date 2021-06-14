@@ -57,7 +57,7 @@ spec:
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://b27dbvl016.preprod.local:5432/sparenaproxy
     - name: SMREGISTER_SCOPE
-      value: "api://prod-fss.teamsykmelding.syfosmregister/.default"
+      value: "api://dev-fss.teamsykmelding.syfosmregister/.default"
     - name: MQ_HOST_NAME
       value: b27apvl176.preprod.local
     - name: MQ_PORT
