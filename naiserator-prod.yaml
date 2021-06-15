@@ -42,8 +42,6 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /azuread/data/prod/creds/sparenaproxy
-        mountPath: /secrets/azuread/sparenaproxy
       - kvPath: serviceuser/data/prod/srvsparenaproxy
         mountPath: /secrets/serviceuser
       - kvPath: /kv/prod/fss/sparenaproxy/teamsykmelding
@@ -58,12 +56,8 @@ spec:
       value: /postgresql/prod-fss
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://A01DBVL014.adeo.no:5432/sparenaproxy
-    - name: AADACCESSTOKEN_URL
-      value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/oauth2/token
-    - name: SPOKELSE_CLIENTID
-      value: 2cfc9652-f3c7-4b23-a43b-e8844f49aeca
-    - name: SMREGISTER_CLIENTID
-      value: 96a10e4e-4437-47a2-ae9c-2f1c1634340e
+    - name: SMREGISTER_SCOPE
+      value: "api://prod-fss.teamsykmelding.syfosmregister/.default"
     - name: MQ_HOST_NAME
       value: a01apvl063.adeo.no
     - name: MQ_PORT

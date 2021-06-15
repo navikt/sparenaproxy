@@ -30,7 +30,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.client.AccessTokenClient
+import no.nav.syfo.client.AccessTokenClientV2
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -39,7 +39,7 @@ import org.spekframework.spek2.style.specification.describe
 object SmregisterClientTest : Spek({
     val fom = LocalDate.of(2020, 3, 15)
     val tom = LocalDate.of(2020, 4, 12)
-    val accessTokenClientMock = mockk<AccessTokenClient>()
+    val accessTokenClientMock = mockk<AccessTokenClientV2>()
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -64,7 +64,7 @@ object SmregisterClientTest : Spek({
         }
         routing {
             accept(ContentType.Application.Json) {
-                post("/api/v1/sykmelding/sykmeldtStatus") {
+                post("/api/v2/sykmelding/sykmeldtStatus") {
                     when (call.receive<StatusRequest>().fnr) {
                         "fnr" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = true, gradert = false, fom = fom, tom = tom))
                         "fnr-ikkesyk" -> call.respond(HttpStatusCode.OK, SykmeldtStatus(erSykmeldt = false))
@@ -83,7 +83,7 @@ object SmregisterClientTest : Spek({
     }
 
     beforeEachTest {
-        coEvery { accessTokenClientMock.hentAccessToken(any()) } returns "token"
+        coEvery { accessTokenClientMock.getAccessTokenV2(any()) } returns "token"
     }
 
     describe("Test av SmRegisterClient - 100% sykmeldt") {

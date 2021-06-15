@@ -13,10 +13,10 @@ import no.nav.syfo.log
 
 @KtorExperimentalAPI
 class SpokelseClient(
-        private val spokelseEndpointURL: String,
-        private val accessTokenClientV2: AccessTokenClientV2,
-        private val resourceId: String,
-        private val httpClient: HttpClient
+    private val spokelseEndpointURL: String,
+    private val accessTokenClientV2: AccessTokenClientV2,
+    private val resourceId: String,
+    private val httpClient: HttpClient
 ) {
 
     suspend fun finnSykmeldingId(dokumenter: Set<UUID>, utbetaltEventId: UUID): UUID {
