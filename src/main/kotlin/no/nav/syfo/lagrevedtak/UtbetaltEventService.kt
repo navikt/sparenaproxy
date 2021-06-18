@@ -32,33 +32,37 @@ class UtbetaltEventService(
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage, callid: String) {
         MOTTATT_VEDTAK.inc()
         log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid} for callid $callid")
-        val sykmeldingId = spokelseClient.finnSykmeldingId(
-            utbetaltEventKafkaMessage.hendelser,
-            utbetaltEventKafkaMessage.utbetalteventid
-        )
-        val startdato = syfoSyketilfelleClient.finnStartdato(
-            utbetaltEventKafkaMessage.aktorid,
-            sykmeldingId.toString(),
-            utbetaltEventKafkaMessage.utbetalteventid
-        )
-        val utbetaltEvent = UtbetaltEvent(
-            utbetalteventid = utbetaltEventKafkaMessage.utbetalteventid,
-            startdato = startdato,
-            sykmeldingid = sykmeldingId,
-            aktorid = utbetaltEventKafkaMessage.aktorid,
-            fnr = utbetaltEventKafkaMessage.fnr,
-            organisasjonsnummer = utbetaltEventKafkaMessage.organisasjonsnummer,
-            hendelser = utbetaltEventKafkaMessage.hendelser,
-            oppdrag = utbetaltEventKafkaMessage.oppdrag,
-            fom = utbetaltEventKafkaMessage.fom,
-            tom = utbetaltEventKafkaMessage.tom,
-            forbrukteSykedager = utbetaltEventKafkaMessage.forbrukteSykedager,
-            gjenstaendeSykedager = utbetaltEventKafkaMessage.gjenstaendeSykedager,
-            opprettet = utbetaltEventKafkaMessage.opprettet
-        )
+        if (callid == "951d404d-d7af-47db-8c1a-3a78712a54de") {
+            log.error("Ignorerer melding for gammel sykmelding")
+        } else {
+            val sykmeldingId = spokelseClient.finnSykmeldingId(
+                utbetaltEventKafkaMessage.hendelser,
+                utbetaltEventKafkaMessage.utbetalteventid
+            )
+            val startdato = syfoSyketilfelleClient.finnStartdato(
+                utbetaltEventKafkaMessage.aktorid,
+                sykmeldingId.toString(),
+                utbetaltEventKafkaMessage.utbetalteventid
+            )
+            val utbetaltEvent = UtbetaltEvent(
+                utbetalteventid = utbetaltEventKafkaMessage.utbetalteventid,
+                startdato = startdato,
+                sykmeldingid = sykmeldingId,
+                aktorid = utbetaltEventKafkaMessage.aktorid,
+                fnr = utbetaltEventKafkaMessage.fnr,
+                organisasjonsnummer = utbetaltEventKafkaMessage.organisasjonsnummer,
+                hendelser = utbetaltEventKafkaMessage.hendelser,
+                oppdrag = utbetaltEventKafkaMessage.oppdrag,
+                fom = utbetaltEventKafkaMessage.fom,
+                tom = utbetaltEventKafkaMessage.tom,
+                forbrukteSykedager = utbetaltEventKafkaMessage.forbrukteSykedager,
+                gjenstaendeSykedager = utbetaltEventKafkaMessage.gjenstaendeSykedager,
+                opprettet = utbetaltEventKafkaMessage.opprettet
+            )
 
-        lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
 
-        maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
+            maksdatoService.sendMaksdatomeldingTilArena(utbetaltEvent)
+        }
     }
 }
