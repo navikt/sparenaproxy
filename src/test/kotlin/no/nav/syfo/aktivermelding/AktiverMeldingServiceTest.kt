@@ -14,6 +14,8 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.kafka.model.AktiverMelding
+import no.nav.syfo.client.SyfoSyketilfelleClient
+import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.STANS_TYPE
@@ -21,7 +23,9 @@ import no.nav.syfo.pdl.service.PdlPersonService
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
+import no.nav.syfo.testutil.hentPlanlagtMeldingMedId
 import no.nav.syfo.testutil.lagrePlanlagtMelding
+import no.nav.syfo.testutil.lagreUtbetaltEvent
 import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldNotEqual
@@ -34,7 +38,8 @@ object AktiverMeldingServiceTest : Spek({
     val arenaMeldingService = mockk<ArenaMeldingService>()
     val smregisterClient = mockk<SmregisterClient>()
     val pdlPersonService = mockk<PdlPersonService>()
-    val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService, pdlPersonService)
+    val syfosyketilfelleClient = mockk<SyfoSyketilfelleClient>()
+    val aktiverMeldingService = AktiverMeldingService(testDb, smregisterClient, arenaMeldingService, pdlPersonService, syfosyketilfelleClient)
 
     beforeEachTest {
         clearAllMocks()
@@ -139,6 +144,26 @@ object AktiverMeldingServiceTest : Spek({
             planlagtMelding.sendt shouldEqual null
             planlagtMelding.jmsCorrelationId shouldEqual null
         }
+        it("Avbryter 8-ukersmelding hvis bruker er sykmeldt, men det er et nytt sykefravær og stansmelding har blitt vurdert (avbrutt)") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.er100ProsentSykmeldt("fnr", any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("aktorId", any(), any()) } returns true
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = "fnr", startdato = LocalDate.of(2020, 1, 10), type = AKTIVITETSKRAV_8_UKER_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "fnr", startdato = LocalDate.of(2020, 1, 10), type = STANS_TYPE, avbrutt = OffsetDateTime.now(ZoneOffset.UTC)))
+            testDb.connection.lagreUtbetaltEvent("fnr", LocalDate.of(2020, 1, 10), "aktorId")
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMeldingMedId(id)
+            planlagtMelding!!.avbrutt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
+        }
     }
 
     describe("Aktivering 39-ukersmelding") {
@@ -212,6 +237,26 @@ object AktiverMeldingServiceTest : Spek({
             planlagtMelding.sendt shouldNotEqual null
             planlagtMelding.avbrutt shouldEqual null
             planlagtMelding.jmsCorrelationId shouldEqual "correlationId"
+        }
+        it("Avbryter 39-ukersmelding hvis bruker er sykmeldt, men det er et nytt sykefravær og stansmelding har blitt vurdert (sendt)") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.erSykmeldt("fnr2", any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("aktorId2", any(), any()) } returns true
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, fnr = "fnr2", startdato = LocalDate.of(2020, 1, 10), type = BREV_39_UKER_TYPE))
+            testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "fnr2", startdato = LocalDate.of(2020, 1, 10), type = STANS_TYPE, sendt = OffsetDateTime.now(ZoneOffset.UTC)))
+            testDb.connection.lagreUtbetaltEvent("fnr2", LocalDate.of(2020, 1, 10), "aktorId2")
+
+            runBlocking {
+                aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+            }
+
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMeldingMedId(id)
+            planlagtMelding!!.avbrutt shouldNotEqual null
+            planlagtMelding.sendt shouldEqual null
         }
     }
 

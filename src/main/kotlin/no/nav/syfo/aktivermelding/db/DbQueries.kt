@@ -70,6 +70,18 @@ fun DatabaseInterface.finnAktivStansmelding(fnr: String): List<PlanlagtMeldingDb
     }
 }
 
+fun DatabaseInterface.erStansmeldingSendt(fnr: String, startdato: LocalDate): Boolean {
+    connection.use { connection ->
+        return connection.erStansmeldingSendt(fnr, startdato)
+    }
+}
+
+fun DatabaseInterface.finnAktorIdFraDatabase(fnr: String, startdato: LocalDate): String? {
+    connection.use { connection ->
+        return connection.finnAktorIdFraDatabase(fnr, startdato)
+    }
+}
+
 private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
     this.prepareStatement(
         """
@@ -164,4 +176,26 @@ private fun Connection.finnAktiveStansmeldinger(fnr: String): List<PlanlagtMeldi
     ).use {
         it.setString(1, fnr)
         it.executeQuery().toList { toPlanlagtMeldingDbModel() }
+    }
+
+private fun Connection.erStansmeldingSendt(fnr: String, startdato: LocalDate): Boolean =
+    this.prepareStatement(
+        """
+            SELECT 1 FROM planlagt_melding WHERE fnr=? AND startdato=? AND type='STANS' AND (sendt is not null OR avbrutt is not null);
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setObject(2, startdato)
+        it.executeQuery().next()
+    }
+
+private fun Connection.finnAktorIdFraDatabase(fnr: String, startdato: LocalDate): String? =
+    this.prepareStatement(
+        """
+            SELECT aktorid FROM utbetaltevent WHERE fnr=? AND startdato=? limit 1;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setObject(2, startdato)
+        it.executeQuery().toList { getString("aktorid") }.firstOrNull()
     }

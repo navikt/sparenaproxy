@@ -44,6 +44,7 @@ object SyfoSyketilfelleClientTest : Spek({
 
     val aktorId1 = "123456"
     val aktorId2 = "654321"
+    val aktorId3 = "111222"
 
     val stsOidcClient = mockk<StsOidcClient>()
     val httpClient = HttpClient(Apache) {
@@ -70,62 +71,69 @@ object SyfoSyketilfelleClientTest : Spek({
         }
         routing {
             get("/sparenaproxy/$aktorId1/sykeforloep") {
-                call.respond(listOf(
-                    Sykeforloep(
-                        oppfolgingsdato1,
-                        listOf(
-                            SimpleSykmelding(
-                                UUID.randomUUID().toString(),
-                                oppfolgingsdato1,
-                                oppfolgingsdato1.plusWeeks(3)
+                call.respond(
+                    listOf(
+                        Sykeforloep(
+                            oppfolgingsdato1,
+                            listOf(
+                                SimpleSykmelding(
+                                    UUID.randomUUID().toString(),
+                                    oppfolgingsdato1,
+                                    oppfolgingsdato1.plusWeeks(3)
+                                )
                             )
-                        )
-                    ),
-                    Sykeforloep(
-                        oppfolgingsdato2,
-                        listOf(
-                            SimpleSykmelding(
-                                sykmeldingUUID.toString(),
-                                oppfolgingsdato2,
-                                oppfolgingsdato2.plusWeeks(4)
+                        ),
+                        Sykeforloep(
+                            oppfolgingsdato2,
+                            listOf(
+                                SimpleSykmelding(
+                                    sykmeldingUUID.toString(),
+                                    oppfolgingsdato2,
+                                    oppfolgingsdato2.plusWeeks(4)
+                                )
                             )
-                        )
-                    ),
-                    Sykeforloep(
-                        oppfolgingsdato3,
-                        listOf(
-                            SimpleSykmelding(
-                                UUID.randomUUID().toString(),
-                                oppfolgingsdato3,
-                                oppfolgingsdato3.plusWeeks(8)
+                        ),
+                        Sykeforloep(
+                            oppfolgingsdato3,
+                            listOf(
+                                SimpleSykmelding(
+                                    UUID.randomUUID().toString(),
+                                    oppfolgingsdato3,
+                                    oppfolgingsdato3.plusWeeks(8)
+                                )
                             )
                         )
                     )
-                ))
+                )
             }
             get("/sparenaproxy/$aktorId2/sykeforloep") {
-                call.respond(listOf(
-                    Sykeforloep(
-                        oppfolgingsdato1,
-                        listOf(
-                            SimpleSykmelding(
-                                UUID.randomUUID().toString(),
-                                oppfolgingsdato1,
-                                oppfolgingsdato1.plusWeeks(3)
+                call.respond(
+                    listOf(
+                        Sykeforloep(
+                            oppfolgingsdato1,
+                            listOf(
+                                SimpleSykmelding(
+                                    UUID.randomUUID().toString(),
+                                    oppfolgingsdato1,
+                                    oppfolgingsdato1.plusWeeks(3)
+                                )
                             )
-                        )
-                    ),
-                    Sykeforloep(
-                        oppfolgingsdato3,
-                        listOf(
-                            SimpleSykmelding(
-                                UUID.randomUUID().toString(),
-                                oppfolgingsdato3,
-                                oppfolgingsdato3.plusWeeks(8)
+                        ),
+                        Sykeforloep(
+                            oppfolgingsdato3,
+                            listOf(
+                                SimpleSykmelding(
+                                    UUID.randomUUID().toString(),
+                                    oppfolgingsdato3,
+                                    oppfolgingsdato3.plusWeeks(8)
+                                )
                             )
                         )
                     )
-                ))
+                )
+            }
+            get("/sparenaproxy/$aktorId3/sykeforloep") {
+                call.respond(emptyList<Sykeforloep>())
             }
         }
     }.start()
@@ -145,7 +153,7 @@ object SyfoSyketilfelleClientTest : Spek({
         coEvery { stsOidcClient.oidcToken() } returns OidcToken("token", "type", 100)
     }
 
-    describe("Test av SyfoSyketilfelleClient") {
+    describe("Test av SyfoSyketilfelleClient - finnStartDato") {
         it("Henter riktig startdato fra syfosyketilfelle") {
             var startDato: LocalDate? = null
             runBlocking {
@@ -174,6 +182,39 @@ object SyfoSyketilfelleClientTest : Spek({
             }
 
             startDato shouldEqual LocalDate.now().minusMonths(1)
+        }
+    }
+
+    describe("Test av SyfoSyketilfelleClient - harSykeforlopMedNyereStartdato") {
+        it("Returnerer true hvis det finnes syketilfeller med nyere startdato") {
+            val startDato = LocalDate.of(2020, 1, 1)
+            runBlocking {
+                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId1, startDato, UUID.randomUUID()) shouldEqual true
+            }
+        }
+        it("Returnerer false hvis det ikke finnes syketilfeller med nyere startdato") {
+            val startDato = LocalDate.of(2020, 1, 30)
+            runBlocking {
+                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId1, startDato, UUID.randomUUID()) shouldEqual false
+            }
+        }
+        it("Kaster feil hvis det ikke finnes noen syketilfeller") {
+            assertFailsWith<RuntimeException> {
+                runBlocking {
+                    syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId3, LocalDate.now(), UUID.randomUUID())
+                }
+            }
+        }
+        it("Returnerer false hvis det ikke finnes noen syketilfeller og vi kjører i dev-fss") {
+            val syfoSyketilfelleClientDev = SyfoSyketilfelleClient(
+                mockHttpServerUrl,
+                stsOidcClient,
+                httpClient,
+                "dev-fss"
+            )
+            runBlocking {
+                syfoSyketilfelleClientDev.harSykeforlopMedNyereStartdato(aktorId3, LocalDate.now(), UUID.randomUUID()) shouldEqual false
+            }
         }
     }
 })

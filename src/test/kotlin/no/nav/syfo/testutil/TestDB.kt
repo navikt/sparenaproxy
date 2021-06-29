@@ -12,10 +12,12 @@ import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
+import no.nav.syfo.lagrevedtak.client.Hendelse
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.flywaydb.core.Flyway
+import org.postgresql.util.PGobject
 
 class TestDB : DatabaseInterface {
     private var pg: EmbeddedPostgres? = null
@@ -126,3 +128,47 @@ fun ResultSet.getHendelser(): Set<UUID> =
 
 fun ResultSet.getOppdrag(): List<Utbetalt> =
     objectMapper.readValue(getString("oppdrag"))
+
+fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: String) {
+    this.prepareStatement(
+        """
+            INSERT INTO utbetaltevent(
+                utbetalteventid,
+                startdato,
+                sykmeldingid,
+                aktorid,
+                fnr,
+                organisasjonsnummer,
+                hendelser,
+                oppdrag,
+                fom,
+                tom,
+                forbrukte_sykedager,
+                gjenstaende_sykedager,
+                opprettet) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             """
+    ).use {
+        it.setObject(1, UUID.randomUUID())
+        it.setObject(2, startdato)
+        it.setObject(3, UUID.randomUUID())
+        it.setString(4, aktorId)
+        it.setString(5, fnr)
+        it.setString(6, "9090880")
+        it.setObject(7, PGobject().apply {
+            type = "json"
+            value = objectMapper.writeValueAsString(emptyList<Hendelse>())
+        })
+        it.setObject(8, PGobject().apply {
+            type = "json"
+            value = objectMapper.writeValueAsString(emptyList<Utbetalt>())
+        })
+        it.setObject(9, LocalDate.now().minusMonths(1))
+        it.setObject(10, LocalDate.now().minusDays(10))
+        it.setInt(11, 20)
+        it.setInt(12, 250)
+        it.setTimestamp(13, Timestamp.valueOf(LocalDateTime.now()))
+        it.execute()
+    }
+    this.commit()
+}

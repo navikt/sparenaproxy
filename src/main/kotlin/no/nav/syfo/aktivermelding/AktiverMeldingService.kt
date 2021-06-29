@@ -8,6 +8,8 @@ import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
+import no.nav.syfo.aktivermelding.db.erStansmeldingSendt
+import no.nav.syfo.aktivermelding.db.finnAktorIdFraDatabase
 import no.nav.syfo.aktivermelding.db.finnesNyerePlanlagtMeldingMedAnnenStartdato
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
@@ -19,6 +21,7 @@ import no.nav.syfo.application.metrics.IKKE_FUNNET_MELDING
 import no.nav.syfo.application.metrics.MOTTATT_AKTIVERMELDING
 import no.nav.syfo.application.metrics.SENDT_MELDING
 import no.nav.syfo.application.metrics.UTSATT_MELDING
+import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.dodshendelser.db.avbrytPlanlagteMeldingerVedDodsfall
 import no.nav.syfo.log
@@ -35,7 +38,8 @@ class AktiverMeldingService(
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,
     private val arenaMeldingService: ArenaMeldingService,
-    private val pdlPersonService: PdlPersonService
+    private val pdlPersonService: PdlPersonService,
+    private val syfoSyketilfelleClient: SyfoSyketilfelleClient
 ) {
     suspend fun mottaAktiverMelding(record: String) {
         val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
@@ -60,10 +64,18 @@ class AktiverMeldingService(
                         smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
                     }
                     AKTIVITETSKRAV_8_UKER_TYPE -> {
-                        smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                        if (smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
+                            gjelderSammeSykefravaer(planlagtMelding)
+                        } else {
+                            false
+                        }
                     }
                     BREV_39_UKER_TYPE -> {
-                        smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                        if (smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
+                            gjelderSammeSykefravaer(planlagtMelding)
+                        } else {
+                            false
+                        }
                     }
                     else -> {
                         log.error("Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}")
@@ -109,6 +121,19 @@ class AktiverMeldingService(
             log.info("Person er død, avbryter alle planlagte meldinger ${planlagtMelding.id}")
             avbrytPgaDodsfall(planlagtMelding.fnr, planlagtMelding.id)
         }
+    }
+
+    private suspend fun gjelderSammeSykefravaer(planlagtMelding: PlanlagtMeldingDbModel): Boolean {
+        if (database.erStansmeldingSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
+            log.info("Det er sendt/avbrutt stansmelding for sykefravær som melding med id ${planlagtMelding.id} tilhører")
+            val aktorId = database.finnAktorIdFraDatabase(planlagtMelding.fnr, planlagtMelding.startdato)
+            if (aktorId.isNullOrEmpty()) {
+                log.error("Fant ikke aktørid i databasen, skal ikke kunne skje ${planlagtMelding.id}")
+                throw IllegalStateException("Fant ikke aktørid i databasen, skal ikke kunne skje")
+            }
+            return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId, planlagtMelding.startdato, planlagtMelding.id)
+        }
+        return true
     }
 
     private fun avbrytMelding(aktiverMelding: AktiverMelding) {
