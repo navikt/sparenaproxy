@@ -37,6 +37,20 @@ class SyfoSyketilfelleClient(
         }
     }
 
+    suspend fun harSykeforlopMedNyereStartdato(aktorId: String, startdato: LocalDate, planlagtMeldingId: UUID): Boolean {
+        val sykeforloep = hentSykeforloep(aktorId)
+        if (sykeforloep.isEmpty()) {
+            log.error("Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId")
+            if (cluster == "dev-fss") {
+                log.info("Siden dette er dev returnerer vi false, $planlagtMeldingId")
+                return false
+            }
+            throw RuntimeException("Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId")
+        } else {
+            return sykeforloep.any { it.oppfolgingsdato.isAfter(startdato) }
+        }
+    }
+
     private suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
         httpClient.get<List<Sykeforloep>>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
             accept(ContentType.Application.Json)
