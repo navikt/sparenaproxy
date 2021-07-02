@@ -9,6 +9,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAktivStansmelding
+import no.nav.syfo.aktivermelding.db.finnAvbrutt39ukersmelding
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
 import no.nav.syfo.aktivermelding.db.resendAvbruttMelding
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
@@ -40,8 +41,9 @@ class MottattSykmeldingService(
 
         val aktiveStansmeldinger = database.finnAktivStansmelding(receivedSykmelding.personNrPasient)
         val avbrutteAktivitetskravMeldinger = database.finnAvbruttAktivitetskravmelding(receivedSykmelding.personNrPasient)
+        val avbrutte39ukersMeldinger = database.finnAvbrutt39ukersmelding(receivedSykmelding.personNrPasient)
 
-        if (aktiveStansmeldinger.isEmpty() && avbrutteAktivitetskravMeldinger.isEmpty()) {
+        if (aktiveStansmeldinger.isEmpty() && avbrutteAktivitetskravMeldinger.isEmpty() && avbrutte39ukersMeldinger.isEmpty()) {
             log.info("Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId")
             return
         }
@@ -51,6 +53,7 @@ class MottattSykmeldingService(
         val startdato = syfoSyketilfelleClient.finnStartdato(receivedSykmelding.sykmelding.pasientAktoerId, sykmeldingId, UUID.fromString(sykmeldingId))
 
         sendAvbruttAktivitetskravmelding(receivedSykmelding, avbrutteAktivitetskravMeldinger.firstOrNull { it.startdato == startdato })
+        sendAvbrutt39ukersmelding(receivedSykmelding, avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato })
         utsettStansmelding(receivedSykmelding, aktiveStansmeldinger.firstOrNull { it.startdato == startdato })
     }
 
@@ -64,9 +67,22 @@ class MottattSykmeldingService(
             return
         }
         if (avbruttMelding == null) {
-            log.info("Fant ingen matchende avbrutte meldinger, ignorerer sykmelding med id {}", sykmeldingId)
+            log.info("Fant ingen matchende avbrutte aktivitetskravmeldinger, ignorerer sykmelding med id {}", sykmeldingId)
         } else {
-            log.info("Sender melding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
+            log.info("Sender aktivitetskravmelding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
+            database.resendAvbruttMelding(avbruttMelding.id)
+            val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
+            database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)
+            SENDT_AVBRUTT_MELDING.inc()
+        }
+    }
+
+    fun sendAvbrutt39ukersmelding(receivedSykmelding: ReceivedSykmelding, avbruttMelding: PlanlagtMeldingDbModel?) {
+        val sykmeldingId = receivedSykmelding.sykmelding.id
+        if (avbruttMelding == null) {
+            log.info("Fant ingen matchende avbrutte 39-ukersmeldinger, ignorerer sykmelding med id {}", sykmeldingId)
+        } else {
+            log.info("Sender 39-ukersmelding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
             database.resendAvbruttMelding(avbruttMelding.id)
             val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
             database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)

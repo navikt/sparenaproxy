@@ -17,6 +17,7 @@ import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.AktivitetIkkeMulig
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.Gradert
 import no.nav.syfo.model.MedisinskArsak
 import no.nav.syfo.model.Periode
@@ -39,9 +40,11 @@ object MottattSykmeldingServiceTest : Spek({
     val mottattSykmeldingService = MottattSykmeldingService(testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
     val idAvbrutt = UUID.randomUUID()
     val idAvbrutt2 = UUID.randomUUID()
+    val idAvbrutt3 = UUID.randomUUID()
     val idIkkeAvbrutt = UUID.randomUUID()
     val idAvbruttStansmelding = UUID.randomUUID()
     val idStansmelding = UUID.randomUUID()
+    val idStansmelding2 = UUID.randomUUID()
     val utsendingStansmelding = OffsetDateTime.now(ZoneOffset.UTC).plusDays(3)
 
     beforeEachTest {
@@ -51,6 +54,8 @@ object MottattSykmeldingServiceTest : Spek({
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt2, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idIkkeAvbrutt, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbruttStansmelding, type = STANS_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt3, type = BREV_39_UKER_TYPE, fnr = "11223344556", startdato = LocalDate.of(2020, 3, 30), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(3)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idStansmelding2, type = STANS_TYPE, fnr = "11223344556", startdato = LocalDate.of(2020, 3, 30), sendes = utsendingStansmelding))
         every { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) } returns "correlationId"
     }
 
@@ -218,6 +223,90 @@ object MottattSykmeldingServiceTest : Spek({
             meldinger.size shouldEqual 2
             val planlagtMelding8uker = meldinger.find { it.type == AKTIVITETSKRAV_8_UKER_TYPE }
             planlagtMelding8uker!!.avbrutt shouldEqual null
+        }
+        it("Ignorerer sykmelding som ikke har avbrutt 39-ukersmelding for samme sykeforløp") {
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 6, 30)
+            val receivedSykmelding = opprettReceivedSykmelding(
+                "11223344556", listOf(
+                    Periode(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusWeeks(3),
+                        aktivitetIkkeMulig = AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, emptyList()), arbeidsrelatertArsak = null),
+                        avventendeInnspillTilArbeidsgiver = null,
+                        behandlingsdager = null,
+                        gradert = null,
+                        reisetilskudd = false
+                    )
+                )
+            )
+
+            runBlocking {
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+            }
+
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val stansmelding = testDb.hentPlanlagtMelding(idStansmelding2)
+            stansmelding?.sendes shouldEqual utsendingStansmelding
+        }
+        it("Oppdaterer og sender tidligere avbrutt 39-ukersmelding for samme sykeforløp, utsetter stansmelding") {
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
+            val receivedSykmelding = opprettReceivedSykmelding(
+                "11223344556", listOf(
+                    Periode(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusWeeks(3),
+                        aktivitetIkkeMulig = AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, emptyList()), arbeidsrelatertArsak = null),
+                        avventendeInnspillTilArbeidsgiver = null,
+                        behandlingsdager = null,
+                        gradert = null,
+                        reisetilskudd = false
+                    )
+                )
+            )
+
+            runBlocking {
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+            }
+
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+            coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val meldinger = testDb.connection.hentPlanlagtMelding("11223344556", LocalDate.of(2020, 3, 30))
+            meldinger.size shouldEqual 2
+            val planlagtMelding39uker = meldinger.find { it.type == BREV_39_UKER_TYPE }
+            val planlagtStansmelding = meldinger.find { it.type == STANS_TYPE }
+            planlagtMelding39uker!!.avbrutt shouldEqual null
+            planlagtStansmelding?.sendes shouldEqual LocalDate.now().plusWeeks(3).plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+            planlagtMelding39uker.jmsCorrelationId shouldEqual "correlationId"
+        }
+        it("Skal ikke sende ny 39-ukersmelding hvis melding er sent før") {
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
+            val receivedSykmelding = opprettReceivedSykmelding(
+                "11223344556", listOf(
+                    Periode(
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusWeeks(3),
+                        aktivitetIkkeMulig = AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, emptyList()), arbeidsrelatertArsak = null),
+                        avventendeInnspillTilArbeidsgiver = null,
+                        behandlingsdager = null,
+                        gradert = null,
+                        reisetilskudd = false
+                    )
+                )
+            )
+
+            runBlocking {
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+                testDb.sendPlanlagtMelding(idAvbrutt3, OffsetDateTime.now(ZoneOffset.UTC), "correlationId")
+                mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
+            }
+
+            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+            coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val meldinger = testDb.connection.hentPlanlagtMelding("11223344556", LocalDate.of(2020, 3, 30))
+            meldinger.size shouldEqual 2
+            val planlagtMelding39uker = meldinger.find { it.type == BREV_39_UKER_TYPE }
+            planlagtMelding39uker!!.avbrutt shouldEqual null
         }
     }
 
