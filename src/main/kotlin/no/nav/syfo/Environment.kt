@@ -44,9 +44,7 @@ data class Environment(
 
 data class VaultSecrets(
     val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
-    val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password"),
-    val mqUsername: String = getEnvVar("MQ_USERNAME"),
-    val mqPassword: String = getEnvVar("MQ_PASSWORD")
+    val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password")
 ) : KafkaCredentials {
     override val kafkaUsername: String = serviceuserUsername
     override val kafkaPassword: String = serviceuserPassword

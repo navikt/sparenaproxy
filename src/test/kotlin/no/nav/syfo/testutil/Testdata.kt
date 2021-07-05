@@ -92,7 +92,8 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         rulesetVersion = null,
         tlfPasient = null,
         tssid = null,
-        merknader = null
+        merknader = null,
+        partnerreferanse = ""
     )
 }
 
