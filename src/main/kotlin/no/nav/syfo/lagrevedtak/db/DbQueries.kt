@@ -10,6 +10,7 @@ import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
+import no.nav.syfo.log
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
@@ -31,6 +32,13 @@ fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
                     utbetaltEvent.tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault())
                         .withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
                 )
+            }
+        }
+        if (utbetaltEvent.gjenstaendeSykedager < 66) {
+            val planlagt39ukersmelding = connection.hentPlanlagt39ukersmelding(utbetaltEvent.fnr, utbetaltEvent.startdato)
+            if (planlagt39ukersmelding != null) {
+                log.info("Fremskynder utsendingstidspunkt for 39-ukersmelding med id ${planlagt39ukersmelding.id}")
+                connection.oppdater39ukersmelding(planlagt39ukersmelding.id, OffsetDateTime.now(ZoneOffset.UTC))
             }
         }
         connection.lagreUtbetaltEvent(utbetaltEvent)
@@ -154,4 +162,26 @@ private fun Connection.planlagtMeldingFinnes(fnr: String, startdato: LocalDate):
         it.setString(1, fnr)
         it.setObject(2, startdato)
         it.executeQuery().next()
+    }
+
+private fun Connection.hentPlanlagt39ukersmelding(fnr: String, startdato: LocalDate): PlanlagtMeldingDbModel? =
+    this.prepareStatement(
+        """
+            SELECT * FROM planlagt_melding WHERE fnr=? AND startdato=? AND type='39UKER' AND sendt is null AND avbrutt is null;
+            """
+    ).use {
+        it.setString(1, fnr)
+        it.setObject(2, startdato)
+        it.executeQuery().toList { toPlanlagtMeldingDbModel() }.firstOrNull()
+    }
+
+private fun Connection.oppdater39ukersmelding(id: UUID, sendes: OffsetDateTime) =
+    this.prepareStatement(
+        """
+            UPDATE planlagt_melding SET sendes=?, avbrutt=null  WHERE id=?;
+            """
+    ).use {
+        it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
+        it.setObject(2, id)
+        it.execute()
     }

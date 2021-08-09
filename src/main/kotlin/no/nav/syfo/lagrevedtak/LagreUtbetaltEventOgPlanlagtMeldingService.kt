@@ -51,13 +51,20 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                     lagPlanlagtMeldingDbModelForUtbetaling(
                         utbetaltEvent,
                         BREV_39_UKER_TYPE,
-                        utbetaltEvent.startdato.plusWeeks(39).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+                        finnUtsendingstidspunkt39Ukersmelding(utbetaltEvent)
                     ),
                     planlagtStansmelding
                 )
             )
         }
     }
+
+    private fun finnUtsendingstidspunkt39Ukersmelding(utbetaltEvent: UtbetaltEvent): OffsetDateTime =
+        if (utbetaltEvent.gjenstaendeSykedager < 66) {
+            OffsetDateTime.now(ZoneOffset.UTC)
+        } else {
+            utbetaltEvent.startdato.plusWeeks(39).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+        }
 
     private fun lagPlanlagtMeldingDbModelForUtbetaling(utbetaltEvent: UtbetaltEvent, type: String, sendes: OffsetDateTime): PlanlagtMeldingDbModel {
         return PlanlagtMeldingDbModel(
