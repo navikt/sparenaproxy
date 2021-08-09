@@ -1,6 +1,7 @@
 package no.nav.syfo.lagrevedtak
 
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
@@ -88,6 +89,22 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
 
             utbetaltEventFraDb shouldEqual utbetaltEvent
         }
+        it("39-ukersmelding sendes umiddelbart for nytt tilfelle hvis antall gjenstående sykedager er mindre enn 66") {
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom, gjenstaendeSykedager = 60)
+
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
+
+            val planlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", startdato)
+            planlagtMeldingFraDbListe.size shouldEqual 4
+            val planlagtMelding39uker = planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
+
+            planlagtMelding39uker?.fnr shouldEqual "fnr"
+            planlagtMelding39uker?.startdato shouldEqual startdato
+            planlagtMelding39uker?.type shouldEqual BREV_39_UKER_TYPE
+            planlagtMelding39uker?.sendes?.toLocalDate() shouldEqual OffsetDateTime.now(ZoneOffset.UTC).toLocalDate()
+            planlagtMelding39uker?.sendt shouldEqual null
+            planlagtMelding39uker?.avbrutt shouldEqual null
+        }
         it("Lagrer kun vedtak og oppdaterer stansmelding, hvis planlagte meldinger finnes for syketilfellet fra før") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
@@ -103,6 +120,21 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
             planlagtStansmelding?.sendes shouldEqual tom.plusWeeks(1).plusDays(17).atStartOfDay()
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
+        }
+        it("Oppdaterer 39-ukersmelding hvis finnes og ikke sendt for syketilfellet fra før og antall gjenstående sykedager er mindre enn 66") {
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val nesteUtbetaltEvent =
+                lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1), gjenstaendeSykedager = 60)
+
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
+            lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(nesteUtbetaltEvent)
+
+            val planlagtMeldingFraDbListe = testDb.connection.hentPlanlagtMelding("fnr", startdato)
+            val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
+            planlagtMeldingFraDbListe.size shouldEqual 4
+            utbetaltEventFraDbListe.size shouldEqual 2
+            val planlagt39ukersmelding = planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
+            planlagt39ukersmelding?.sendes?.toLocalDate() shouldEqual OffsetDateTime.now(ZoneOffset.UTC).toLocalDate()
         }
         it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
