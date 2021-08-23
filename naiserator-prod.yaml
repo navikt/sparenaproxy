@@ -44,8 +44,6 @@ spec:
     paths:
       - kvPath: serviceuser/data/prod/srvsparenaproxy
         mountPath: /secrets/serviceuser
-      - kvPath: /kv/prod/fss/sparenaproxy/teamsykmelding
-        mountPath: /var/run/secrets/nais.io/vault
   ingresses:
     - "https://sparenaproxy.nais.adeo.no"
   webproxy: true
@@ -59,11 +57,11 @@ spec:
     - name: SMREGISTER_SCOPE
       value: "api://prod-fss.teamsykmelding.syfosmregister/.default"
     - name: MQ_HOST_NAME
-      value: a01apvl063.adeo.no
+      value: a01apvl269.adeo.no
     - name: MQ_PORT
       value: '1414'
     - name: MQ_GATEWAY_NAME
-      value: MPLSC02
+      value: MPLS02
     - name: MQ_CHANNEL_NAME
       value: P_SPARENAPROXY
     - name: MQ_ARENA_QUEUE_NAME
