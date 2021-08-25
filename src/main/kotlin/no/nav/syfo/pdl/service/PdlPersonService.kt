@@ -2,16 +2,19 @@ package no.nav.syfo.pdl.service
 
 import io.ktor.util.KtorExperimentalAPI
 import java.util.UUID
-import no.nav.syfo.client.sts.StsOidcClient
+import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.log
 import no.nav.syfo.pdl.client.PdlClient
 
 @KtorExperimentalAPI
-class PdlPersonService(private val pdlClient: PdlClient, private val stsOidcClient: StsOidcClient) {
-
+class PdlPersonService(
+    private val pdlClient: PdlClient,
+    private val accessTokenClientV2: AccessTokenClientV2,
+    private val pdlScope: String
+) {
     suspend fun isAlive(ident: String, meldingId: UUID): Boolean {
-        val stsToken = stsOidcClient.oidcToken().access_token
-        val pdlResponse = pdlClient.getPerson(ident, stsToken)
+        val accessToken = accessTokenClientV2.getAccessTokenV2(pdlScope)
+        val pdlResponse = pdlClient.getPerson(ident, accessToken)
 
         if (pdlResponse.errors != null) {
             pdlResponse.errors.forEach {

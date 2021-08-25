@@ -76,3 +76,5 @@ spec:
       value: "sparenaproxy"
     - name: SPOKELSE_SCOPE
       value: "api://dev-fss.tbd.spokelse/.default"
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
