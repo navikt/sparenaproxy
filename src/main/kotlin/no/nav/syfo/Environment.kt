@@ -36,10 +36,11 @@ data class Environment(
     val pdlGraphqlPath: String = getEnvVar("PDL_GRAPHQL_PATH"),
     override val truststore: String? = getEnvVar("NAV_TRUSTSTORE_PATH"),
     override val truststorePassword: String? = getEnvVar("NAV_TRUSTSTORE_PASSWORD"),
-    val aadAccessTokenV2Url: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"), // erstatter på sikt aadAccessTokenUrl
+    val aadAccessTokenV2Url: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     val clientIdV2: String = getEnvVar("AZURE_APP_CLIENT_ID"),
     val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
-    val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE")
+    val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE"),
+    val pdlScope: String = getEnvVar("PDL_SCOPE")
 ) : MqConfig, KafkaConfig
 
 data class VaultSecrets(
