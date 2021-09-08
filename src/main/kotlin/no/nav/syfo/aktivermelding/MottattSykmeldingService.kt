@@ -33,7 +33,11 @@ class MottattSykmeldingService(
 ) {
     suspend fun mottaNySykmelding(record: String) {
         val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
-        behandleMottattSykmelding(receivedSykmelding)
+        if (receivedSykmelding.merknader?.any { it.type == "UNDER_BEHANDLING" } == true) {
+            log.info("Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}")
+        } else {
+            behandleMottattSykmelding(receivedSykmelding)
+        }
     }
 
     suspend fun behandleMottattSykmelding(receivedSykmelding: ReceivedSykmelding) {
