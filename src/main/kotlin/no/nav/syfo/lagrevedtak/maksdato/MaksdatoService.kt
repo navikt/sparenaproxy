@@ -54,7 +54,7 @@ class MaksdatoService(
             k278M815 = K278M815(),
             k278M830 = K278M830(
                 startdato = formatDate(utbetaltEvent.startdato),
-                maksdato = formatDate(finnMaksdato(utbetaltEvent.tom, utbetaltEvent.gjenstaendeSykedager)),
+                maksdato = formatDate(utbetaltEvent.maksdato ?: finnMaksdato(utbetaltEvent.tom, utbetaltEvent.gjenstaendeSykedager)),
                 orgnummer = utbetaltEvent.organisasjonsnummer.padEnd(9, ' ')
             ),
             k278M840 = K278M840()

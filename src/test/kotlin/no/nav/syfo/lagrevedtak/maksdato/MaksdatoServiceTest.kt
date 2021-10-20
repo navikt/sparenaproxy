@@ -36,7 +36,29 @@ object MaksdatoServiceTest : Spek({
                 startdato = LocalDate.of(2020, 5, 2),
                 sykmeldingId = UUID.randomUUID(),
                 gjenstaendeSykedager = 50,
-                tom = LocalDate.of(2020, 9, 9)
+                tom = LocalDate.of(2020, 9, 9),
+                maksdato = LocalDate.of(2020, 12, 1)
+            )
+
+            val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)
+
+            maksdatoMelding.k278M810.dato shouldEqual "10092020"
+            maksdatoMelding.k278M810.klokke shouldEqual "152000"
+            maksdatoMelding.k278M810.fnr shouldEqual "12345678910"
+            maksdatoMelding.k278M830.startdato shouldEqual "02052020"
+            maksdatoMelding.k278M830.maksdato shouldEqual "01122020"
+            maksdatoMelding.k278M830.orgnummer shouldEqual "orgnummer"
+        }
+        it("Beregner maksdato hvis maksdato mangler") {
+            val now = OffsetDateTime.of(LocalDate.of(2020, 9, 10).atTime(15, 20), ZoneOffset.UTC)
+            val utbetaltEvent = lagUtbetaltEvent(
+                id = UUID.randomUUID(),
+                fnr = "12345678910",
+                startdato = LocalDate.of(2020, 5, 2),
+                sykmeldingId = UUID.randomUUID(),
+                gjenstaendeSykedager = 50,
+                tom = LocalDate.of(2020, 9, 9),
+                maksdato = null
             )
 
             val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)

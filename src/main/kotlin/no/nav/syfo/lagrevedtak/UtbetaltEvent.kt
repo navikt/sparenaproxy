@@ -17,7 +17,8 @@ data class UtbetaltEvent(
     val tom: LocalDate,
     val forbrukteSykedager: Int,
     val gjenstaendeSykedager: Int,
-    val opprettet: LocalDateTime
+    val opprettet: LocalDateTime,
+    val maksdato: LocalDate?
 )
 
 data class Utbetalt(

@@ -16,5 +16,6 @@ data class UtbetaltEventKafkaMessage(
     val tom: LocalDate,
     val forbrukteSykedager: Int,
     val gjenstaendeSykedager: Int,
-    val opprettet: LocalDateTime
+    val opprettet: LocalDateTime,
+    val maksdato: LocalDate?
 )
