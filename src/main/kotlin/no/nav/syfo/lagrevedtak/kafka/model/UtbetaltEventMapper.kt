@@ -19,7 +19,8 @@ fun tilUtbetaltEventKafkaMessage(node: JsonNode): UtbetaltEventKafkaMessage {
         tom = LocalDate.parse(node["tom"].textValue()),
         forbrukteSykedager = node["forbrukteSykedager"].asInt(),
         gjenstaendeSykedager = node["gjenståendeSykedager"].asInt(),
-        opprettet = LocalDateTime.parse(node["@opprettet"].textValue())
+        opprettet = LocalDateTime.parse(node["@opprettet"].textValue()),
+        maksdato = if (node["maksdato"] != null) { LocalDate.parse(node["maksdato"].textValue()) } else { null }
     )
 }
 

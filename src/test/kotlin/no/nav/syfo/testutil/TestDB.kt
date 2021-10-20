@@ -120,7 +120,8 @@ fun ResultSet.toUtbetaltEvent(): UtbetaltEvent =
         tom = getObject("tom", LocalDate::class.java),
         forbrukteSykedager = getInt("forbrukte_sykedager"),
         gjenstaendeSykedager = getInt("gjenstaende_sykedager"),
-        opprettet = getObject("opprettet", LocalDateTime::class.java)
+        opprettet = getObject("opprettet", LocalDateTime::class.java),
+        maksdato = getObject("maksdato", LocalDate::class.java)
     )
 
 fun ResultSet.getHendelser(): Set<UUID> =
@@ -145,8 +146,9 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
                 tom,
                 forbrukte_sykedager,
                 gjenstaende_sykedager,
-                opprettet) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                opprettet,
+                maksdato) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
     ).use {
         it.setObject(1, UUID.randomUUID())
@@ -168,6 +170,7 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
         it.setInt(11, 20)
         it.setInt(12, 250)
         it.setTimestamp(13, Timestamp.valueOf(LocalDateTime.now()))
+        it.setObject(14, LocalDate.now().plusDays(250))
         it.execute()
     }
     this.commit()

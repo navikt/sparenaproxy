@@ -54,7 +54,8 @@ class UtbetaltEventService(
             tom = utbetaltEventKafkaMessage.tom,
             forbrukteSykedager = utbetaltEventKafkaMessage.forbrukteSykedager,
             gjenstaendeSykedager = utbetaltEventKafkaMessage.gjenstaendeSykedager,
-            opprettet = utbetaltEventKafkaMessage.opprettet
+            opprettet = utbetaltEventKafkaMessage.opprettet,
+            maksdato = utbetaltEventKafkaMessage.maksdato
         )
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
