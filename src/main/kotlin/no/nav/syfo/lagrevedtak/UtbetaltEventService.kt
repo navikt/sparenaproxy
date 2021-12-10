@@ -1,6 +1,5 @@
 package no.nav.syfo.lagrevedtak
 
-import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.lagrevedtak.client.SpokelseClient
@@ -10,7 +9,6 @@ import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.log
 import no.nav.syfo.objectMapper
 
-@KtorExperimentalAPI
 class UtbetaltEventService(
     private val spokelseClient: SpokelseClient,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,

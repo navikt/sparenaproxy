@@ -1,9 +1,5 @@
 package no.nav.syfo.lagrevedtak
 
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KUN_LAGRET_VEDTAK
 import no.nav.syfo.application.metrics.OPPRETTET_PLANLAGT_MELDING
@@ -16,6 +12,10 @@ import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
 

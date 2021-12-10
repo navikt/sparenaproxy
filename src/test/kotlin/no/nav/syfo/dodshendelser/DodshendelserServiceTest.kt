@@ -2,10 +2,6 @@ package no.nav.syfo.dodshendelser
 
 import io.mockk.clearAllMocks
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.testutil.TestDB
@@ -13,10 +9,14 @@ import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.hentPlanlagtMelding
 import no.nav.syfo.testutil.lagrePlanlagtMelding
 import no.nav.syfo.testutil.opprettPlanlagtMelding
-import org.amshove.kluent.shouldEqual
-import org.amshove.kluent.shouldNotEqual
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 
 object DodshendelserServiceTest : Spek({
     val personhendelserConsumer = mockk<PersonhendelserConsumer>()
@@ -44,16 +44,34 @@ object DodshendelserServiceTest : Spek({
         it("Avbryter kun planlagte meldinger for avdød bruker") {
             dodshendelserService.handleDodsfall(listOf("12345678910"))
 
-            testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 1, 25))[0].avbrutt shouldEqual avbruttTidspunkt
-            testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 2, 25))[0].avbrutt shouldEqual null
-            testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))[0].avbrutt shouldNotEqual null
-            testDb.connection.hentPlanlagtMelding("01987654321", LocalDate.of(2020, 4, 25))[0].avbrutt shouldEqual null
+            testDb.connection.hentPlanlagtMelding(
+                "12345678910",
+                LocalDate.of(2020, 1, 25)
+            )[0].avbrutt shouldBeEqualTo avbruttTidspunkt
+            testDb.connection.hentPlanlagtMelding(
+                "12345678910",
+                LocalDate.of(2020, 2, 25)
+            )[0].avbrutt shouldBeEqualTo null
+            testDb.connection.hentPlanlagtMelding(
+                "12345678910",
+                LocalDate.of(2020, 3, 25)
+            )[0].avbrutt shouldNotBeEqualTo null
+            testDb.connection.hentPlanlagtMelding(
+                "01987654321",
+                LocalDate.of(2020, 4, 25)
+            )[0].avbrutt shouldBeEqualTo null
         }
         it("Avbryter planlagte meldinger for alle brukers identer for avdød bruker") {
             dodshendelserService.handleDodsfall(listOf("12345678910", "01987654321"))
 
-            testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))[0].avbrutt shouldNotEqual null
-            testDb.connection.hentPlanlagtMelding("01987654321", LocalDate.of(2020, 4, 25))[0].avbrutt shouldNotEqual null
+            testDb.connection.hentPlanlagtMelding(
+                "12345678910",
+                LocalDate.of(2020, 3, 25)
+            )[0].avbrutt shouldNotBeEqualTo null
+            testDb.connection.hentPlanlagtMelding(
+                "01987654321",
+                LocalDate.of(2020, 4, 25)
+            )[0].avbrutt shouldNotBeEqualTo null
         }
         it("Feiler ikke hvis personidenter ikke finnes") {
             dodshendelserService.handleDodsfall(listOf("000000111111"))

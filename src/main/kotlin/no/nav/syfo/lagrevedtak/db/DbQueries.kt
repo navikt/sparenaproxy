@@ -1,12 +1,5 @@
 package no.nav.syfo.lagrevedtak.db
 
-import java.sql.Connection
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
@@ -15,6 +8,13 @@ import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.postgresql.util.PGobject
+import java.sql.Connection
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 
 fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
     utbetaltEvent: UtbetaltEvent,
@@ -92,14 +92,20 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
         it.setString(4, utbetaltEvent.aktorid)
         it.setString(5, utbetaltEvent.fnr)
         it.setString(6, utbetaltEvent.organisasjonsnummer)
-        it.setObject(7, PGobject().apply {
-            type = "json"
-            value = objectMapper.writeValueAsString(utbetaltEvent.hendelser)
-        })
-        it.setObject(8, PGobject().apply {
-            type = "json"
-            value = objectMapper.writeValueAsString(utbetaltEvent.oppdrag)
-        })
+        it.setObject(
+            7,
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(utbetaltEvent.hendelser)
+            }
+        )
+        it.setObject(
+            8,
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(utbetaltEvent.oppdrag)
+            }
+        )
         it.setObject(9, utbetaltEvent.fom)
         it.setObject(10, utbetaltEvent.tom)
         it.setInt(11, utbetaltEvent.forbrukteSykedager)

@@ -2,12 +2,6 @@ package no.nav.syfo.testutil
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.Utbetalt
@@ -18,6 +12,12 @@ import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
 import org.flywaydb.core.Flyway
 import org.postgresql.util.PGobject
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class TestDB : DatabaseInterface {
     private var pg: EmbeddedPostgres? = null
@@ -157,14 +157,20 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
         it.setString(4, aktorId)
         it.setString(5, fnr)
         it.setString(6, "9090880")
-        it.setObject(7, PGobject().apply {
-            type = "json"
-            value = objectMapper.writeValueAsString(emptyList<Hendelse>())
-        })
-        it.setObject(8, PGobject().apply {
-            type = "json"
-            value = objectMapper.writeValueAsString(emptyList<Utbetalt>())
-        })
+        it.setObject(
+            7,
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(emptyList<Hendelse>())
+            }
+        )
+        it.setObject(
+            8,
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(emptyList<Utbetalt>())
+            }
+        )
         it.setObject(9, LocalDate.now().minusMonths(1))
         it.setObject(10, LocalDate.now().minusDays(10))
         it.setInt(11, 20)

@@ -6,13 +6,11 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.util.KtorExperimentalAPI
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.log
+import java.time.LocalDate
+import java.util.UUID
 
-@KtorExperimentalAPI
 class SmregisterClient(
     private val smregisterEndpointURL: String,
     private val accessTokenClientV2: AccessTokenClientV2,

@@ -1,19 +1,17 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
-import io.ktor.util.KtorExperimentalAPI
+import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
+import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
+import no.nav.syfo.lagrevedtak.UtbetaltEvent
+import no.nav.syfo.log
+import no.nav.syfo.pdl.service.PdlPersonService
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
-import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
-import no.nav.syfo.lagrevedtak.UtbetaltEvent
-import no.nav.syfo.log
-import no.nav.syfo.pdl.service.PdlPersonService
 
-@KtorExperimentalAPI
 class MaksdatoService(
     private val arenaMqProducer: ArenaMqProducer,
     private val pdlPersonService: PdlPersonService

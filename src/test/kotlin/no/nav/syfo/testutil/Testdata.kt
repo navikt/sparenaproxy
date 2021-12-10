@@ -1,10 +1,5 @@
 package no.nav.syfo.testutil
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.lagrevedtak.Utbetalingslinje
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
@@ -20,6 +15,11 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.Sykmelding
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 
 fun opprettPlanlagtMelding(
     id: UUID,
@@ -93,7 +93,9 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         tlfPasient = null,
         tssid = null,
         merknader = null,
-        partnerreferanse = ""
+        partnerreferanse = "",
+        legeHelsepersonellkategori = null,
+        legeHprNr = null
     )
 }
 

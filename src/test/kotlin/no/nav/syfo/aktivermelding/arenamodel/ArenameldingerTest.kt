@@ -1,6 +1,6 @@
 package no.nav.syfo.aktivermelding.arenamodel
 
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -51,30 +51,30 @@ object ArenameldingerTest : Spek({
         it("N2810 får riktig tekstverdi") {
             val n2810SomTekst = n28108uker.tilTekst()
 
-            n2810SomTekst shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO "
+            n2810SomTekst shouldBeEqualTo "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO "
         }
         it("N2820 får riktig tekstverdi") {
             val n2820SomTekst = N2820().tilTekst()
 
-            n2820SomTekst shouldEqual "N2820   00001                                                                                                                                                                                            " // lengde 201
+            n2820SomTekst shouldBeEqualTo "N2820   00001                                                                                                                                                                                            " // lengde 201
         }
         it("N2830 får riktig tekstverdi") {
             val n2830SomTekst = n28308uker.tilTekst()
 
-            n2830SomTekst shouldEqual "N2830   00001M-RK68-1  00802052020                                                                                  " // lengde 116
+            n2830SomTekst shouldBeEqualTo "N2830   00001M-RK68-1  00802052020                                                                                  " // lengde 116
         }
         it("N2840 får riktig tekstverdi") {
             val n2840SomTekst = n28408uker.tilTekst()
 
-            n2840SomTekst shouldEqual "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 93
+            n2840SomTekst shouldBeEqualTo "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 93
         }
         it("Aktivitetskravmelding får riktig tekstverdi") {
             val aktivitetskravMqMelding = aktivitetskrav8UkerMelding.tilMqMelding()
 
-            aktivitetskravMqMelding shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO " +
-                    "N2820   00001                                                                                                                                                                                            " +
-                    "N2830   00001M-RK68-1  00802052020                                                                                  " +
-                    "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 482
+            aktivitetskravMqMelding shouldBeEqualTo "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO " +
+                "N2820   00001                                                                                                                                                                                            " +
+                "N2830   00001M-RK68-1  00802052020                                                                                  " +
+                "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 482
         }
     }
 
@@ -82,25 +82,25 @@ object ArenameldingerTest : Spek({
         it("N2810 får riktig tekstverdi") {
             val n2810SomTekst = n281039uker.tilTekst()
 
-            n2810SomTekst shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPI "
+            n2810SomTekst shouldBeEqualTo "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPI "
         }
         it("N2830 får riktig tekstverdi") {
             val n2830SomTekst = n283039uker.tilTekst()
 
-            n2830SomTekst shouldEqual "N2830   00001M-F226-1  01502052020                                                                                  " // lengde 116
+            n2830SomTekst shouldBeEqualTo "N2830   00001M-F226-1  01502052020                                                                                  " // lengde 116
         }
         it("N2840 får riktig tekstverdi") {
             val n2840SomTekst = n284039uker.tilTekst()
 
-            n2840SomTekst shouldEqual "N2840   00001SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 93
+            n2840SomTekst shouldBeEqualTo "N2840   00001SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 93
         }
         it("39-ukersmelding får riktig tekstverdi") {
             val brev39UkerMqMelding = brev39UkerMelding.tilMqMelding()
 
-            brev39UkerMqMelding shouldEqual "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPI " +
-                    "N2820   00001                                                                                                                                                                                            " +
-                    "N2830   00001M-F226-1  01502052020                                                                                  " +
-                    "N2840   00001SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 482
+            brev39UkerMqMelding shouldBeEqualTo "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPI " +
+                "N2820   00001                                                                                                                                                                                            " +
+                "N2830   00001M-F226-1  01502052020                                                                                  " +
+                "N2840   00001SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 482
         }
     }
 })

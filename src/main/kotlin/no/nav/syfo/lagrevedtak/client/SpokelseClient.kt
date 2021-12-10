@@ -6,12 +6,10 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
-import io.ktor.util.KtorExperimentalAPI
-import java.util.UUID
 import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.log
+import java.util.UUID
 
-@KtorExperimentalAPI
 class SpokelseClient(
     private val spokelseEndpointURL: String,
     private val accessTokenClientV2: AccessTokenClientV2,

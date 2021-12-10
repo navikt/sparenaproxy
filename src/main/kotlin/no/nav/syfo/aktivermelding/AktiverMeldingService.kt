@@ -1,11 +1,6 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.util.KtorExperimentalAPI
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.erStansmeldingSendt
@@ -32,8 +27,11 @@ import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
 import no.nav.syfo.objectMapper
 import no.nav.syfo.pdl.service.PdlPersonService
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 
-@KtorExperimentalAPI
 class AktiverMeldingService(
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,

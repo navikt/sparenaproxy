@@ -1,12 +1,6 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.util.KtorExperimentalAPI
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAktivStansmelding
 import no.nav.syfo.aktivermelding.db.finnAvbrutt39ukersmelding
@@ -23,8 +17,12 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.objectMapper
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 
-@KtorExperimentalAPI
 class MottattSykmeldingService(
     private val database: DatabaseInterface,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
@@ -113,6 +111,6 @@ class MottattSykmeldingService(
     }
 
     private fun finnSisteTom(perioder: List<Periode>): LocalDate {
-        return perioder.maxBy { it.tom }?.tom ?: throw IllegalStateException("Skal ikke kunne ha periode uten tom")
+        return perioder.maxByOrNull { it.tom }?.tom ?: throw IllegalStateException("Skal ikke kunne ha periode uten tom")
     }
 }

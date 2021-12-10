@@ -1,9 +1,9 @@
 package no.nav.syfo.dodshendelser.db
 
+import no.nav.syfo.application.db.DatabaseInterface
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.OffsetDateTime
-import no.nav.syfo.application.db.DatabaseInterface
 
 fun DatabaseInterface.avbrytPlanlagteMeldingerVedDodsfall(personidenter: List<String>, avbrutt: OffsetDateTime): Int {
     var avbrutteMeldinger = 0

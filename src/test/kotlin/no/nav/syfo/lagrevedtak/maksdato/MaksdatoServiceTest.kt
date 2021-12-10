@@ -1,22 +1,20 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
-import io.ktor.util.KtorExperimentalAPI
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.pdl.service.PdlPersonService
 import no.nav.syfo.testutil.lagUtbetaltEvent
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 
-@KtorExperimentalAPI
 object MaksdatoServiceTest : Spek({
     val arenaMqProducer = mockk<ArenaMqProducer>(relaxed = true)
     val pdlPersonService = mockk<PdlPersonService>()
@@ -42,12 +40,12 @@ object MaksdatoServiceTest : Spek({
 
             val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)
 
-            maksdatoMelding.k278M810.dato shouldEqual "10092020"
-            maksdatoMelding.k278M810.klokke shouldEqual "152000"
-            maksdatoMelding.k278M810.fnr shouldEqual "12345678910"
-            maksdatoMelding.k278M830.startdato shouldEqual "02052020"
-            maksdatoMelding.k278M830.maksdato shouldEqual "01122020"
-            maksdatoMelding.k278M830.orgnummer shouldEqual "orgnummer"
+            maksdatoMelding.k278M810.dato shouldBeEqualTo "10092020"
+            maksdatoMelding.k278M810.klokke shouldBeEqualTo "152000"
+            maksdatoMelding.k278M810.fnr shouldBeEqualTo "12345678910"
+            maksdatoMelding.k278M830.startdato shouldBeEqualTo "02052020"
+            maksdatoMelding.k278M830.maksdato shouldBeEqualTo "01122020"
+            maksdatoMelding.k278M830.orgnummer shouldBeEqualTo "orgnummer"
         }
         it("Beregner maksdato hvis maksdato mangler") {
             val now = OffsetDateTime.of(LocalDate.of(2020, 9, 10).atTime(15, 20), ZoneOffset.UTC)
@@ -63,12 +61,12 @@ object MaksdatoServiceTest : Spek({
 
             val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)
 
-            maksdatoMelding.k278M810.dato shouldEqual "10092020"
-            maksdatoMelding.k278M810.klokke shouldEqual "152000"
-            maksdatoMelding.k278M810.fnr shouldEqual "12345678910"
-            maksdatoMelding.k278M830.startdato shouldEqual "02052020"
-            maksdatoMelding.k278M830.maksdato shouldEqual "18112020"
-            maksdatoMelding.k278M830.orgnummer shouldEqual "orgnummer"
+            maksdatoMelding.k278M810.dato shouldBeEqualTo "10092020"
+            maksdatoMelding.k278M810.klokke shouldBeEqualTo "152000"
+            maksdatoMelding.k278M810.fnr shouldBeEqualTo "12345678910"
+            maksdatoMelding.k278M830.startdato shouldBeEqualTo "02052020"
+            maksdatoMelding.k278M830.maksdato shouldBeEqualTo "18112020"
+            maksdatoMelding.k278M830.orgnummer shouldBeEqualTo "orgnummer"
         }
     }
 
@@ -78,21 +76,21 @@ object MaksdatoServiceTest : Spek({
             val gjenstaendeSykedager = 4
             val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
-            maksdato shouldEqual LocalDate.of(2020, 10, 9)
+            maksdato shouldBeEqualTo LocalDate.of(2020, 10, 9)
         }
         it("Finner maksdato == mandag for tom = mandag og 5 gjenstående dager") {
             val tom = LocalDate.of(2020, 10, 5)
             val gjenstaendeSykedager = 5
             val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
-            maksdato shouldEqual LocalDate.of(2020, 10, 12)
+            maksdato shouldBeEqualTo LocalDate.of(2020, 10, 12)
         }
         it("Finner maksdato == tirsdag for tom = mandag og 6 gjenstående dager") {
             val tom = LocalDate.of(2020, 10, 5)
             val gjenstaendeSykedager = 6
             val maksdato = maksdatoService.finnMaksdato(tom, gjenstaendeSykedager)
 
-            maksdato shouldEqual LocalDate.of(2020, 10, 13)
+            maksdato shouldBeEqualTo LocalDate.of(2020, 10, 13)
         }
     }
 
@@ -102,13 +100,13 @@ object MaksdatoServiceTest : Spek({
         it("Skal sende maksdatomelding hvis forbrukte sykedager er mer enn 20 dager") {
             val forbrukteSykedager = 21
             runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldEqual true
+                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo true
             }
         }
         it("Skal ikke sende maksdatomelding hvis forbrukte sykedager er mindre enn 20 dager") {
             val forbrukteSykedager = 19
             runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldEqual false
+                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
             }
         }
         it("Skal ikke sende maksdatomelding hvis bruker er død") {
@@ -116,7 +114,7 @@ object MaksdatoServiceTest : Spek({
             val forbrukteSykedager = 21
 
             runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldEqual false
+                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
             }
         }
     }

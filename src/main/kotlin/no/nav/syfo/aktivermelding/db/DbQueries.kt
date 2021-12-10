@@ -1,14 +1,14 @@
 package no.nav.syfo.aktivermelding.db
 
+import no.nav.syfo.application.db.DatabaseInterface
+import no.nav.syfo.application.db.toList
+import no.nav.syfo.model.PlanlagtMeldingDbModel
+import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
-import no.nav.syfo.application.db.DatabaseInterface
-import no.nav.syfo.application.db.toList
-import no.nav.syfo.model.PlanlagtMeldingDbModel
-import no.nav.syfo.model.toPlanlagtMeldingDbModel
 
 fun DatabaseInterface.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? {
     connection.use { connection ->

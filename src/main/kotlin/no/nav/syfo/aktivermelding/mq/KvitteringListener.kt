@@ -1,13 +1,13 @@
 package no.nav.syfo.aktivermelding.mq
 
-import javax.jms.MessageConsumer
-import javax.jms.MessageProducer
-import javax.jms.TextMessage
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.KvitteringService
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.metrics.KVITTERING_FEILET
 import no.nav.syfo.log
+import javax.jms.MessageConsumer
+import javax.jms.MessageProducer
+import javax.jms.TextMessage
 
 class KvitteringListener(
     private val applicationState: ApplicationState,
