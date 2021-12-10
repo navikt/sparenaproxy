@@ -16,6 +16,7 @@ import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -102,7 +103,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtMelding39uker?.fnr shouldBeEqualTo "fnr"
             planlagtMelding39uker?.startdato shouldBeEqualTo startdato
             planlagtMelding39uker?.type shouldBeEqualTo BREV_39_UKER_TYPE
-            planlagtMelding39uker?.sendes?.toLocalDate() shouldBeEqualTo OffsetDateTime.now(ZoneOffset.UTC)
+            planlagtMelding39uker?.sendes?.toLocalDate() shouldBeEqualTo OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC))
                 .toLocalDate()
             planlagtMelding39uker?.sendt shouldBeEqualTo null
             planlagtMelding39uker?.avbrutt shouldBeEqualTo null
@@ -143,7 +144,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtMeldingFraDbListe.size shouldBeEqualTo 4
             utbetaltEventFraDbListe.size shouldBeEqualTo 2
             val planlagt39ukersmelding = planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
-            planlagt39ukersmelding?.sendes?.toLocalDate() shouldBeEqualTo OffsetDateTime.now(ZoneOffset.UTC)
+            planlagt39ukersmelding?.sendes?.toLocalDate() shouldBeEqualTo OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC))
                 .toLocalDate()
         }
         it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {

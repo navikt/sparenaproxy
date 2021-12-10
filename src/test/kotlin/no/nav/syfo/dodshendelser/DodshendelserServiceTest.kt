@@ -13,6 +13,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -22,12 +23,12 @@ object DodshendelserServiceTest : Spek({
     val personhendelserConsumer = mockk<PersonhendelserConsumer>()
     val testDb = TestDB()
     val dodshendelserService = DodshendelserService(ApplicationState(alive = true, ready = true), personhendelserConsumer, testDb)
-    val avbruttTidspunkt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(3)
+    val avbruttTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)
 
     beforeEachTest {
         clearAllMocks()
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = avbruttTidspunkt))
-        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 2, 25), sendt = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(3)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 2, 25), sendt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusWeeks(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 3, 25)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "01987654321", startdato = LocalDate.of(2020, 4, 25)))
     }

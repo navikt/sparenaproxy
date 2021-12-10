@@ -25,6 +25,7 @@ import no.nav.syfo.testutil.opprettReceivedSykmelding
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -43,16 +44,16 @@ object MottattSykmeldingServiceTest : Spek({
     val idAvbruttStansmelding = UUID.randomUUID()
     val idStansmelding = UUID.randomUUID()
     val idStansmelding2 = UUID.randomUUID()
-    val utsendingStansmelding = OffsetDateTime.now(ZoneOffset.UTC).plusDays(3)
+    val utsendingStansmelding = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).plusDays(3)
 
     beforeEachTest {
         clearAllMocks()
-        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(3)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idStansmelding, type = STANS_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 3, 25), sendes = utsendingStansmelding))
-        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt2, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(3)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt2, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusWeeks(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idIkkeAvbrutt, type = AKTIVITETSKRAV_8_UKER_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25)))
-        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbruttStansmelding, type = STANS_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(ZoneOffset.UTC)))
-        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt3, type = BREV_39_UKER_TYPE, fnr = "11223344556", startdato = LocalDate.of(2020, 3, 30), avbrutt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(3)))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbruttStansmelding, type = STANS_TYPE, fnr = "01987654321", startdato = LocalDate.of(2020, 3, 25), avbrutt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC))))
+        testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idAvbrutt3, type = BREV_39_UKER_TYPE, fnr = "11223344556", startdato = LocalDate.of(2020, 3, 30), avbrutt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = idStansmelding2, type = STANS_TYPE, fnr = "11223344556", startdato = LocalDate.of(2020, 3, 30), sendes = utsendingStansmelding))
         every { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) } returns "correlationId"
     }
@@ -234,7 +235,7 @@ object MottattSykmeldingServiceTest : Spek({
 
             runBlocking {
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
-                testDb.sendPlanlagtMelding(idAvbrutt, OffsetDateTime.now(ZoneOffset.UTC), "correlationId")
+                testDb.sendPlanlagtMelding(idAvbrutt, OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)), "correlationId")
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
@@ -331,7 +332,7 @@ object MottattSykmeldingServiceTest : Spek({
 
             runBlocking {
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
-                testDb.sendPlanlagtMelding(idAvbrutt3, OffsetDateTime.now(ZoneOffset.UTC), "correlationId")
+                testDb.sendPlanlagtMelding(idAvbrutt3, OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)), "correlationId")
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
