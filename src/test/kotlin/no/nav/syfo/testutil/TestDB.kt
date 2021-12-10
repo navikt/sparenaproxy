@@ -15,8 +15,10 @@ import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 class TestDB : DatabaseInterface {
@@ -175,7 +177,7 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
         it.setObject(10, LocalDate.now().minusDays(10))
         it.setInt(11, 20)
         it.setInt(12, 250)
-        it.setTimestamp(13, Timestamp.valueOf(LocalDateTime.now()))
+        it.setTimestamp(13, Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault()))))
         it.setObject(14, LocalDate.now().plusDays(250))
         it.execute()
     }
