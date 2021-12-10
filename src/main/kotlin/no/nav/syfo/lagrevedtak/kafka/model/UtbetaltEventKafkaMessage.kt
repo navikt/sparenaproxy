@@ -1,9 +1,9 @@
 package no.nav.syfo.lagrevedtak.kafka.model
 
+import no.nav.syfo.lagrevedtak.Utbetalt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.syfo.lagrevedtak.Utbetalt
 
 data class UtbetaltEventKafkaMessage(
     val utbetalteventid: UUID,

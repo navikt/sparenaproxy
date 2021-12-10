@@ -5,35 +5,36 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.3.3"
+val coroutinesVersion = "1.5.1"
 val javaxActivationVersion = "1.1.1"
-val jacksonVersion = "2.9.7"
-val kluentVersion = "1.49"
-val ktorVersion = "1.3.2"
-val logbackVersion = "1.2.3"
-val logstashEncoderVersion = "5.1"
-val prometheusVersion = "0.6.0"
-val spekVersion = "2.0.9"
-val smCommonVersion = "1.dff6489"
-val mockkVersion = "1.10.0"
-val nimbusdsVersion = "7.5.1"
-val testContainerKafkaVersion = "1.12.5"
-val postgresVersion = "42.2.5"
-val flywayVersion = "5.2.4"
-val hikariVersion = "3.3.0"
+val jacksonVersion = "2.13.0"
+val kluentVersion = "1.68"
+val ktorVersion = "1.6.6"
+val logbackVersion = "1.2.7"
+val logstashEncoderVersion = "7.0.1"
+val prometheusVersion = "0.12.0"
+val spekVersion = "2.0.17"
+val smCommonVersion = "1.e6f10d8"
+val mockkVersion = "1.12.1"
+val nimbusdsVersion = "9.15.2"
+val testContainerKafkaVersion = "1.16.2"
+val postgresVersion = "42.3.1"
+val flywayVersion = "8.1.0"
+val hikariVersion = "5.0.0"
 val vaultJavaDriveVersion = "3.1.0"
 val postgresEmbeddedVersion = "0.13.1"
-val confluentVersion = "5.0.0"
+val confluentVersion = "5.3.0"
+val kotlinVersion = "1.6.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
 }
 
 plugins {
-    id("org.jmailen.kotlinter") version "2.2.0"
-    kotlin("jvm") version "1.3.72"
-    id("com.diffplug.gradle.spotless") version "3.23.1"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.jmailen.kotlinter") version "3.6.0"
+    kotlin("jvm") version "1.6.0"
+    id("com.diffplug.spotless") version "5.16.0"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
     jacoco
 }
 
@@ -50,11 +51,7 @@ val githubPassword: String by project
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://kotlin.bintray.com/kotlinx")
     maven {
         url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
         credentials {
@@ -99,6 +96,7 @@ dependencies {
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion") 
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
@@ -131,7 +129,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "13"
+        kotlinOptions.jvmTarget = "16"
     }
 
     withType<JacocoReport> {

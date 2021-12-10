@@ -1,9 +1,5 @@
 package no.nav.syfo.aktivermelding
 
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import no.nav.syfo.aktivermelding.arenamodel.Aktivitetskrav8UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev39UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev4UkerMelding
@@ -24,6 +20,10 @@ import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class ArenaMeldingService(
     private val arenaMqProducer: ArenaMqProducer

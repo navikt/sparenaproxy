@@ -1,8 +1,8 @@
 package no.nav.syfo.db
 
+import no.nav.syfo.application.db.DatabaseInterface
 import java.sql.Connection
 import java.time.LocalDate
-import no.nav.syfo.application.db.DatabaseInterface
 
 fun DatabaseInterface.fireukersmeldingErSendt(fnr: String, startdato: LocalDate): Boolean {
     connection.use { connection ->

@@ -1,11 +1,11 @@
 package no.nav.syfo.lagrevedtak.kafka.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.syfo.lagrevedtak.Utbetalingslinje
+import no.nav.syfo.lagrevedtak.Utbetalt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.syfo.lagrevedtak.Utbetalingslinje
-import no.nav.syfo.lagrevedtak.Utbetalt
 
 fun tilUtbetaltEventKafkaMessage(node: JsonNode): UtbetaltEventKafkaMessage {
     return UtbetaltEventKafkaMessage(

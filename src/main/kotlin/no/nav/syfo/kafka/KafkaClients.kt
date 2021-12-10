@@ -1,7 +1,6 @@
 package no.nav.syfo.kafka
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
-import java.util.Properties
 import no.nav.syfo.Environment
 import no.nav.syfo.VaultSecrets
 import no.nav.syfo.kafka.aiven.KafkaUtils
@@ -9,6 +8,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
+import java.util.Properties
 
 class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
     private val baseConfig = getBaseConfig(vaultSecrets, env)
@@ -42,8 +42,10 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
 
     private fun getAivenKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
         val properties = KafkaUtils.getAivenKafkaConfig()
-            .toConsumerConfig("${env.applicationName}-consumer",
-                valueDeserializer = StringDeserializer::class)
+            .toConsumerConfig(
+                "${env.applicationName}-consumer",
+                valueDeserializer = StringDeserializer::class
+            )
 
         return KafkaConsumer(properties)
     }

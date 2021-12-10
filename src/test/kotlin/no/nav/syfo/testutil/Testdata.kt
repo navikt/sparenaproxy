@@ -1,10 +1,5 @@
 package no.nav.syfo.testutil
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.syfo.lagrevedtak.Utbetalingslinje
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
@@ -20,6 +15,13 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.Sykmelding
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 
 fun opprettPlanlagtMelding(
     id: UUID,
@@ -48,7 +50,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
     return ReceivedSykmelding(
         sykmelding = Sykmelding(
             id = UUID.randomUUID().toString(),
-            behandletTidspunkt = LocalDateTime.now(),
+            behandletTidspunkt = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
             behandler = Behandler(
                 fornavn = "fornavn",
                 adresse = Adresse(null, null, null, null, null),
@@ -72,7 +74,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
             pasientAktoerId = "1234",
             perioder = perioder,
             prognose = null,
-            signaturDato = LocalDateTime.now(),
+            signaturDato = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
             skjermesForPasient = false,
             syketilfelleStartDato = LocalDate.now(),
             tiltakArbeidsplassen = null,
@@ -85,7 +87,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         legekontorOrgName = "navn",
         legekontorOrgNr = null,
         legekontorReshId = null,
-        mottattDato = LocalDateTime.now(),
+        mottattDato = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
         navLogId = "1",
         personNrLege = "12345678901",
         personNrPasient = fnr,
@@ -93,7 +95,9 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         tlfPasient = null,
         tssid = null,
         merknader = null,
-        partnerreferanse = ""
+        partnerreferanse = "",
+        legeHelsepersonellkategori = null,
+        legeHprNr = null
     )
 }
 
@@ -119,7 +123,7 @@ fun lagUtbetaltEvent(
         tom = tom,
         forbrukteSykedager = 0,
         gjenstaendeSykedager = gjenstaendeSykedager,
-        opprettet = LocalDateTime.now(),
+        opprettet = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
         maksdato = maksdato
     )
 

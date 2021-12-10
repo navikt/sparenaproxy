@@ -17,25 +17,23 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.net.ServerSocket
-import java.time.LocalDate
-import java.util.UUID
-import java.util.concurrent.TimeUnit
-import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.client.SimpleSykmelding
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.client.Sykeforloep
 import no.nav.syfo.client.sts.OidcToken
 import no.nav.syfo.client.sts.StsOidcClient
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.net.ServerSocket
+import java.time.LocalDate
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertFailsWith
 
-@KtorExperimentalAPI
 object SyfoSyketilfelleClientTest : Spek({
     val sykmeldingUUID = UUID.randomUUID()
     val oppfolgingsdato1 = LocalDate.of(2019, 9, 30)
@@ -155,12 +153,12 @@ object SyfoSyketilfelleClientTest : Spek({
 
     describe("Test av SyfoSyketilfelleClient - finnStartDato") {
         it("Henter riktig startdato fra syfosyketilfelle") {
-            var startDato: LocalDate? = null
+            var startDato: LocalDate?
             runBlocking {
                 startDato = syfoSyketilfelleClient.finnStartdato(aktorId1, sykmeldingUUID.toString(), UUID.randomUUID())
             }
 
-            startDato shouldEqual oppfolgingsdato2
+            startDato shouldBeEqualTo oppfolgingsdato2
         }
         it("Kaster feil hvis sykmelding ikke er knyttet til syketilfelle") {
             assertFailsWith<RuntimeException> {
@@ -176,12 +174,13 @@ object SyfoSyketilfelleClientTest : Spek({
                 httpClient,
                 "dev-fss"
             )
-            var startDato: LocalDate? = null
+            var startDato: LocalDate?
             runBlocking {
-                startDato = syfoSyketilfelleClientDev.finnStartdato(aktorId2, sykmeldingUUID.toString(), UUID.randomUUID())
+                startDato =
+                    syfoSyketilfelleClientDev.finnStartdato(aktorId2, sykmeldingUUID.toString(), UUID.randomUUID())
             }
 
-            startDato shouldEqual LocalDate.now().minusMonths(1)
+            startDato shouldBeEqualTo LocalDate.now().minusMonths(1)
         }
     }
 
@@ -189,13 +188,21 @@ object SyfoSyketilfelleClientTest : Spek({
         it("Returnerer true hvis det finnes syketilfeller med nyere startdato") {
             val startDato = LocalDate.of(2020, 1, 1)
             runBlocking {
-                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId1, startDato, UUID.randomUUID()) shouldEqual true
+                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
+                    aktorId1,
+                    startDato,
+                    UUID.randomUUID()
+                ) shouldBeEqualTo true
             }
         }
         it("Returnerer false hvis det ikke finnes syketilfeller med nyere startdato") {
             val startDato = LocalDate.of(2020, 1, 30)
             runBlocking {
-                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId1, startDato, UUID.randomUUID()) shouldEqual false
+                syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
+                    aktorId1,
+                    startDato,
+                    UUID.randomUUID()
+                ) shouldBeEqualTo false
             }
         }
         it("Kaster feil hvis det ikke finnes noen syketilfeller") {
@@ -213,7 +220,11 @@ object SyfoSyketilfelleClientTest : Spek({
                 "dev-fss"
             )
             runBlocking {
-                syfoSyketilfelleClientDev.harSykeforlopMedNyereStartdato(aktorId3, LocalDate.now(), UUID.randomUUID()) shouldEqual false
+                syfoSyketilfelleClientDev.harSykeforlopMedNyereStartdato(
+                    aktorId3,
+                    LocalDate.now(),
+                    UUID.randomUUID()
+                ) shouldBeEqualTo false
             }
         }
     }

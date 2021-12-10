@@ -1,7 +1,5 @@
 package no.nav.syfo.dodshendelser
 
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
@@ -11,6 +9,8 @@ import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.log
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class DodshendelserService(
     private val applicationState: ApplicationState,

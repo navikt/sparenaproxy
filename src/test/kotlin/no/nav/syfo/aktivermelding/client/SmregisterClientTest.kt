@@ -21,21 +21,19 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import no.nav.syfo.client.AccessTokenClientV2
+import org.amshove.kluent.shouldBeEqualTo
+import org.spekframework.spek2.Spek
+import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
-import kotlinx.coroutines.runBlocking
-import no.nav.syfo.client.AccessTokenClientV2
-import org.amshove.kluent.shouldEqual
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-@KtorExperimentalAPI
 object SmregisterClientTest : Spek({
     val fom = LocalDate.of(2020, 3, 15)
     val tom = LocalDate.of(2020, 4, 12)
@@ -88,74 +86,74 @@ object SmregisterClientTest : Spek({
 
     describe("Test av SmRegisterClient - 100% sykmeldt") {
         it("Er 100% sykmeldt hvis sykmeldt og ikke gradert") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.er100ProsentSykmeldt("fnr", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual true
+            erSykmeldt shouldBeEqualTo true
         }
         it("Er ikke 100% sykmeldt hvis sykmeldt, men gradert") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.er100ProsentSykmeldt("fnr-gradert", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual false
+            erSykmeldt shouldBeEqualTo false
         }
         it("Er ikke 100% sykmeldt hvis ikke lenger sykmeldt") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.er100ProsentSykmeldt("fnr-ikkesyk", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual false
+            erSykmeldt shouldBeEqualTo false
         }
     }
 
     describe("Test av SmRegisterClient - sykmeldt uavhengig av grad") {
         it("Er sykmeldt hvis sykmeldt og ikke gradert") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.erSykmeldt("fnr", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual true
+            erSykmeldt shouldBeEqualTo true
         }
         it("Er sykmeldt hvis sykmeldt, men gradert") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.erSykmeldt("fnr-gradert", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual true
+            erSykmeldt shouldBeEqualTo true
         }
         it("Er ikke sykmeldt hvis ikke lenger sykmeldt") {
-            var erSykmeldt: Boolean? = null
+            var erSykmeldt: Boolean?
             runBlocking {
                 erSykmeldt = smregisterClient.erSykmeldt("fnr-ikkesyk", UUID.randomUUID())
             }
 
-            erSykmeldt shouldEqual false
+            erSykmeldt shouldBeEqualTo false
         }
     }
 
     describe("Test av SmRegisterClient - sykmeldt til og med-dato") {
         it("Henter tom-dato hvis bruker er sykmeldt") {
-            var sykmeldtTom: LocalDate? = null
+            var sykmeldtTom: LocalDate?
             runBlocking {
                 sykmeldtTom = smregisterClient.erSykmeldtTilOgMed("fnr", UUID.randomUUID())
             }
 
-            sykmeldtTom shouldEqual tom
+            sykmeldtTom shouldBeEqualTo tom
         }
         it("Tom-dato er null hvis ikke lenger sykmeldt") {
-            var sykmeldtTom: LocalDate? = null
+            var sykmeldtTom: LocalDate?
             runBlocking {
                 sykmeldtTom = smregisterClient.erSykmeldtTilOgMed("fnr-ikkesyk", UUID.randomUUID())
             }
 
-            sykmeldtTom shouldEqual null
+            sykmeldtTom shouldBeEqualTo null
         }
         it("Feiler hvis bruker er sykmeldt, men tom-dato mangler") {
             assertFailsWith<IllegalStateException> {

@@ -1,15 +1,13 @@
 package no.nav.syfo.kafka
 
-import io.ktor.util.KtorExperimentalAPI
-import java.time.Duration
 import kotlinx.coroutines.delay
 import no.nav.syfo.Environment
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import java.time.Duration
 
-@KtorExperimentalAPI
 class CommonAivenKafkaService(
     private val applicationState: ApplicationState,
     private val kafkaConsumer: KafkaConsumer<String, String>,

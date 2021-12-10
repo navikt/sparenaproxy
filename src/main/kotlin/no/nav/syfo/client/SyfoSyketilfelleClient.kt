@@ -5,13 +5,11 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
-import io.ktor.util.KtorExperimentalAPI
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.log
+import java.time.LocalDate
+import java.util.UUID
 
-@KtorExperimentalAPI
 class SyfoSyketilfelleClient(
     private val syketilfelleEndpointURL: String,
     private val stsClient: StsOidcClient,
