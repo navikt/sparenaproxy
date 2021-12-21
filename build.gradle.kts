@@ -21,7 +21,7 @@ val postgresVersion = "42.3.1"
 val flywayVersion = "8.1.0"
 val hikariVersion = "5.0.0"
 val vaultJavaDriveVersion = "5.1.0"
-val confluentVersion = "5.3.0"
+val confluentVersion = "6.2.2"
 val kotlinVersion = "1.6.0"
 val testContainerVersion = "1.16.2"
 
