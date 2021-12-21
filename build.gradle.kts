@@ -5,26 +5,25 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.5.1"
+val coroutinesVersion = "1.5.2"
 val javaxActivationVersion = "1.1.1"
 val jacksonVersion = "2.13.0"
 val kluentVersion = "1.68"
-val ktorVersion = "1.6.6"
-val logbackVersion = "1.2.7"
+val ktorVersion = "1.6.7"
+val logbackVersion = "1.2.8"
 val logstashEncoderVersion = "7.0.1"
 val prometheusVersion = "0.12.0"
 val spekVersion = "2.0.17"
-val smCommonVersion = "1.e6f10d8"
+val smCommonVersion = "1.a92720c"
 val mockkVersion = "1.12.1"
 val nimbusdsVersion = "9.15.2"
-val testContainerKafkaVersion = "1.16.2"
 val postgresVersion = "42.3.1"
 val flywayVersion = "8.1.0"
 val hikariVersion = "5.0.0"
 val vaultJavaDriveVersion = "3.1.0"
-val postgresEmbeddedVersion = "0.13.1"
-val confluentVersion = "5.3.0"
+val confluentVersion = "6.2.2"
 val kotlinVersion = "1.6.0"
+val testContainerVersion = "1.16.2"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -34,7 +33,7 @@ plugins {
     id("org.jmailen.kotlinter") version "3.6.0"
     kotlin("jvm") version "1.6.0"
     id("com.diffplug.spotless") version "5.16.0"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     jacoco
 }
 
@@ -97,16 +96,15 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    testImplementation("org.amshove.kluent:kluent:$kluentVersion") 
+    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("com.nimbusds:nimbus-jose-jwt:$nimbusdsVersion")
-    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-    testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
+    testImplementation("org.testcontainers:kafka:$testContainerVersion")
+    testImplementation("org.testcontainers:postgresql:$testContainerVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
-        exclude(group = "org.eclipse.jetty") 
+        exclude(group = "org.eclipse.jetty")
     }
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion") {
         exclude(group = "org.jetbrains.kotlin")
@@ -131,7 +129,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "16"
+        kotlinOptions.jvmTarget = "17"
     }
 
     withType<JacocoReport> {

@@ -15,15 +15,11 @@ object KvitteringServiceTest : Spek({
     val kvitteringsmelding = "K278M890Kvittering Arena002270307202010070612345678910J                                                                                                                                                                            "
     val kvitteringsmeldingMedFeil = "K278M890Kvittering Arena002270307202010070612345678910NXXXXXXXXFeilmelding                                                                                                                                                         "
 
-    val testDb = TestDB()
+    val testDb = TestDB.database
     val kvitteringService = KvitteringService(testDb)
 
     afterEachTest {
         testDb.connection.dropData()
-    }
-
-    afterGroup {
-        testDb.stop()
     }
 
     describe("Test av behandleKvittering") {
