@@ -10,7 +10,7 @@ import java.sql.ResultSet
 enum class Role {
     ADMIN, USER, READONLY;
 
-    override fun toString() = name.toLowerCase()
+    override fun toString() = name.lowercase()
 }
 
 class Database(private val env: Environment, private val vaultCredentialService: VaultCredentialService) :
@@ -33,7 +33,7 @@ class Database(private val env: Environment, private val vaultCredentialService:
                 jdbcUrl = env.sparenaproxyDBURL
                 username = initialCredentials.username
                 password = initialCredentials.password
-                maximumPoolSize = 3
+                maximumPoolSize = 30
                 minimumIdle = 1
                 idleTimeout = 10001
                 maxLifetime = 300000

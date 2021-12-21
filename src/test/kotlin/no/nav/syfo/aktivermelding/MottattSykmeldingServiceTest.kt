@@ -33,7 +33,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 object MottattSykmeldingServiceTest : Spek({
-    val testDb = TestDB()
+    val testDb = TestDB.database
     val arenaMeldingService = mockk<ArenaMeldingService>()
     val syfoSyketilfelleClient = mockk<SyfoSyketilfelleClient>()
     val mottattSykmeldingService = MottattSykmeldingService(testDb, syfoSyketilfelleClient, arenaMeldingService, skalVenteLitt = false)
@@ -60,10 +60,6 @@ object MottattSykmeldingServiceTest : Spek({
 
     afterEachTest {
         testDb.connection.dropData()
-    }
-
-    afterGroup {
-        testDb.stop()
     }
 
     describe("Test av behandling av mottatt sykmelding") {

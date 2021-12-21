@@ -32,7 +32,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 object AktiverMeldingServiceTest : Spek({
-    val testDb = TestDB()
+    val testDb = TestDB.database
     val arenaMeldingService = mockk<ArenaMeldingService>()
     val smregisterClient = mockk<SmregisterClient>()
     val pdlPersonService = mockk<PdlPersonService>()
@@ -48,11 +48,6 @@ object AktiverMeldingServiceTest : Spek({
     afterEachTest {
         testDb.connection.dropData()
     }
-
-    afterGroup {
-        testDb.stop()
-    }
-
     describe("Test av behandleAktiverMelding") {
         it("Ignorerer melding som er avbrutt") {
             val id = UUID.randomUUID()
