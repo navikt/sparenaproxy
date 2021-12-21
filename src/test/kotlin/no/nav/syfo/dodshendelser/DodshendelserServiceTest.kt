@@ -21,7 +21,7 @@ import java.util.UUID
 
 object DodshendelserServiceTest : Spek({
     val personhendelserConsumer = mockk<PersonhendelserConsumer>()
-    val testDb = TestDB.database
+    val testDb = TestDB()
     val dodshendelserService = DodshendelserService(ApplicationState(alive = true, ready = true), personhendelserConsumer, testDb)
     val avbruttTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)
 
@@ -35,6 +35,10 @@ object DodshendelserServiceTest : Spek({
 
     afterEachTest {
         testDb.connection.dropData()
+    }
+
+    afterGroup {
+        testDb.stop()
     }
 
     describe("Håndtering av dødsfall") {

@@ -24,7 +24,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
-    val testDb = TestDB.database
+    val testDb = TestDB()
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(testDb)
 
     val utbetaltEventId = UUID.fromString("58ac4866-5944-48a1-99fa-86d6f9f3103c")
@@ -32,6 +32,10 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
 
     afterEachTest {
         testDb.connection.dropData()
+    }
+
+    afterGroup {
+        testDb.stop()
     }
 
     describe("Test av lagring av vedtaksinfo og planlagte meldinger") {
