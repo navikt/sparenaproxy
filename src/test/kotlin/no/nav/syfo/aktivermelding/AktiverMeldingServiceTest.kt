@@ -32,7 +32,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 object AktiverMeldingServiceTest : Spek({
-    val testDb = TestDB()
+    val testDb = TestDB.database
     val arenaMeldingService = mockk<ArenaMeldingService>()
     val smregisterClient = mockk<SmregisterClient>()
     val pdlPersonService = mockk<PdlPersonService>()
@@ -48,11 +48,6 @@ object AktiverMeldingServiceTest : Spek({
     afterEachTest {
         testDb.connection.dropData()
     }
-
-    afterGroup {
-        testDb.stop()
-    }
-
     describe("Test av behandleAktiverMelding") {
         it("Ignorerer melding som er avbrutt") {
             val id = UUID.randomUUID()
@@ -355,7 +350,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 10)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 10)).find { it.type == STANS_TYPE }!!
             planlagtMelding.avbrutt shouldNotBeEqualTo null
             planlagtMelding.sendt shouldBeEqualTo null
         }
@@ -388,7 +383,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).find { it.type == STANS_TYPE }!!
             planlagtMelding.sendt shouldNotBeEqualTo null
             planlagtMelding.avbrutt shouldBeEqualTo null
             planlagtMelding.jmsCorrelationId shouldBeEqualTo "correlationId"
@@ -421,7 +416,7 @@ object AktiverMeldingServiceTest : Spek({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify { smregisterClient.erSykmeldtTilOgMed(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).first()
+            val planlagtMelding = testDb.connection.hentPlanlagtMelding(fnr, LocalDate.of(2020, 1, 14)).find { it.type == STANS_TYPE }!!
             planlagtMelding.avbrutt shouldNotBeEqualTo null
             planlagtMelding.sendt shouldBeEqualTo null
         }

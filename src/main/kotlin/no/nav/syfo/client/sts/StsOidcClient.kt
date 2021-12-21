@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.auth.Auth
+import io.ktor.client.features.auth.providers.BasicAuthCredentials
 import io.ktor.client.features.auth.providers.basic
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
@@ -31,9 +32,12 @@ class StsOidcClient(
         }
         install(Auth) {
             basic {
-                this.username = username
-                this.password = password
-                this.sendWithoutRequest = true
+                credentials {
+                    BasicAuthCredentials(
+                        username, password
+                    )
+                }
+                sendWithoutRequest { true }
             }
         }
     }
