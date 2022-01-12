@@ -45,7 +45,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
             .toConsumerConfig(
                 "${env.applicationName}-consumer",
                 valueDeserializer = StringDeserializer::class
-            )
+            ).also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest" }
 
         return KafkaConsumer(properties)
     }

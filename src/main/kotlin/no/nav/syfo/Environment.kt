@@ -39,7 +39,9 @@ data class Environment(
     val clientIdV2: String = getEnvVar("AZURE_APP_CLIENT_ID"),
     val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
     val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE"),
-    val pdlScope: String = getEnvVar("PDL_SCOPE")
+    val pdlScope: String = getEnvVar("PDL_SCOPE"),
+    val okSykmeldingTopic: String = "teamsykmelding.ok-sykmelding",
+    val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding"
 ) : MqConfig, KafkaConfig
 
 data class VaultSecrets(
