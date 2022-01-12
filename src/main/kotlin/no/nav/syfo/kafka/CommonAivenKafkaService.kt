@@ -2,6 +2,7 @@ package no.nav.syfo.kafka
 
 import kotlinx.coroutines.delay
 import no.nav.syfo.Environment
+import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
@@ -12,12 +13,15 @@ class CommonAivenKafkaService(
     private val applicationState: ApplicationState,
     private val kafkaConsumer: KafkaConsumer<String, String>,
     private val env: Environment,
-    private val utbetaltEventService: UtbetaltEventService
+    private val utbetaltEventService: UtbetaltEventService,
+    private val mottattSykmeldingService: MottattSykmeldingService
 ) {
     suspend fun start() {
         kafkaConsumer.subscribe(
             listOf(
-                env.utbetaltEventAivenTopic
+                env.utbetaltEventAivenTopic,
+                env.okSykmeldingTopic,
+                env.manuellSykmeldingTopic
             )
         )
 
@@ -27,9 +31,9 @@ class CommonAivenKafkaService(
             records.forEach {
                 if (it.value() != null) {
                     when (it.topic()) {
-                        env.utbetaltEventAivenTopic -> {
-                            utbetaltEventService.mottaUtbetaltEvent(it.value())
-                        }
+                        env.utbetaltEventAivenTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
+                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding på topic ${env.okSykmeldingTopic}") }
+                        env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding på topic ${env.manuellSykmeldingTopic}") }
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
                     }
                 }
