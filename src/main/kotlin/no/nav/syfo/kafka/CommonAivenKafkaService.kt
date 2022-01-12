@@ -32,8 +32,8 @@ class CommonAivenKafkaService(
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetaltEventAivenTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
-                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding med id på topic ${env.okSykmeldingTopic}") }
-                        env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding med id på topic ${env.manuellSykmeldingTopic}") }
+                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding på topic ${env.okSykmeldingTopic}") }
+                        env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value()).also { log.info("Mottatt sykmelding på topic ${env.manuellSykmeldingTopic}") }
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
                     }
                 }
