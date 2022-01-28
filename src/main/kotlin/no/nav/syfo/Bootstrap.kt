@@ -140,7 +140,7 @@ fun main() {
     val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
 
     val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, aktiverMeldingService)
-    val commonAivenKafkaService = CommonAivenKafkaService(applicationState, kafkaClients.aivenKafkaConsumer, env, utbetaltEventService, mottattSykmeldingService)
+    val commonAivenKafkaService = CommonAivenKafkaService(applicationState, kafkaClients.aivenKafkaConsumer, env, utbetaltEventService, mottattSykmeldingService, aktiverMeldingService)
 
     val applicationEngine = createApplicationEngine(
         env,
