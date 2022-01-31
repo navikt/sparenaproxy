@@ -37,7 +37,7 @@ class CommonAivenKafkaService(
                         env.utbetaltEventAivenTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
                         env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
-                        env.aktiverMeldingAivenTopic -> aktiverMeldingService.mottaAktiverMelding(it.value()).also { log.info("Mottatt aktivermelding på topic ${env.aktiverMeldingAivenTopic}") }
+                        env.aktiverMeldingAivenTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())
                         else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
                     }
                 }

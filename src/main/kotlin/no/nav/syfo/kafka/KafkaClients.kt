@@ -13,7 +13,6 @@ import java.util.Properties
 class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
     private val baseConfig = getBaseConfig(vaultSecrets, env)
 
-    val kafkaConsumer = getKafkaConsumer(baseConfig, env)
     val personhendelserKafkaConsumer = getPersonhendelserKafkaConsumer(baseConfig, env)
     val aivenKafkaConsumer = getAivenKafkaConsumer(env)
 
@@ -22,13 +21,6 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
         kafkaBaseConfig["auto.offset.reset"] = "none"
         kafkaBaseConfig["specific.avro.reader"] = false
         return kafkaBaseConfig
-    }
-
-    private fun getKafkaConsumer(kafkaBaseConfig: Properties, env: Environment): KafkaConsumer<String, String> {
-        val properties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = StringDeserializer::class)
-        properties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
-
-        return KafkaConsumer(properties)
     }
 
     private fun getPersonhendelserKafkaConsumer(kafkaBaseConfig: Properties, env: Environment): KafkaConsumer<String, GenericRecord> {
@@ -46,7 +38,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
                 "${env.applicationName}-consumer",
                 valueDeserializer = StringDeserializer::class
             ).also {
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
+                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
                 it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
             }
 
