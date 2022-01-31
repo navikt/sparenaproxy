@@ -39,7 +39,6 @@ import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
 import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.kafka.CommonAivenKafkaService
-import no.nav.syfo.kafka.CommonKafkaService
 import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
@@ -139,7 +138,6 @@ fun main() {
     val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
     val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
 
-    val commonKafkaService = CommonKafkaService(applicationState, kafkaClients.kafkaConsumer, env, aktiverMeldingService)
     val commonAivenKafkaService = CommonAivenKafkaService(applicationState, kafkaClients.aivenKafkaConsumer, env, utbetaltEventService, mottattSykmeldingService, aktiverMeldingService)
 
     val applicationEngine = createApplicationEngine(
@@ -152,9 +150,6 @@ fun main() {
 
     RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
 
-    createListener(applicationState) {
-        commonKafkaService.start()
-    }
     createListener(applicationState) {
         dodshendelserService.start()
     }
