@@ -5,25 +5,23 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.5.2"
-val javaxActivationVersion = "1.1.1"
-val jacksonVersion = "2.13.0"
+val coroutinesVersion = "1.6.0"
+val jacksonVersion = "2.13.1"
 val kluentVersion = "1.68"
 val ktorVersion = "1.6.7"
-val logbackVersion = "1.2.8"
+val logbackVersion = "1.2.10"
 val logstashEncoderVersion = "7.0.1"
-val prometheusVersion = "0.12.0"
+val prometheusVersion = "0.14.1"
 val spekVersion = "2.0.17"
 val smCommonVersion = "1.a92720c"
-val mockkVersion = "1.12.1"
-val nimbusdsVersion = "9.15.2"
+val mockkVersion = "1.12.2"
 val postgresVersion = "42.3.1"
-val flywayVersion = "8.1.0"
-val hikariVersion = "5.0.0"
+val flywayVersion = "8.4.2"
+val hikariVersion = "5.0.1"
 val vaultJavaDriveVersion = "3.1.0"
 val confluentVersion = "6.2.2"
 val kotlinVersion = "1.6.0"
-val testContainerVersion = "1.16.2"
+val testContainerVersion = "1.16.3"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -34,14 +32,10 @@ plugins {
     kotlin("jvm") version "1.6.0"
     id("com.diffplug.spotless") version "5.16.0"
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    jacoco
 }
 
 buildscript {
     dependencies {
-        classpath("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-        classpath("org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438")
-        classpath("com.sun.activation:javax.activation:1.2.0")
     }
 }
 
@@ -62,7 +56,7 @@ repositories {
 
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
@@ -100,7 +94,6 @@ dependencies {
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
-    testImplementation("com.nimbusds:nimbus-jose-jwt:$nimbusdsVersion")
     testImplementation("org.testcontainers:kafka:$testContainerVersion")
     testImplementation("org.testcontainers:postgresql:$testContainerVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
@@ -114,14 +107,6 @@ dependencies {
     }
 }
 
-tasks.jacocoTestReport {
-    reports {
-        xml.isEnabled = true
-        html.isEnabled = true
-    }
-}
-
-
 tasks {
 
     create("printVersion") {
@@ -132,14 +117,6 @@ tasks {
         kotlinOptions.jvmTarget = "17"
     }
 
-    withType<JacocoReport> {
-        classDirectories.setFrom(
-                sourceSets.main.get().output.asFileTree.matching {
-                    exclude()
-                }
-        )
-
-    }
     withType<ShadowJar> {
         transform(ServiceFileTransformer::class.java) {
             setPath("META-INF/cxf")
