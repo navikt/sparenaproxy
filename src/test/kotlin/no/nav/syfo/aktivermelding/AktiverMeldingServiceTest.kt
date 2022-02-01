@@ -140,7 +140,7 @@ object AktiverMeldingServiceTest : Spek({
         it("Avbryter 8-ukersmelding hvis bruker er sykmeldt, men det er et nytt sykefravær og stansmelding har blitt vurdert (avbrutt)") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", any()) } returns true
-            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("aktorId", any(), any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns true
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = id,
@@ -277,7 +277,7 @@ object AktiverMeldingServiceTest : Spek({
         it("Avbryter 39-ukersmelding hvis bruker er sykmeldt, men det er et nytt sykefravær og stansmelding har blitt vurdert (sendt)") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.erSykmeldt("fnr2", any()) } returns true
-            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("aktorId2", any(), any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr2", any(), any()) } returns true
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = id,

@@ -35,7 +35,7 @@ class UtbetaltEventService(
             utbetaltEventKafkaMessage.utbetalteventid
         )
         val startdato = syfoSyketilfelleClient.finnStartdato(
-            utbetaltEventKafkaMessage.aktorid,
+            utbetaltEventKafkaMessage.fnr,
             sykmeldingId.toString(),
             utbetaltEventKafkaMessage.utbetalteventid
         )

@@ -35,7 +35,6 @@ import no.nav.syfo.application.exeption.ServiceUnavailableException
 import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.client.SyfoSyketilfelleClient
-import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.dodshendelser.DodshendelserService
 import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.kafka.CommonAivenKafkaService
@@ -102,14 +101,14 @@ fun main() {
     val httpClientWithProxy = HttpClient(Apache, proxyConfig)
     val httpClient = HttpClient(Apache, config)
 
-    val oidcClient = StsOidcClient(username = vaultSecrets.serviceuserUsername, password = vaultSecrets.serviceuserPassword, stsUrl = env.stsUrl)
-    val syfoSyketilfelleClient = SyfoSyketilfelleClient(
-        env.syketilfelleEndpointURL,
-        oidcClient,
-        httpClient,
-        env.cluster
-    )
     val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClientWithProxy)
+    val syfoSyketilfelleClient = SyfoSyketilfelleClient(
+        syketilfelleEndpointURL = env.syketilfelleEndpointURL,
+        accessTokenClientV2 = accessTokenClientV2,
+        resourceId = env.syketilfelleScope,
+        httpClient = httpClient,
+        cluster = env.cluster
+    )
     val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.spokelseScope, httpClient)
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClientV2, env.smregisterScope, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)

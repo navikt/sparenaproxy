@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.erStansmeldingSendt
-import no.nav.syfo.aktivermelding.db.finnAktorIdFraDatabase
 import no.nav.syfo.aktivermelding.db.finnesNyerePlanlagtMeldingMedAnnenStartdato
 import no.nav.syfo.aktivermelding.db.hentPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
@@ -124,12 +123,7 @@ class AktiverMeldingService(
     private suspend fun gjelderSammeSykefravaer(planlagtMelding: PlanlagtMeldingDbModel): Boolean {
         if (database.erStansmeldingSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
             log.info("Det er sendt/avbrutt stansmelding for sykefravær som melding med id ${planlagtMelding.id} tilhører")
-            val aktorId = database.finnAktorIdFraDatabase(planlagtMelding.fnr, planlagtMelding.startdato)
-            if (aktorId.isNullOrEmpty()) {
-                log.error("Fant ikke aktørid i databasen, skal ikke kunne skje ${planlagtMelding.id}")
-                throw IllegalStateException("Fant ikke aktørid i databasen, skal ikke kunne skje")
-            }
-            return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(aktorId, planlagtMelding.startdato, planlagtMelding.id)
+            return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.id)
         }
         return true
     }

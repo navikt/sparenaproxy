@@ -78,3 +78,7 @@ spec:
       value: "api://prod-fss.tbd.spokelse/.default"
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
+    - name: SYKETILLFELLE_ENDPOINT_URL
+      value: https://flex-syketilfelle.intern.nav.no
+    - name: SYKETILLFELLE_SCOPE
+      value: api://prod-gcp.flex.flex-syketilfelle/.default
