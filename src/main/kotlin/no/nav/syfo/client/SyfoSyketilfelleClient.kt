@@ -5,20 +5,20 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
-import no.nav.syfo.client.sts.StsOidcClient
 import no.nav.syfo.log
 import java.time.LocalDate
 import java.util.UUID
 
 class SyfoSyketilfelleClient(
     private val syketilfelleEndpointURL: String,
-    private val stsClient: StsOidcClient,
+    private val accessTokenClientV2: AccessTokenClientV2,
+    private val resourceId: String,
     private val httpClient: HttpClient,
     private val cluster: String
 ) {
 
-    suspend fun finnStartdato(aktorId: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
-        val sykeforloep = hentSykeforloep(aktorId)
+    suspend fun finnStartdato(fnr: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
+        val sykeforloep = hentSykeforloep(fnr)
         val aktueltSykeforloep = sykeforloep.firstOrNull {
             it.sykmeldinger.any { simpleSykmelding -> simpleSykmelding.id == sykmeldingId }
         }
@@ -35,8 +35,8 @@ class SyfoSyketilfelleClient(
         }
     }
 
-    suspend fun harSykeforlopMedNyereStartdato(aktorId: String, startdato: LocalDate, planlagtMeldingId: UUID): Boolean {
-        val sykeforloep = hentSykeforloep(aktorId)
+    suspend fun harSykeforlopMedNyereStartdato(fnr: String, startdato: LocalDate, planlagtMeldingId: UUID): Boolean {
+        val sykeforloep = hentSykeforloep(fnr)
         if (sykeforloep.isEmpty()) {
             log.error("Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId")
             if (cluster == "dev-fss") {
@@ -49,12 +49,13 @@ class SyfoSyketilfelleClient(
         }
     }
 
-    private suspend fun hentSykeforloep(aktorId: String): List<Sykeforloep> =
-        httpClient.get<List<Sykeforloep>>("$syketilfelleEndpointURL/sparenaproxy/$aktorId/sykeforloep") {
+    private suspend fun hentSykeforloep(fnr: String): List<Sykeforloep> =
+        httpClient.get<List<Sykeforloep>>("$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true") {
             accept(ContentType.Application.Json)
-            val oidcToken = stsClient.oidcToken()
+            val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
             headers {
-                append("Authorization", "Bearer ${oidcToken.access_token}")
+                append("Authorization", "Bearer $accessToken")
+                append("fnr", fnr)
             }
         }
 }

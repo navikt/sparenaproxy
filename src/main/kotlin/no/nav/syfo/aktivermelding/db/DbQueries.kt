@@ -82,12 +82,6 @@ fun DatabaseInterface.erStansmeldingSendt(fnr: String, startdato: LocalDate): Bo
     }
 }
 
-fun DatabaseInterface.finnAktorIdFraDatabase(fnr: String, startdato: LocalDate): String? {
-    connection.use { connection ->
-        return connection.finnAktorIdFraDatabase(fnr, startdato)
-    }
-}
-
 private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
     this.prepareStatement(
         """
@@ -203,15 +197,4 @@ private fun Connection.erStansmeldingSendt(fnr: String, startdato: LocalDate): B
         it.setString(1, fnr)
         it.setObject(2, startdato)
         it.executeQuery().next()
-    }
-
-private fun Connection.finnAktorIdFraDatabase(fnr: String, startdato: LocalDate): String? =
-    this.prepareStatement(
-        """
-            SELECT aktorid FROM utbetaltevent WHERE fnr=? AND startdato=? limit 1;
-            """
-    ).use {
-        it.setString(1, fnr)
-        it.setObject(2, startdato)
-        it.executeQuery().toList { getString("aktorid") }.firstOrNull()
     }
