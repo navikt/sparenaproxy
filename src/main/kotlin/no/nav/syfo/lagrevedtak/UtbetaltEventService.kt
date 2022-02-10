@@ -17,7 +17,7 @@ class UtbetaltEventService(
 ) {
     suspend fun mottaUtbetaltEvent(record: String) {
         val jsonNode = toJsonNode(record)
-        if (jsonNode["@event_name"].asText() == "utbetalt") {
+        if (jsonNode["@event_name"]?.asText() == "utbetalt") {
             val callid = jsonNode["@id"].asText()
             log.info("Mottatt melding med callid {}", callid)
             handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode), callid)
