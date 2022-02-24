@@ -5,8 +5,10 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import no.nav.syfo.application.metrics.ULIK_STARTDATO
 import no.nav.syfo.log
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class SyfoSyketilfelleClient(
@@ -17,12 +19,17 @@ class SyfoSyketilfelleClient(
     private val cluster: String
 ) {
 
-    suspend fun finnStartdato(fnr: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
+    suspend fun finnStartdato(fnr: String, sykmeldingId: String, fom: LocalDate? = null, tom: LocalDate? = null, sporingsId: UUID): LocalDate {
         val sykeforloep = hentSykeforloep(fnr)
         val aktueltSykeforloep = sykeforloep.firstOrNull {
             it.sykmeldinger.any { simpleSykmelding -> simpleSykmelding.id == sykmeldingId }
         }
 
+        val startdatoFraFomOgTom = if (fom != null && tom != null) {
+            finnStartdatoGittFomOgTom(fom, tom, sykeforloep)
+        } else {
+            null
+        }
         if (aktueltSykeforloep == null) {
             log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", sporingsId)
             if (cluster == "dev-fss") {
@@ -31,8 +38,22 @@ class SyfoSyketilfelleClient(
             }
             throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
         } else {
+            if (fom != null && tom != null && aktueltSykeforloep.oppfolgingsdato != startdatoFraFomOgTom) {
+                log.warn(
+                    "Startdato gitt sykmeldingId: ${formaterDato(aktueltSykeforloep.oppfolgingsdato)}, " +
+                        "startdato gitt fom og tom: ${formaterDato(startdatoFraFomOgTom)}, $sporingsId"
+                )
+                ULIK_STARTDATO.inc()
+            }
             return aktueltSykeforloep.oppfolgingsdato
         }
+    }
+
+    fun finnStartdatoGittFomOgTom(fom: LocalDate, tom: LocalDate, sykeforloep: List<Sykeforloep>): LocalDate? {
+        val aktueltSykeforloep = sykeforloep.filter { it.oppfolgingsdato <= fom }.firstOrNull {
+            it.sykmeldinger.any { simpleSykmelding -> tom in simpleSykmelding.fom.rangeTo(simpleSykmelding.tom) }
+        }
+        return aktueltSykeforloep?.oppfolgingsdato
     }
 
     suspend fun harSykeforlopMedNyereStartdato(fnr: String, startdato: LocalDate, planlagtMeldingId: UUID): Boolean {
@@ -58,6 +79,11 @@ class SyfoSyketilfelleClient(
                 append("fnr", fnr)
             }
         }
+
+    private fun formaterDato(dato: LocalDate?): String {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        return dato?.format(formatter) ?: "null"
+    }
 }
 
 data class Sykeforloep(
