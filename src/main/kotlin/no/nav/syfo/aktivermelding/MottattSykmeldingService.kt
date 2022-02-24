@@ -52,7 +52,7 @@ class MottattSykmeldingService(
         if (skalVenteLitt) {
             delay(5000) // Venter slik at sykmeldingen kommer inn i syfosyketilfelle...
         }
-        val startdato = syfoSyketilfelleClient.finnStartdato(receivedSykmelding.personNrPasient, sykmeldingId, UUID.fromString(sykmeldingId))
+        val startdato = syfoSyketilfelleClient.finnStartdato(fnr = receivedSykmelding.personNrPasient, sykmeldingId = sykmeldingId, sporingsId = UUID.fromString(sykmeldingId))
 
         sendAvbruttAktivitetskravmelding(receivedSykmelding, avbrutteAktivitetskravMeldinger.firstOrNull { it.startdato == startdato })
         sendAvbrutt39ukersmelding(receivedSykmelding, avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato })

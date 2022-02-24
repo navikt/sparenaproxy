@@ -36,7 +36,7 @@ import kotlin.test.assertFailsWith
 object SyfoSyketilfelleClientTest : Spek({
     val sykmeldingUUID = UUID.randomUUID()
     val oppfolgingsdato1 = LocalDate.of(2019, 9, 30)
-    val oppfolgingsdato2 = LocalDate.of(2020, 1, 30)
+    val oppfolgingsdato2 = LocalDate.of(2020, 5, 30)
     val oppfolgingsdato3 = LocalDate.of(2018, 10, 15)
 
     val fnr1 = "123456"
@@ -153,7 +153,7 @@ object SyfoSyketilfelleClientTest : Spek({
         it("Henter riktig startdato fra syfosyketilfelle") {
             var startDato: LocalDate?
             runBlocking {
-                startDato = syfoSyketilfelleClient.finnStartdato(fnr1, sykmeldingUUID.toString(), UUID.randomUUID())
+                startDato = syfoSyketilfelleClient.finnStartdato(fnr1, sykmeldingUUID.toString(), oppfolgingsdato2, oppfolgingsdato2.plusWeeks(2), UUID.randomUUID())
             }
 
             startDato shouldBeEqualTo oppfolgingsdato2
@@ -161,7 +161,7 @@ object SyfoSyketilfelleClientTest : Spek({
         it("Kaster feil hvis sykmelding ikke er knyttet til syketilfelle") {
             assertFailsWith<RuntimeException> {
                 runBlocking {
-                    syfoSyketilfelleClient.finnStartdato(fnr2, sykmeldingUUID.toString(), UUID.randomUUID())
+                    syfoSyketilfelleClient.finnStartdato(fnr2, sykmeldingUUID.toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(3), UUID.randomUUID())
                 }
             }
         }
@@ -176,16 +176,97 @@ object SyfoSyketilfelleClientTest : Spek({
             var startDato: LocalDate?
             runBlocking {
                 startDato =
-                    syfoSyketilfelleClientDev.finnStartdato(fnr2, sykmeldingUUID.toString(), UUID.randomUUID())
+                    syfoSyketilfelleClientDev.finnStartdato(fnr2, sykmeldingUUID.toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(1), UUID.randomUUID())
             }
 
             startDato shouldBeEqualTo LocalDate.now().minusMonths(1)
         }
     }
 
+    describe("Test av SyfoSyketilfelleClient - finnStartdatoGittFomOgTom") {
+        val sykeforloep = listOf(
+            Sykeforloep(
+                oppfolgingsdato1,
+                listOf(
+                    SimpleSykmelding(
+                        UUID.randomUUID().toString(),
+                        oppfolgingsdato1,
+                        oppfolgingsdato1.plusWeeks(3)
+                    ),
+                    SimpleSykmelding(
+                        UUID.randomUUID().toString(),
+                        oppfolgingsdato1.plusWeeks(3),
+                        oppfolgingsdato1.plusWeeks(7)
+                    ),
+                    SimpleSykmelding(
+                        UUID.randomUUID().toString(),
+                        oppfolgingsdato1.plusWeeks(8),
+                        oppfolgingsdato1.plusWeeks(19)
+                    )
+                )
+            ),
+            Sykeforloep(
+                oppfolgingsdato2,
+                listOf(
+                    SimpleSykmelding(
+                        UUID.randomUUID().toString(),
+                        oppfolgingsdato2,
+                        oppfolgingsdato2.plusWeeks(4)
+                    )
+                )
+            ),
+            Sykeforloep(
+                oppfolgingsdato3,
+                listOf(
+                    SimpleSykmelding(
+                        UUID.randomUUID().toString(),
+                        oppfolgingsdato3,
+                        oppfolgingsdato3.plusWeeks(8)
+                    )
+                )
+            )
+        )
+        it("Finner riktig startdato når fom og tom er en sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato2,
+                tom = oppfolgingsdato2.plusWeeks(4),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato2
+        }
+        it("Finner riktig startdato når fom og tom er en del av en sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato3.plusWeeks(1),
+                tom = oppfolgingsdato3.plusWeeks(3),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato3
+        }
+        it("Finner riktig startdato når fom er første utbetalingsdag og tom er en del av en senere sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato1,
+                tom = oppfolgingsdato1.plusWeeks(18),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato1
+        }
+        it("Finner ikke startdato når fom er siste dag i siste sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato1.plusWeeks(19),
+                tom = oppfolgingsdato1.plusWeeks(20),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo null
+        }
+    }
+
     describe("Test av SyfoSyketilfelleClient - harSykeforlopMedNyereStartdato") {
         it("Returnerer true hvis det finnes syketilfeller med nyere startdato") {
-            val startDato = LocalDate.of(2020, 1, 1)
+            val startDato = LocalDate.of(2020, 5, 1)
             runBlocking {
                 syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
                     fnr1,
@@ -195,7 +276,7 @@ object SyfoSyketilfelleClientTest : Spek({
             }
         }
         it("Returnerer false hvis det ikke finnes syketilfeller med nyere startdato") {
-            val startDato = LocalDate.of(2020, 1, 30)
+            val startDato = LocalDate.of(2020, 5, 30)
             runBlocking {
                 syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
                     fnr1,
