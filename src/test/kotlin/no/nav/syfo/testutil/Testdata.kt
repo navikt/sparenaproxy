@@ -124,7 +124,10 @@ fun lagUtbetaltEvent(
         forbrukteSykedager = 0,
         gjenstaendeSykedager = gjenstaendeSykedager,
         opprettet = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
-        maksdato = maksdato
+        maksdato = maksdato,
+        utbetalingId = UUID.randomUUID(),
+        utbetalingFom = startdato.minusDays(3),
+        utbetalingTom = tom
     )
 
 fun lagOppdragsliste(): List<Utbetalt> {

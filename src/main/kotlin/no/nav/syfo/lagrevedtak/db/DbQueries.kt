@@ -82,8 +82,11 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
                 forbrukte_sykedager,
                 gjenstaende_sykedager,
                 opprettet,
-                maksdato) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                maksdato,
+                utbetalingid,
+                utbetaling_fom,
+                utbetaling_tom) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
     ).use {
         it.setObject(1, utbetaltEvent.utbetalteventid)
@@ -112,6 +115,9 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
         it.setInt(12, utbetaltEvent.gjenstaendeSykedager)
         it.setTimestamp(13, Timestamp.valueOf(utbetaltEvent.opprettet))
         it.setObject(14, utbetaltEvent.maksdato)
+        it.setObject(15, utbetaltEvent.utbetalingId)
+        it.setObject(16, utbetaltEvent.utbetalingFom)
+        it.setObject(17, utbetaltEvent.utbetalingTom)
         it.execute()
     }
 }

@@ -20,7 +20,10 @@ fun tilUtbetaltEventKafkaMessage(node: JsonNode): UtbetaltEventKafkaMessage {
         forbrukteSykedager = node["forbrukteSykedager"].asInt(),
         gjenstaendeSykedager = node["gjenståendeSykedager"].asInt(),
         opprettet = LocalDateTime.parse(node["@opprettet"].textValue()),
-        maksdato = if (node["maksdato"] != null) { LocalDate.parse(node["maksdato"].textValue()) } else { null }
+        maksdato = if (node["maksdato"] != null) { LocalDate.parse(node["maksdato"].textValue()) } else { null },
+        utbetalingId = node["utbetalingId"]?.let { UUID.fromString(it.textValue()) },
+        utbetalingFom = node["utbetalingFom"]?.let { LocalDate.parse(it.textValue()) },
+        utbetalingTom = node["utbetalingTom"]?.let { LocalDate.parse(it.textValue()) }
     )
 }
 

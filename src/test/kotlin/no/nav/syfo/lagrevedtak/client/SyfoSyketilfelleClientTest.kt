@@ -253,9 +253,36 @@ object SyfoSyketilfelleClientTest : Spek({
 
             startdato shouldBeEqualTo oppfolgingsdato1
         }
-        it("Finner ikke startdato når fom er siste dag i siste sykmeldingsperiode") {
+        it("Finner riktig startdato når fom er før startdato og tom er en del av en senere sykmeldingsperiode") {
             val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
-                fom = oppfolgingsdato1.plusWeeks(19),
+                fom = oppfolgingsdato1.minusWeeks(1),
+                tom = oppfolgingsdato1.plusWeeks(18),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato1
+        }
+        it("Finner riktig startdato når fom er siste dag i siste sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato3.plusWeeks(8),
+                tom = oppfolgingsdato3.plusWeeks(10),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato3
+        }
+        it("Finner riktig startdato når fom og tom overlapper med opphold i sykmeldingsperioder") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato1.plusWeeks(7).plusDays(1),
+                tom = oppfolgingsdato1.plusWeeks(7).plusDays(5),
+                sykeforloep = sykeforloep
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato1
+        }
+        it("Finner ikke startdato når fom er dagen etter siste dag i siste sykmeldingsperiode") {
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato1.plusWeeks(19).plusDays(1),
                 tom = oppfolgingsdato1.plusWeeks(20),
                 sykeforloep = sykeforloep
             )
