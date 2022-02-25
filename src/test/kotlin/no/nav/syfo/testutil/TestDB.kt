@@ -11,7 +11,6 @@ import no.nav.syfo.application.db.VaultCredentials
 import no.nav.syfo.application.db.toList
 import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
-import no.nav.syfo.lagrevedtak.client.Hendelse
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import no.nav.syfo.objectMapper
@@ -143,7 +142,6 @@ fun ResultSet.toUtbetaltEvent(): UtbetaltEvent =
         utbetalteventid = getObject("utbetalteventid", UUID::class.java),
         fnr = getString("fnr"),
         aktorid = getString("aktorid"),
-        sykmeldingid = getObject("sykmeldingid", UUID::class.java),
         startdato = getObject("startdato", LocalDate::class.java),
         organisasjonsnummer = getString("organisasjonsnummer"),
         hendelser = getHendelser(),
@@ -224,3 +222,9 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
         it.commit()
     }
 }
+
+data class Hendelse(
+    val dokumentId: UUID,
+    val hendelseId: UUID,
+    val type: String
+)

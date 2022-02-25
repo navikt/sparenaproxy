@@ -74,8 +74,6 @@ spec:
       value: https://pdl-api.nais.adeo.no/graphql
     - name: KAFKA_CLIENT_ID
       value: "sparenaproxy"
-    - name: SPOKELSE_SCOPE
-      value: "api://prod-fss.tbd.spokelse/.default"
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
     - name: SYKETILLFELLE_ENDPOINT_URL

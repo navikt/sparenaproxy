@@ -5,10 +5,8 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
-import no.nav.syfo.application.metrics.ULIK_STARTDATO
 import no.nav.syfo.log
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class SyfoSyketilfelleClient(
@@ -19,17 +17,29 @@ class SyfoSyketilfelleClient(
     private val cluster: String
 ) {
 
-    suspend fun finnStartdato(fnr: String, sykmeldingId: String, fom: LocalDate? = null, tom: LocalDate? = null, sporingsId: UUID): LocalDate {
+    suspend fun finnStartdato(fnr: String, fom: LocalDate, tom: LocalDate, sporingsId: UUID): LocalDate {
+        val sykeforloep = hentSykeforloep(fnr)
+        val startdato = finnStartdatoGittFomOgTom(fom, tom, sykeforloep)
+
+        if (startdato == null) {
+            log.error("Fant ikke startdato for utbetaltEvent med id $sporingsId")
+            if (cluster == "dev-fss") {
+                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", sporingsId)
+                return LocalDate.now().minusMonths(1)
+            }
+            throw RuntimeException("Fant ikke startdato for utbetaltEvent med id $sporingsId")
+        } else {
+
+            return startdato
+        }
+    }
+
+    suspend fun finnStartdato(fnr: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
         val sykeforloep = hentSykeforloep(fnr)
         val aktueltSykeforloep = sykeforloep.firstOrNull {
             it.sykmeldinger.any { simpleSykmelding -> simpleSykmelding.id == sykmeldingId }
         }
 
-        val startdatoFraFomOgTom = if (fom != null && tom != null) {
-            finnStartdatoGittFomOgTom(fom, tom, sykeforloep)
-        } else {
-            null
-        }
         if (aktueltSykeforloep == null) {
             log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", sporingsId)
             if (cluster == "dev-fss") {
@@ -38,13 +48,6 @@ class SyfoSyketilfelleClient(
             }
             throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
         } else {
-            if (fom != null && tom != null && aktueltSykeforloep.oppfolgingsdato != startdatoFraFomOgTom) {
-                log.warn(
-                    "Startdato gitt sykmeldingId: ${formaterDato(aktueltSykeforloep.oppfolgingsdato)}, " +
-                        "startdato gitt fom og tom: ${formaterDato(startdatoFraFomOgTom)}, $sporingsId"
-                )
-                ULIK_STARTDATO.inc()
-            }
             return aktueltSykeforloep.oppfolgingsdato
         }
     }
@@ -83,11 +86,6 @@ class SyfoSyketilfelleClient(
                 append("fnr", fnr)
             }
         }
-
-    private fun formaterDato(dato: LocalDate?): String {
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-        return dato?.format(formatter) ?: "null"
-    }
 }
 
 data class Sykeforloep(

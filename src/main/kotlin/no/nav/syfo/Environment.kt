@@ -21,7 +21,6 @@ data class Environment(
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL"),
     val syketilfelleScope: String = getEnvVar("SYKETILLFELLE_SCOPE"),
     val smregisterEndpointURL: String = getEnvVar("SMREGISTER_ENDPOINT_URL", "http://syfosmregister"),
-    val spokelseEndpointURL: String = getEnvVar("SPOKELSE_ENDPOINT_URL", "http://spokelse.tbd.svc.nais.local"),
     val smregisterScope: String = getEnvVar("SMREGISTER_SCOPE"),
     override val mqHostname: String = getEnvVar("MQ_HOST_NAME"),
     override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
@@ -36,7 +35,6 @@ data class Environment(
     val aadAccessTokenV2Url: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     val clientIdV2: String = getEnvVar("AZURE_APP_CLIENT_ID"),
     val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
-    val spokelseScope: String = getEnvVar("SPOKELSE_SCOPE"),
     val pdlScope: String = getEnvVar("PDL_SCOPE"),
     val okSykmeldingTopic: String = "teamsykmelding.ok-sykmelding",
     val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding"
