@@ -40,8 +40,8 @@ class UtbetaltEventService(
         val startdato = syfoSyketilfelleClient.finnStartdato(
             fnr = utbetaltEventKafkaMessage.fnr,
             sykmeldingId = sykmeldingId.toString(),
-            fom = utbetaltEventKafkaMessage.fom,
-            tom = utbetaltEventKafkaMessage.tom,
+            fom = utbetaltEventKafkaMessage.utbetalingFom ?: utbetaltEventKafkaMessage.fom,
+            tom = utbetaltEventKafkaMessage.utbetalingTom ?: utbetaltEventKafkaMessage.tom,
             sporingsId = utbetaltEventKafkaMessage.utbetalteventid
         )
         val utbetaltEvent = UtbetaltEvent(
