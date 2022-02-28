@@ -289,6 +289,39 @@ object SyfoSyketilfelleClientTest : Spek({
 
             startdato shouldBeEqualTo null
         }
+        it("Bruker nyeste startdato hvis to syketilfeller overlapper med hverandre") {
+            val oppfolgingsdato4 = LocalDate.of(2020, 3, 5)
+            val oppfolgingsdato5 = oppfolgingsdato4.plusWeeks(1)
+            val sykeforloepMedOverlapp = listOf(
+                Sykeforloep(
+                    oppfolgingsdato4,
+                    listOf(
+                        SimpleSykmelding(
+                            UUID.randomUUID().toString(),
+                            oppfolgingsdato4,
+                            oppfolgingsdato4.plusWeeks(3)
+                        )
+                    )
+                ),
+                Sykeforloep(
+                    oppfolgingsdato5,
+                    listOf(
+                        SimpleSykmelding(
+                            UUID.randomUUID().toString(),
+                            oppfolgingsdato5,
+                            oppfolgingsdato5.plusWeeks(4)
+                        )
+                    )
+                )
+            )
+            val startdato = syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                fom = oppfolgingsdato4.plusWeeks(2),
+                tom = oppfolgingsdato4.plusWeeks(3),
+                sykeforloep = sykeforloepMedOverlapp
+            )
+
+            startdato shouldBeEqualTo oppfolgingsdato5
+        }
     }
 
     describe("Test av SyfoSyketilfelleClient - harSykeforlopMedNyereStartdato") {
