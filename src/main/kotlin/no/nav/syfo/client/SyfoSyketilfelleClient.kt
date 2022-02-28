@@ -53,7 +53,7 @@ class SyfoSyketilfelleClient(
     }
 
     fun finnStartdatoGittFomOgTom(fom: LocalDate, tom: LocalDate, sykeforloep: List<Sykeforloep>): LocalDate? {
-        val aktueltSykeforloep = sykeforloep.firstOrNull {
+        val aktueltSykeforloep = sykeforloep.sortedByDescending { it.oppfolgingsdato }.firstOrNull {
             val forsteFom = it.sykmeldinger.minOf { simpleSykmelding -> simpleSykmelding.fom }
             val sisteTom = it.sykmeldinger.maxOf { simpleSykmelding -> simpleSykmelding.tom }
             val syketilfelleRange = forsteFom.rangeTo(sisteTom)
