@@ -153,7 +153,7 @@ object SyfoSyketilfelleClientTest : Spek({
         it("Henter riktig startdato fra syfosyketilfelle") {
             var startDato: LocalDate?
             runBlocking {
-                startDato = syfoSyketilfelleClient.finnStartdato(fnr1, sykmeldingUUID.toString(), oppfolgingsdato2, oppfolgingsdato2.plusWeeks(2), UUID.randomUUID())
+                startDato = syfoSyketilfelleClient.finnStartdato(fnr1, sykmeldingUUID.toString(), UUID.randomUUID())
             }
 
             startDato shouldBeEqualTo oppfolgingsdato2
@@ -161,7 +161,7 @@ object SyfoSyketilfelleClientTest : Spek({
         it("Kaster feil hvis sykmelding ikke er knyttet til syketilfelle") {
             assertFailsWith<RuntimeException> {
                 runBlocking {
-                    syfoSyketilfelleClient.finnStartdato(fnr2, sykmeldingUUID.toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(3), UUID.randomUUID())
+                    syfoSyketilfelleClient.finnStartdato(fnr2, sykmeldingUUID.toString(), UUID.randomUUID())
                 }
             }
         }
@@ -176,7 +176,7 @@ object SyfoSyketilfelleClientTest : Spek({
             var startDato: LocalDate?
             runBlocking {
                 startDato =
-                    syfoSyketilfelleClientDev.finnStartdato(fnr2, sykmeldingUUID.toString(), oppfolgingsdato1, oppfolgingsdato1.plusWeeks(1), UUID.randomUUID())
+                    syfoSyketilfelleClientDev.finnStartdato(fnr2, sykmeldingUUID.toString(), UUID.randomUUID())
             }
 
             startDato shouldBeEqualTo LocalDate.now().minusMonths(1)

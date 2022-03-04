@@ -28,7 +28,6 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(testDb)
 
     val utbetaltEventId = UUID.fromString("58ac4866-5944-48a1-99fa-86d6f9f3103c")
-    val sykmeldingId = UUID.fromString("f9e3db67-2913-40c7-bb68-9a701d9fd4f4")
 
     afterEachTest {
         testDb.connection.dropData()
@@ -38,7 +37,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
         val startdato = LocalDate.of(2020, 6, 1)
         val tom = LocalDate.of(2020, 7, 15)
         it("Lagrer vedtak, stansmelding og planlagt melding 4, 8, 39 uker for nytt tilfelle") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
 
@@ -88,7 +87,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
         }
         it("39-ukersmelding sendes umiddelbart for nytt tilfelle hvis antall gjenstående sykedager er mindre enn 66") {
             val utbetaltEvent =
-                lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom, gjenstaendeSykedager = 60)
+                lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom, gjenstaendeSykedager = 60)
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
 
@@ -105,9 +104,9 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtMelding39uker?.avbrutt shouldBeEqualTo null
         }
         it("Lagrer kun vedtak og oppdaterer stansmelding, hvis planlagte meldinger finnes for syketilfellet fra før") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
-                lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
+                lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(nesteUtbetaltEvent)
@@ -121,10 +120,9 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
         it("Oppdaterer 39-ukersmelding hvis finnes og ikke sendt for syketilfellet fra før og antall gjenstående sykedager er mindre enn 66") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
                 lagUtbetaltEvent(
-                    UUID.randomUUID(),
                     UUID.randomUUID(),
                     startdato,
                     "fnr",
@@ -144,9 +142,9 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
                 .toLocalDate()
         }
         it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
-                lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), startdato, "fnr", tom.minusWeeks(1))
+                lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.minusWeeks(1))
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(nesteUtbetaltEvent)
@@ -158,9 +156,9 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
                 .withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
         it("Gjenåpner stansmelding hvis stansmelding for samme sykefravær var avbrutt") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
-                lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
+                lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
             testDb.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
                 listOf(
@@ -189,7 +187,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtStansmelding?.avbrutt shouldBeEqualTo null
         }
         it("Oppretter stansmelding hvis det ikke finnes fra før") {
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr", tom)
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = UUID.randomUUID(),
@@ -208,8 +206,8 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
         }
         it("Lagrer vedtak og melding hvis planlagt melding finnes for tidligere syketilfelle for samme bruker") {
             val nesteStartdato = startdato.plusMonths(1)
-            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, sykmeldingId, startdato, "fnr")
-            val nesteUtbetaltEvent = lagUtbetaltEvent(UUID.randomUUID(), UUID.randomUUID(), nesteStartdato, "fnr")
+            val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr")
+            val nesteUtbetaltEvent = lagUtbetaltEvent(UUID.randomUUID(), nesteStartdato, "fnr")
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(nesteUtbetaltEvent)

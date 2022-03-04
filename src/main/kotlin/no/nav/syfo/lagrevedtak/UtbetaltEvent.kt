@@ -7,7 +7,6 @@ import java.util.UUID
 data class UtbetaltEvent(
     val utbetalteventid: UUID,
     val startdato: LocalDate,
-    val sykmeldingid: UUID,
     val aktorid: String,
     val fnr: String,
     val organisasjonsnummer: String,

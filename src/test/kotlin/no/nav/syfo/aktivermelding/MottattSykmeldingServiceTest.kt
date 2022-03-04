@@ -83,11 +83,11 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify(exactly = 0) { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 0) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
         it("Sender ikke avbrutt aktivitetskravmelding for gradert sykmelding, utsetter stansmelding") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910",
                 listOf(
@@ -110,14 +110,14 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
             stansmelding?.sendes shouldBeEqualTo LocalDate.now().plusWeeks(3).plusDays(17).atStartOfDay()
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
         it("Ignorerer sykmelding som ikke har avbrutt melding for samme sykeforløp") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 6, 25)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 6, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910",
                 listOf(
@@ -140,13 +140,13 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
             stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
         }
         it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det som er satt") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910",
                 listOf(
@@ -169,13 +169,13 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
             stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
         }
         it("Oppdaterer og sender tidligere avbrutt melding for samme sykeforløp hvis sykmelding ikke er gradert, utsetter stansmelding") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910",
                 listOf(
@@ -198,7 +198,7 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
             meldinger.size shouldBeEqualTo 2
@@ -210,7 +210,7 @@ object MottattSykmeldingServiceTest : Spek({
             planlagtMelding8uker.jmsCorrelationId shouldBeEqualTo "correlationId"
         }
         it("Skal ikke sende ny 8-ukersmelding hvis melding er sent før") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "12345678910",
                 listOf(
@@ -235,7 +235,7 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
             meldinger.size shouldBeEqualTo 2
@@ -243,7 +243,7 @@ object MottattSykmeldingServiceTest : Spek({
             planlagtMelding8uker!!.avbrutt shouldBeEqualTo null
         }
         it("Ignorerer sykmelding som ikke har avbrutt 39-ukersmelding for samme sykeforløp") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 6, 30)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 6, 30)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "11223344556",
                 listOf(
@@ -266,13 +266,13 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val stansmelding = testDb.hentPlanlagtMelding(idStansmelding2)
             stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
         }
         it("Oppdaterer og sender tidligere avbrutt 39-ukersmelding for samme sykeforløp, utsetter stansmelding") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "11223344556",
                 listOf(
@@ -295,7 +295,7 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("11223344556", LocalDate.of(2020, 3, 30))
             meldinger.size shouldBeEqualTo 2
@@ -307,7 +307,7 @@ object MottattSykmeldingServiceTest : Spek({
             planlagtMelding39uker.jmsCorrelationId shouldBeEqualTo "correlationId"
         }
         it("Skal ikke sende ny 39-ukersmelding hvis melding er sent før") {
-            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
+            coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 30)
             val receivedSykmelding = opprettReceivedSykmelding(
                 "11223344556",
                 listOf(
@@ -332,7 +332,7 @@ object MottattSykmeldingServiceTest : Spek({
                 mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
             }
 
-            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
             coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("11223344556", LocalDate.of(2020, 3, 30))
             meldinger.size shouldBeEqualTo 2

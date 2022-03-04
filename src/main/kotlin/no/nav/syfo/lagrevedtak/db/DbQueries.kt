@@ -71,7 +71,6 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
             INSERT INTO utbetaltevent(
                 utbetalteventid,
                 startdato,
-                sykmeldingid,
                 aktorid,
                 fnr,
                 organisasjonsnummer,
@@ -86,38 +85,37 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
                 utbetalingid,
                 utbetaling_fom,
                 utbetaling_tom) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
     ).use {
         it.setObject(1, utbetaltEvent.utbetalteventid)
         it.setObject(2, utbetaltEvent.startdato)
-        it.setObject(3, utbetaltEvent.sykmeldingid)
-        it.setString(4, utbetaltEvent.aktorid)
-        it.setString(5, utbetaltEvent.fnr)
-        it.setString(6, utbetaltEvent.organisasjonsnummer)
+        it.setString(3, utbetaltEvent.aktorid)
+        it.setString(4, utbetaltEvent.fnr)
+        it.setString(5, utbetaltEvent.organisasjonsnummer)
         it.setObject(
-            7,
+            6,
             PGobject().apply {
                 type = "json"
                 value = objectMapper.writeValueAsString(utbetaltEvent.hendelser)
             }
         )
         it.setObject(
-            8,
+            7,
             PGobject().apply {
                 type = "json"
                 value = objectMapper.writeValueAsString(utbetaltEvent.oppdrag)
             }
         )
-        it.setObject(9, utbetaltEvent.fom)
-        it.setObject(10, utbetaltEvent.tom)
-        it.setInt(11, utbetaltEvent.forbrukteSykedager)
-        it.setInt(12, utbetaltEvent.gjenstaendeSykedager)
-        it.setTimestamp(13, Timestamp.valueOf(utbetaltEvent.opprettet))
-        it.setObject(14, utbetaltEvent.maksdato)
-        it.setObject(15, utbetaltEvent.utbetalingId)
-        it.setObject(16, utbetaltEvent.utbetalingFom)
-        it.setObject(17, utbetaltEvent.utbetalingTom)
+        it.setObject(8, utbetaltEvent.fom)
+        it.setObject(9, utbetaltEvent.tom)
+        it.setInt(10, utbetaltEvent.forbrukteSykedager)
+        it.setInt(11, utbetaltEvent.gjenstaendeSykedager)
+        it.setTimestamp(12, Timestamp.valueOf(utbetaltEvent.opprettet))
+        it.setObject(13, utbetaltEvent.maksdato)
+        it.setObject(14, utbetaltEvent.utbetalingId)
+        it.setObject(15, utbetaltEvent.utbetalingFom)
+        it.setObject(16, utbetaltEvent.utbetalingTom)
         it.execute()
     }
 }

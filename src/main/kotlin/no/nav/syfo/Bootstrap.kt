@@ -41,7 +41,6 @@ import no.nav.syfo.kafka.CommonAivenKafkaService
 import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
-import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
@@ -109,7 +108,6 @@ fun main() {
         httpClient = httpClient,
         cluster = env.cluster
     )
-    val spokelseClient = SpokelseClient(env.spokelseEndpointURL, accessTokenClientV2, env.spokelseScope, httpClient)
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClientV2, env.smregisterScope, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)
 
@@ -126,7 +124,7 @@ fun main() {
     val kafkaClients = KafkaClients(env, vaultSecrets)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
-    val utbetaltEventService = UtbetaltEventService(spokelseClient, syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
+    val utbetaltEventService = UtbetaltEventService(syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
 
     val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService, pdlPersonService, syfoSyketilfelleClient)
 

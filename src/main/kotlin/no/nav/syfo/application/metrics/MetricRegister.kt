@@ -96,12 +96,6 @@ val AVBRUTT_MELDING_DODSFALL: Counter = Counter.build()
     .help("Antall avbrutte meldinger pga dødsfall")
     .register()
 
-val ULIK_STARTDATO: Counter = Counter.build()
-    .namespace(METRICS_NS)
-    .name("ulik_startdato_counter")
-    .help("Antall ganger startdato er ulik")
-    .register()
-
 val ULIK_TOM: Counter = Counter.build()
     .namespace(METRICS_NS)
     .name("ulik_tom_counter")

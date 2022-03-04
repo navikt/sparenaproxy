@@ -103,7 +103,6 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
 
 fun lagUtbetaltEvent(
     id: UUID,
-    sykmeldingId: UUID,
     startdato: LocalDate,
     fnr: String,
     tom: LocalDate = LocalDate.of(2020, 6, 29),
@@ -113,7 +112,6 @@ fun lagUtbetaltEvent(
     UtbetaltEvent(
         utbetalteventid = id,
         startdato = startdato,
-        sykmeldingid = sykmeldingId,
         aktorid = "aktorid",
         fnr = fnr,
         organisasjonsnummer = "orgnummer",

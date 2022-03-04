@@ -3,7 +3,6 @@ package no.nav.syfo.lagrevedtak
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.application.metrics.ULIK_TOM
 import no.nav.syfo.client.SyfoSyketilfelleClient
-import no.nav.syfo.lagrevedtak.client.SpokelseClient
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
@@ -13,7 +12,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class UtbetaltEventService(
-    private val spokelseClient: SpokelseClient,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val lagreUtbetaltEventOgPlanlagtMeldingService: LagreUtbetaltEventOgPlanlagtMeldingService,
     private val maksdatoService: MaksdatoService
@@ -33,13 +31,9 @@ class UtbetaltEventService(
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage, callid: String) {
         MOTTATT_VEDTAK.inc()
         log.info("Behandler utbetaltEvent med id ${utbetaltEventKafkaMessage.utbetalteventid} for callid $callid og utbetalingId ${utbetaltEventKafkaMessage.utbetalingId}")
-        val sykmeldingId = spokelseClient.finnSykmeldingId(
-            utbetaltEventKafkaMessage.hendelser,
-            utbetaltEventKafkaMessage.utbetalteventid
-        )
+
         val startdato = syfoSyketilfelleClient.finnStartdato(
             fnr = utbetaltEventKafkaMessage.fnr,
-            sykmeldingId = sykmeldingId.toString(),
             fom = utbetaltEventKafkaMessage.utbetalingFom ?: utbetaltEventKafkaMessage.fom,
             tom = utbetaltEventKafkaMessage.utbetalingTom ?: utbetaltEventKafkaMessage.tom,
             sporingsId = utbetaltEventKafkaMessage.utbetalteventid
@@ -47,7 +41,6 @@ class UtbetaltEventService(
         val utbetaltEvent = UtbetaltEvent(
             utbetalteventid = utbetaltEventKafkaMessage.utbetalteventid,
             startdato = startdato,
-            sykmeldingid = sykmeldingId,
             aktorid = utbetaltEventKafkaMessage.aktorid,
             fnr = utbetaltEventKafkaMessage.fnr,
             organisasjonsnummer = utbetaltEventKafkaMessage.organisasjonsnummer,
