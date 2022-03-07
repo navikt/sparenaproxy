@@ -16,6 +16,7 @@ data class Environment(
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
     val utbetaltEventAivenTopic: String = "tbd.rapid.v1",
+    val utbetalingTopic: String = "tbd.utbetaling",
     val aktiverMeldingAivenTopic: String = "teamsykmelding.privat-aktiver-planlagtmelding",
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL"),
