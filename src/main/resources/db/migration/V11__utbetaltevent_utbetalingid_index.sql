@@ -1,0 +1,1 @@
+create index concurrently utbetaltevent_utbetalingid_idx on utbetaltevent(utbetalingid);

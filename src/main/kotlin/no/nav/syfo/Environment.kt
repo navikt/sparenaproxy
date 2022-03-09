@@ -15,7 +15,6 @@ data class Environment(
     val sparenaproxyDBURL: String = getEnvVar("SPARENAPROXY_DB_URL"),
     val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
     val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
-    val utbetaltEventAivenTopic: String = "tbd.rapid.v1",
     val utbetalingTopic: String = "tbd.utbetaling",
     val aktiverMeldingAivenTopic: String = "teamsykmelding.privat-aktiver-planlagtmelding",
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",

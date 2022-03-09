@@ -1,6 +1,5 @@
 package no.nav.syfo.testutil
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.syfo.Environment
@@ -9,12 +8,9 @@ import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.db.VaultCredentials
 import no.nav.syfo.application.db.toList
-import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
-import no.nav.syfo.objectMapper
-import org.postgresql.util.PGobject
 import org.testcontainers.containers.PostgreSQLContainer
 import java.sql.Connection
 import java.sql.ResultSet
@@ -144,24 +140,14 @@ fun ResultSet.toUtbetaltEvent(): UtbetaltEvent =
         aktorid = getString("aktorid"),
         startdato = getObject("startdato", LocalDate::class.java),
         organisasjonsnummer = getString("organisasjonsnummer"),
-        hendelser = getHendelser(),
-        oppdrag = getOppdrag(),
         fom = getObject("fom", LocalDate::class.java),
         tom = getObject("tom", LocalDate::class.java),
         forbrukteSykedager = getInt("forbrukte_sykedager"),
         gjenstaendeSykedager = getInt("gjenstaende_sykedager"),
         opprettet = getObject("opprettet", LocalDateTime::class.java),
         maksdato = getObject("maksdato", LocalDate::class.java),
-        utbetalingId = getObject("utbetalingid", UUID::class.java),
-        utbetalingFom = getObject("utbetaling_fom", LocalDate::class.java),
-        utbetalingTom = getObject("utbetaling_tom", LocalDate::class.java)
+        utbetalingId = getObject("utbetalingid", UUID::class.java)
     )
-
-fun ResultSet.getHendelser(): Set<UUID> =
-    objectMapper.readValue(getString("hendelser"))
-
-fun ResultSet.getOppdrag(): List<Utbetalt> =
-    objectMapper.readValue(getString("oppdrag"))
 
 fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: String) {
     use {
@@ -170,61 +156,33 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
             INSERT INTO utbetaltevent(
                 utbetalteventid,
                 startdato,
-                sykmeldingid,
                 aktorid,
                 fnr,
                 organisasjonsnummer,
-                hendelser,
-                oppdrag,
                 fom,
                 tom,
                 forbrukte_sykedager,
                 gjenstaende_sykedager,
                 opprettet,
                 maksdato,
-                utbetalingid,
-                utbetaling_fom,
-                utbetaling_tom) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                utbetalingid) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
         ).use {
             it.setObject(1, UUID.randomUUID())
             it.setObject(2, startdato)
-            it.setObject(3, UUID.randomUUID())
-            it.setString(4, aktorId)
-            it.setString(5, fnr)
-            it.setString(6, "9090880")
-            it.setObject(
-                7,
-                PGobject().apply {
-                    type = "json"
-                    value = objectMapper.writeValueAsString(emptyList<Hendelse>())
-                }
-            )
-            it.setObject(
-                8,
-                PGobject().apply {
-                    type = "json"
-                    value = objectMapper.writeValueAsString(emptyList<Utbetalt>())
-                }
-            )
-            it.setObject(9, LocalDate.now().minusMonths(1))
-            it.setObject(10, LocalDate.now().minusDays(10))
-            it.setInt(11, 20)
-            it.setInt(12, 250)
-            it.setTimestamp(13, Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault()))))
-            it.setObject(14, LocalDate.now().plusDays(250))
-            it.setObject(15, UUID.randomUUID())
-            it.setObject(16, LocalDate.now().minusMonths(1))
-            it.setObject(17, LocalDate.now().minusDays(10))
+            it.setString(3, aktorId)
+            it.setString(4, fnr)
+            it.setString(5, "9090880")
+            it.setObject(6, LocalDate.now().minusMonths(1))
+            it.setObject(7, LocalDate.now().minusDays(10))
+            it.setInt(8, 20)
+            it.setInt(9, 250)
+            it.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault()))))
+            it.setObject(11, LocalDate.now().plusDays(250))
+            it.setObject(12, UUID.randomUUID())
             it.execute()
         }
         it.commit()
     }
 }
-
-data class Hendelse(
-    val dokumentId: UUID,
-    val hendelseId: UUID,
-    val type: String
-)

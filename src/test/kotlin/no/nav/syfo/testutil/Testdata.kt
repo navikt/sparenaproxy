@@ -1,7 +1,5 @@
 package no.nav.syfo.testutil
 
-import no.nav.syfo.lagrevedtak.Utbetalingslinje
-import no.nav.syfo.lagrevedtak.Utbetalt
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.Adresse
@@ -107,7 +105,7 @@ fun lagUtbetaltEvent(
     fnr: String,
     tom: LocalDate = LocalDate.of(2020, 6, 29),
     gjenstaendeSykedager: Int = 300,
-    maksdato: LocalDate? = LocalDate.now().plusDays(gjenstaendeSykedager.toLong())
+    maksdato: LocalDate = LocalDate.now().plusDays(gjenstaendeSykedager.toLong())
 ): UtbetaltEvent =
     UtbetaltEvent(
         utbetalteventid = id,
@@ -115,40 +113,11 @@ fun lagUtbetaltEvent(
         aktorid = "aktorid",
         fnr = fnr,
         organisasjonsnummer = "orgnummer",
-        hendelser = listOf(UUID.randomUUID(), UUID.randomUUID()).toSet(),
-        oppdrag = lagOppdragsliste(),
         fom = startdato,
         tom = tom,
         forbrukteSykedager = 0,
         gjenstaendeSykedager = gjenstaendeSykedager,
         opprettet = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
         maksdato = maksdato,
-        utbetalingId = UUID.randomUUID(),
-        utbetalingFom = startdato.minusDays(3),
-        utbetalingTom = tom
+        utbetalingId = UUID.randomUUID()
     )
-
-fun lagOppdragsliste(): List<Utbetalt> {
-    return listOf(
-        Utbetalt(
-            mottaker = "mottaker",
-            fagomrade = "sykepenger",
-            fagsystemId = "id",
-            totalbelop = 6000,
-            utbetalingslinjer = lagUbetalingslinjeliste()
-        )
-    )
-}
-
-fun lagUbetalingslinjeliste(): List<Utbetalingslinje> {
-    return listOf(
-        Utbetalingslinje(
-            fom = LocalDate.of(2020, 6, 1),
-            tom = LocalDate.of(2020, 6, 29),
-            dagsats = 500,
-            belop = 2000,
-            grad = 70.0,
-            sykedager = 20
-        )
-    )
-}

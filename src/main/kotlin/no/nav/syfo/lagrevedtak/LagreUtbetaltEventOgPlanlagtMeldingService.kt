@@ -3,6 +3,7 @@ package no.nav.syfo.lagrevedtak
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KUN_LAGRET_VEDTAK
 import no.nav.syfo.application.metrics.OPPRETTET_PLANLAGT_MELDING
+import no.nav.syfo.lagrevedtak.db.erBehandletTidligere
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgOppdaterStansmelding
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
@@ -18,6 +19,10 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseInterface) {
+
+    fun erBehandletTidligere(utbetalingId: UUID): Boolean {
+        return database.erBehandletTidligere(utbetalingId)
+    }
 
     fun lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent: UtbetaltEvent) {
         val planlagtStansmelding = lagPlanlagtMeldingDbModelForUtbetaling(

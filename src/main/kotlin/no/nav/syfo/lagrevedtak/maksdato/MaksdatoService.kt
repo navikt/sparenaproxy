@@ -52,24 +52,11 @@ class MaksdatoService(
             k278M815 = K278M815(),
             k278M830 = K278M830(
                 startdato = formatDate(utbetaltEvent.startdato),
-                maksdato = formatDate(utbetaltEvent.maksdato ?: finnMaksdato(utbetaltEvent.tom, utbetaltEvent.gjenstaendeSykedager)),
+                maksdato = formatDate(utbetaltEvent.maksdato),
                 orgnummer = utbetaltEvent.organisasjonsnummer.padEnd(9, ' ')
             ),
             k278M840 = K278M840()
         )
-    }
-
-    fun finnMaksdato(tom: LocalDate, gjenstaendeSykedager: Int): LocalDate {
-        var maksdato = tom
-        var counter = 0
-        while (counter < gjenstaendeSykedager) {
-            maksdato = maksdato.plusDays(1)
-            while (maksdato.erHelg()) {
-                maksdato = maksdato.plusDays(1)
-            }
-            counter += 1
-        }
-        return maksdato
     }
 
     private fun formatDateTime(dateTime: OffsetDateTime): String {

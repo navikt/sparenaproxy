@@ -21,7 +21,7 @@ class CommonAivenKafkaService(
     suspend fun start() {
         kafkaConsumer.subscribe(
             listOf(
-                env.utbetaltEventAivenTopic,
+                env.utbetalingTopic,
                 env.okSykmeldingTopic,
                 env.manuellSykmeldingTopic,
                 env.aktiverMeldingAivenTopic
@@ -34,7 +34,7 @@ class CommonAivenKafkaService(
             records.forEach {
                 if (it.value() != null) {
                     when (it.topic()) {
-                        env.utbetaltEventAivenTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
+                        env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
                         env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.aktiverMeldingAivenTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())

@@ -6,8 +6,6 @@ import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
-import no.nav.syfo.objectMapper
-import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.LocalDate
@@ -15,6 +13,12 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
+
+fun DatabaseInterface.erBehandletTidligere(utbetalingId: UUID): Boolean {
+    connection.use { connection ->
+        return connection.utbetalingErBehandletTidligere(utbetalingId)
+    }
+}
 
 fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
     utbetaltEvent: UtbetaltEvent,
@@ -74,18 +78,14 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
                 aktorid,
                 fnr,
                 organisasjonsnummer,
-                hendelser,
-                oppdrag,
                 fom,
                 tom,
                 forbrukte_sykedager,
                 gjenstaende_sykedager,
                 opprettet,
                 maksdato,
-                utbetalingid,
-                utbetaling_fom,
-                utbetaling_tom) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                utbetalingid) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
     ).use {
         it.setObject(1, utbetaltEvent.utbetalteventid)
@@ -93,29 +93,13 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
         it.setString(3, utbetaltEvent.aktorid)
         it.setString(4, utbetaltEvent.fnr)
         it.setString(5, utbetaltEvent.organisasjonsnummer)
-        it.setObject(
-            6,
-            PGobject().apply {
-                type = "json"
-                value = objectMapper.writeValueAsString(utbetaltEvent.hendelser)
-            }
-        )
-        it.setObject(
-            7,
-            PGobject().apply {
-                type = "json"
-                value = objectMapper.writeValueAsString(utbetaltEvent.oppdrag)
-            }
-        )
-        it.setObject(8, utbetaltEvent.fom)
-        it.setObject(9, utbetaltEvent.tom)
-        it.setInt(10, utbetaltEvent.forbrukteSykedager)
-        it.setInt(11, utbetaltEvent.gjenstaendeSykedager)
-        it.setTimestamp(12, Timestamp.valueOf(utbetaltEvent.opprettet))
-        it.setObject(13, utbetaltEvent.maksdato)
-        it.setObject(14, utbetaltEvent.utbetalingId)
-        it.setObject(15, utbetaltEvent.utbetalingFom)
-        it.setObject(16, utbetaltEvent.utbetalingTom)
+        it.setObject(6, utbetaltEvent.fom)
+        it.setObject(7, utbetaltEvent.tom)
+        it.setInt(8, utbetaltEvent.forbrukteSykedager)
+        it.setInt(9, utbetaltEvent.gjenstaendeSykedager)
+        it.setTimestamp(10, Timestamp.valueOf(utbetaltEvent.opprettet))
+        it.setObject(11, utbetaltEvent.maksdato)
+        it.setObject(12, utbetaltEvent.utbetalingId)
         it.execute()
     }
 }
@@ -196,4 +180,14 @@ private fun Connection.oppdater39ukersmelding(id: UUID, sendes: OffsetDateTime) 
         it.setTimestamp(1, Timestamp.from(sendes.toInstant()))
         it.setObject(2, id)
         it.execute()
+    }
+
+private fun Connection.utbetalingErBehandletTidligere(utbetalingId: UUID): Boolean =
+    this.prepareStatement(
+        """
+            SELECT 1 FROM utbetaltevent WHERE utbetalingid=?;
+            """
+    ).use {
+        it.setObject(1, utbetalingId)
+        it.executeQuery().next()
     }
