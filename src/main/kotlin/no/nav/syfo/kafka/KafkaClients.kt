@@ -38,7 +38,7 @@ class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
                 "${env.applicationName}-consumer",
                 valueDeserializer = StringDeserializer::class
             ).also {
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "latest"
+                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
                 it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
             }
 
