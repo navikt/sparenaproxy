@@ -1,6 +1,7 @@
 package no.nav.syfo.client
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -78,14 +79,14 @@ class SyfoSyketilfelleClient(
     }
 
     private suspend fun hentSykeforloep(fnr: String): List<Sykeforloep> =
-        httpClient.get<List<Sykeforloep>>("$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true") {
+        httpClient.get("$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true") {
             accept(ContentType.Application.Json)
             val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
                 append("fnr", fnr)
             }
-        }
+        }.body<List<Sykeforloep>>()
 }
 
 data class Sykeforloep(
