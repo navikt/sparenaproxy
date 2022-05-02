@@ -1,15 +1,14 @@
 package no.nav.syfo.aktivermelding.arenamodel
 
+import io.kotest.core.spec.style.FunSpec
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object KvitteringTest : Spek({
+class KvitteringTest : FunSpec({
     val kvitteringsmelding = "K278M890Kvittering Arena002270307202010070612345678910J                                                                                                                                                                            "
     val kvitteringsmeldingMedFeil = "K278M890Kvittering Arena002270307202010070612345678910NXXXXXXXXFeilmelding                                                                                                                                                         "
 
-    describe("Kvitteringstest") {
-        it("tilKvittering mapper ok kvitteringstekst riktig") {
+    context("Kvitteringstest") {
+        test("tilKvittering mapper ok kvitteringstekst riktig") {
             val kvittering = tilKvittering(kvitteringsmelding)
 
             kvittering.copyId shouldBeEqualTo "K278M890"
@@ -23,7 +22,7 @@ object KvitteringTest : Spek({
             kvittering.feilkode shouldBeEqualTo "        "
             kvittering.feilmelding shouldBeEqualTo "                                                                                                                                                                    "
         }
-        it("tilKvittering mapper kvitteringstekst med feil riktig") {
+        test("tilKvittering mapper kvitteringstekst med feil riktig") {
             val kvittering = tilKvittering(kvitteringsmeldingMedFeil)
 
             kvittering.copyId shouldBeEqualTo "K278M890"
