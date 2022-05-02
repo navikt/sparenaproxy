@@ -1,5 +1,6 @@
 package no.nav.syfo.lagrevedtak
 
+import io.kotest.core.spec.style.FunSpec
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
@@ -14,8 +15,6 @@ import no.nav.syfo.testutil.lagUtbetaltEvent
 import no.nav.syfo.testutil.lagrePlanlagtMelding
 import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -23,20 +22,20 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
 
-object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
+class LagreUtbetaltEventOgPlanlagtMeldingServiceTest : FunSpec({
     val testDb = TestDB.database
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(testDb)
 
     val utbetaltEventId = UUID.fromString("58ac4866-5944-48a1-99fa-86d6f9f3103c")
 
-    afterEachTest {
+    afterTest {
         testDb.connection.dropData()
     }
 
-    describe("Test av lagring av vedtaksinfo og planlagte meldinger") {
+    context("Test av lagring av vedtaksinfo og planlagte meldinger") {
         val startdato = LocalDate.of(2020, 6, 1)
         val tom = LocalDate.of(2020, 7, 15)
-        it("Lagrer vedtak, stansmelding og planlagt melding 4, 8, 39 uker for nytt tilfelle") {
+        test("Lagrer vedtak, stansmelding og planlagt melding 4, 8, 39 uker for nytt tilfelle") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
 
             lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent)
@@ -85,7 +84,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
 
             utbetaltEventFraDb shouldBeEqualTo utbetaltEvent
         }
-        it("39-ukersmelding sendes umiddelbart for nytt tilfelle hvis antall gjenstående sykedager er mindre enn 66") {
+        test("39-ukersmelding sendes umiddelbart for nytt tilfelle hvis antall gjenstående sykedager er mindre enn 66") {
             val utbetaltEvent =
                 lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom, gjenstaendeSykedager = 60)
 
@@ -103,7 +102,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtMelding39uker?.sendt shouldBeEqualTo null
             planlagtMelding39uker?.avbrutt shouldBeEqualTo null
         }
-        it("Lagrer kun vedtak og oppdaterer stansmelding, hvis planlagte meldinger finnes for syketilfellet fra før") {
+        test("Lagrer kun vedtak og oppdaterer stansmelding, hvis planlagte meldinger finnes for syketilfellet fra før") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
                 lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
@@ -119,7 +118,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtStansmelding?.sendes shouldBeEqualTo tom.plusWeeks(1).plusDays(17).atStartOfDay()
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
-        it("Oppdaterer 39-ukersmelding hvis finnes og ikke sendt for syketilfellet fra før og antall gjenstående sykedager er mindre enn 66") {
+        test("Oppdaterer 39-ukersmelding hvis finnes og ikke sendt for syketilfellet fra før og antall gjenstående sykedager er mindre enn 66") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
                 lagUtbetaltEvent(
@@ -141,7 +140,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagt39ukersmelding?.sendes?.toLocalDate() shouldBeEqualTo OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC))
                 .toLocalDate()
         }
-        it("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {
+        test("Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
                 lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.minusWeeks(1))
@@ -155,7 +154,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtStansmelding?.sendes shouldBeEqualTo tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault())
                 .withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
-        it("Gjenåpner stansmelding hvis stansmelding for samme sykefravær var avbrutt") {
+        test("Gjenåpner stansmelding hvis stansmelding for samme sykefravær var avbrutt") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             val nesteUtbetaltEvent =
                 lagUtbetaltEvent(UUID.randomUUID(), startdato, "fnr", tom.plusWeeks(1))
@@ -186,7 +185,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
             planlagtStansmelding?.avbrutt shouldBeEqualTo null
         }
-        it("Oppretter stansmelding hvis det ikke finnes fra før") {
+        test("Oppretter stansmelding hvis det ikke finnes fra før") {
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
@@ -204,7 +203,7 @@ object LagreUtbetaltEventOgPlanlagtMeldingServiceTest : Spek({
             planlagtStansmelding?.sendes shouldBeEqualTo tom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault())
                 .withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
         }
-        it("Lagrer vedtak og melding hvis planlagt melding finnes for tidligere syketilfelle for samme bruker") {
+        test("Lagrer vedtak og melding hvis planlagt melding finnes for tidligere syketilfelle for samme bruker") {
             val nesteStartdato = startdato.plusMonths(1)
             val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr")
             val nesteUtbetaltEvent = lagUtbetaltEvent(UUID.randomUUID(), nesteStartdato, "fnr")

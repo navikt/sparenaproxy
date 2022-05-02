@@ -1,5 +1,6 @@
 package no.nav.syfo.dodshendelser
 
+import io.kotest.core.spec.style.FunSpec
 import io.mockk.clearAllMocks
 import io.mockk.mockk
 import no.nav.syfo.application.ApplicationState
@@ -11,21 +12,19 @@ import no.nav.syfo.testutil.lagrePlanlagtMelding
 import no.nav.syfo.testutil.opprettPlanlagtMelding
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
-object DodshendelserServiceTest : Spek({
+class DodshendelserServiceTest : FunSpec({
     val personhendelserConsumer = mockk<PersonhendelserConsumer>()
     val testDb = TestDB.database
     val dodshendelserService = DodshendelserService(ApplicationState(alive = true, ready = true), personhendelserConsumer, testDb)
     val avbruttTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)
 
-    beforeEachTest {
+    beforeTest {
         clearAllMocks()
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 1, 25), avbrutt = avbruttTidspunkt))
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "12345678910", startdato = LocalDate.of(2020, 2, 25), sendt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusWeeks(3)))
@@ -33,12 +32,12 @@ object DodshendelserServiceTest : Spek({
         testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = UUID.randomUUID(), fnr = "01987654321", startdato = LocalDate.of(2020, 4, 25)))
     }
 
-    afterEachTest {
+    afterTest {
         testDb.connection.dropData()
     }
 
-    describe("Håndtering av dødsfall") {
-        it("Avbryter kun planlagte meldinger for avdød bruker") {
+    context("Håndtering av dødsfall") {
+        test("Avbryter kun planlagte meldinger for avdød bruker") {
             dodshendelserService.handleDodsfall(listOf("12345678910"))
 
             testDb.connection.hentPlanlagtMelding(
@@ -58,7 +57,7 @@ object DodshendelserServiceTest : Spek({
                 LocalDate.of(2020, 4, 25)
             )[0].avbrutt shouldBeEqualTo null
         }
-        it("Avbryter planlagte meldinger for alle brukers identer for avdød bruker") {
+        test("Avbryter planlagte meldinger for alle brukers identer for avdød bruker") {
             dodshendelserService.handleDodsfall(listOf("12345678910", "01987654321"))
 
             testDb.connection.hentPlanlagtMelding(
@@ -70,7 +69,7 @@ object DodshendelserServiceTest : Spek({
                 LocalDate.of(2020, 4, 25)
             )[0].avbrutt shouldNotBeEqualTo null
         }
-        it("Feiler ikke hvis personidenter ikke finnes") {
+        test("Feiler ikke hvis personidenter ikke finnes") {
             dodshendelserService.handleDodsfall(listOf("000000111111"))
         }
     }

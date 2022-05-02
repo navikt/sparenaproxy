@@ -1,9 +1,11 @@
 package no.nav.syfo.aktivermelding.client
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.syfo.client.AccessTokenClientV2
@@ -56,15 +58,15 @@ class SmregisterClient(
     }
 
     private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
-        httpClient.post<SykmeldtStatus>("$smregisterEndpointURL/api/v2/sykmelding/sykmeldtStatus") {
+        httpClient.post("$smregisterEndpointURL/api/v2/sykmelding/sykmeldtStatus") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
             headers {
                 append("Authorization", "Bearer $accessToken")
             }
-            body = StatusRequest(fnr = fnr)
-        }
+            setBody(StatusRequest(fnr = fnr))
+        }.body<SykmeldtStatus>()
 }
 
 data class StatusRequest(

@@ -1,34 +1,33 @@
 package no.nav.syfo.aktivermelding
 
+import io.kotest.core.spec.style.FunSpec
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.lagrePlanlagtMelding
 import no.nav.syfo.testutil.opprettPlanlagtMelding
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.test.assertFailsWith
 
-object KvitteringServiceTest : Spek({
+class KvitteringServiceTest : FunSpec({
     val kvitteringsmelding = "K278M890Kvittering Arena002270307202010070612345678910J                                                                                                                                                                            "
     val kvitteringsmeldingMedFeil = "K278M890Kvittering Arena002270307202010070612345678910NXXXXXXXXFeilmelding                                                                                                                                                         "
 
     val testDb = TestDB.database
     val kvitteringService = KvitteringService(testDb)
 
-    afterEachTest {
+    afterTest {
         testDb.connection.dropData()
     }
 
-    describe("Test av behandleKvittering") {
-        it("Feiler hvis kvitteringstatus ikke er ok og melding ikke finnes i database") {
+    context("Test av behandleKvittering") {
+        test("Feiler hvis kvitteringstatus ikke er ok og melding ikke finnes i database") {
             assertFailsWith<RuntimeException> {
                 kvitteringService.behandleKvittering(kvitteringsmeldingMedFeil, "corrId")
             }
         }
-        it("Prøver å resende hvis kvitteringstatus ikke er ok og melding finnes i database") {
+        test("Prøver å resende hvis kvitteringstatus ikke er ok og melding finnes i database") {
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = UUID.randomUUID(),
@@ -39,7 +38,7 @@ object KvitteringServiceTest : Spek({
 
             kvitteringService.behandleKvittering(kvitteringsmeldingMedFeil, "correlationId")
         }
-        it("Feiler ikke hvis kvitteringsstatus er ok") {
+        test("Feiler ikke hvis kvitteringsstatus er ok") {
             kvitteringService.behandleKvittering(kvitteringsmelding, "correlationId")
         }
     }

@@ -1,32 +1,30 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
+import io.kotest.core.spec.style.FunSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.pdl.service.PdlPersonService
 import no.nav.syfo.testutil.lagUtbetaltEvent
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
-object MaksdatoServiceTest : Spek({
+class MaksdatoServiceTest : FunSpec({
     val arenaMqProducer = mockk<ArenaMqProducer>(relaxed = true)
     val pdlPersonService = mockk<PdlPersonService>()
     val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
 
-    beforeEachTest {
+    beforeTest {
         clearAllMocks()
         coEvery { pdlPersonService.isAlive(any(), any()) } returns true
     }
 
-    describe("Test av oppretting av maksdatomelding") {
-        it("Oppretter riktig maksdatomelding") {
+    context("Test av oppretting av maksdatomelding") {
+        test("Oppretter riktig maksdatomelding") {
             val now = OffsetDateTime.of(LocalDate.of(2020, 9, 10).atTime(15, 20), ZoneOffset.UTC)
             val utbetaltEvent = lagUtbetaltEvent(
                 id = UUID.randomUUID(),
@@ -48,28 +46,24 @@ object MaksdatoServiceTest : Spek({
         }
     }
 
-    describe("Test av logikk for om det skal sendes maksdato") {
+    context("Test av logikk for om det skal sendes maksdato") {
         val fnr = "15060188888"
         val id = UUID.randomUUID()
-        it("Skal sende maksdatomelding hvis forbrukte sykedager er mer enn 20 dager") {
+        test("Skal sende maksdatomelding hvis forbrukte sykedager er mer enn 20 dager") {
             val forbrukteSykedager = 21
-            runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo true
-            }
+
+            maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo true
         }
-        it("Skal ikke sende maksdatomelding hvis forbrukte sykedager er mindre enn 20 dager") {
+        test("Skal ikke sende maksdatomelding hvis forbrukte sykedager er mindre enn 20 dager") {
             val forbrukteSykedager = 19
-            runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
-            }
+
+            maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
         }
-        it("Skal ikke sende maksdatomelding hvis bruker er død") {
+        test("Skal ikke sende maksdatomelding hvis bruker er død") {
             coEvery { pdlPersonService.isAlive(fnr, id) } returns false
             val forbrukteSykedager = 21
 
-            runBlocking {
-                maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
-            }
+            maksdatoService.skalSendeMaksdatomelding(fnr, forbrukteSykedager, id) shouldBeEqualTo false
         }
     }
 })
