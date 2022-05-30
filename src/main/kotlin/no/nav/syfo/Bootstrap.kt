@@ -142,8 +142,6 @@ fun main() {
         applicationState
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
-    applicationServer.start()
-    applicationState.ready = true
 
     RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
 
@@ -156,6 +154,8 @@ fun main() {
     createListener(applicationState) {
         commonAivenKafkaService.start()
     }
+
+    applicationServer.start()
 }
 
 @DelicateCoroutinesApi
