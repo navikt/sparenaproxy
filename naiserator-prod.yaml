@@ -12,6 +12,20 @@ spec:
     max: 6
     cpuThresholdPercentage: 90
   port: 8080
+  gcp:
+    sqlInstances:
+      - name: sparenaproxy-db-instance
+        type: POSTGRES_14
+        diskSize: 10
+        databases:
+          - name: sparenaproxy
+            envVarPrefix: NAIS_DATABASE
+        diskAutoresize: true
+        highAvailability: false
+        pointInTimeRecovery: false
+        diskType: SSD
+        insights:
+          enabled: true
   liveness:
     path: /is_alive
     initialDelay: 10
@@ -44,9 +58,6 @@ spec:
     paths:
       - kvPath: serviceuser/data/prod/srvsparenaproxy
         mountPath: /secrets/serviceuser
-  ingresses:
-    - "https://sparenaproxy.nais.adeo.no"
-  webproxy: true
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443

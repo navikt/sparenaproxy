@@ -2,7 +2,7 @@ package no.nav.syfo.kafka
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import no.nav.syfo.Environment
-import no.nav.syfo.VaultSecrets
+import no.nav.syfo.Serviceuser
 import no.nav.syfo.kafka.aiven.KafkaUtils
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -10,13 +10,13 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import java.util.Properties
 
-class KafkaClients(env: Environment, vaultSecrets: VaultSecrets) {
+class KafkaClients(env: Environment, vaultSecrets: Serviceuser) {
     private val baseConfig = getBaseConfig(vaultSecrets, env)
 
     val personhendelserKafkaConsumer = getPersonhendelserKafkaConsumer(baseConfig, env)
     val aivenKafkaConsumer = getAivenKafkaConsumer(env)
 
-    private fun getBaseConfig(vaultSecrets: VaultSecrets, env: Environment): Properties {
+    private fun getBaseConfig(vaultSecrets: Serviceuser, env: Environment): Properties {
         val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
         kafkaBaseConfig["auto.offset.reset"] = "none"
         kafkaBaseConfig["specific.avro.reader"] = false

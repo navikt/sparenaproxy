@@ -20,7 +20,7 @@ data class Environment(
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL"),
     val syketilfelleScope: String = getEnvVar("SYKETILLFELLE_SCOPE"),
-    val smregisterEndpointURL: String = getEnvVar("SMREGISTER_ENDPOINT_URL", "http://syfosmregister"),
+    val smregisterEndpointURL: String = getEnvVar("SMREGISTER_URL"),
     val smregisterScope: String = getEnvVar("SMREGISTER_SCOPE"),
     override val mqHostname: String = getEnvVar("MQ_HOST_NAME"),
     override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
@@ -37,12 +37,21 @@ data class Environment(
     val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
     val pdlScope: String = getEnvVar("PDL_SCOPE"),
     val okSykmeldingTopic: String = "teamsykmelding.ok-sykmelding",
-    val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding"
-) : MqConfig, KafkaConfig
+    val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding",
+    val databaseUsername: String = getEnvVar("NAIS_DATABASE_USERNAME"),
+    val databasePassword: String = getEnvVar("NAIS_DATABASE_PASSWORD"),
+    val dbHost: String = getEnvVar("NAIS_DATABASE_HOST"),
+    val dbPort: String = getEnvVar("NAIS_DATABASE_PORT"),
+    val dbName: String = getEnvVar("NAIS_DATABASE_DATABASE"),
+) : MqConfig, KafkaConfig {
+    fun jdbcUrl(): String {
+        return "jdbc:postgresql://$dbHost:$dbPort/$dbName"
+    }
+}
 
-data class VaultSecrets(
-    val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
-    val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password")
+data class Serviceuser(
+    val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
+    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD")
 ) : KafkaCredentials {
     override val kafkaUsername: String = serviceuserUsername
     override val kafkaPassword: String = serviceuserPassword

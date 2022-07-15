@@ -12,6 +12,19 @@ spec:
     max: 2
     cpuThresholdPercentage: 90
   port: 8080
+  gcp:
+    sqlInstances:
+      - name: sparenaproxy-db-instance
+        type: POSTGRES_14
+        diskSize: 10
+        databases:
+          - name: sparenaproxy
+            envVarPrefix: NAIS_DATABASE
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
   liveness:
     path: /is_alive
     initialDelay: 10
@@ -39,14 +52,6 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
-  vault:
-    enabled: true
-    paths:
-      - kvPath: serviceuser/data/dev/srvsparenaproxy
-        mountPath: /secrets/serviceuser
-  ingresses:
-    - "https://sparenaproxy.nais.preprod.local"
-  webproxy: true
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
@@ -55,7 +60,9 @@ spec:
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://b27dbvl016.preprod.local:5432/sparenaproxy
     - name: SMREGISTER_SCOPE
-      value: "api://dev-fss.teamsykmelding.syfosmregister/.default"
+      value: api://dev-gcp.teamsykmelding.syfosmregister/.default
+    - name: SMREGISTER_URL
+      value: https://smregister.dev.nav.no
     - name: MQ_HOST_NAME
       value: b27apvl220.preprod.local
     - name: MQ_PORT

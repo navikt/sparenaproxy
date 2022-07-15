@@ -1,9 +1,9 @@
 name: Deploy to dev
 on:
   push:
-    branches-ignore:
+    branches:
       - 'gcp**'
-      - 'master'
+      - '!gcp'
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/sparenaproxy:${{ github.sha }}
 
@@ -74,6 +74,6 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           RESOURCE: naiserator-dev.yaml
 
