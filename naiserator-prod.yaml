@@ -62,7 +62,7 @@ spec:
       value: jdbc:postgresql://A01DBVL014.adeo.no:5432/sparenaproxy
     - name: SMREGISTER_URL
       value: https://smregister.intern.nav.no
-    - name: SMREGISTER_AUDIENCE
+    - name: SMREGISTER_SCOPE
       value: api://prod-gcp.teamsykmelding.syfosmregister/.default
     - name: MQ_HOST_NAME
       value: a01apvl269.adeo.no
