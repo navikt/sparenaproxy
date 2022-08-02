@@ -39,6 +39,12 @@ spec:
     application:
       enabled: true
       tenant: nav.no
+  accessPolicy:
+    outbound:
+      rules:
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: prod-gcp
   vault:
     enabled: true
     paths:
@@ -54,8 +60,10 @@ spec:
       value: /postgresql/prod-fss
     - name: SPARENAPROXY_DB_URL
       value: jdbc:postgresql://A01DBVL014.adeo.no:5432/sparenaproxy
-    - name: SMREGISTER_SCOPE
-      value: "api://prod-fss.teamsykmelding.syfosmregister/.default"
+    - name: SMREGISTER_URL
+      value: https://smregister.intern.nav.no
+    - name: SMREGISTER_AUDIENCE
+      value: api://prod-gcp.teamsykmelding.syfosmregister/.default
     - name: MQ_HOST_NAME
       value: a01apvl269.adeo.no
     - name: MQ_PORT
