@@ -20,7 +20,7 @@ data class Environment(
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",
     val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL"),
     val syketilfelleScope: String = getEnvVar("SYKETILLFELLE_SCOPE"),
-    val smregisterEndpointURL: String = getEnvVar("SMREGISTER_ENDPOINT_URL", "http://syfosmregister"),
+    val smregisterEndpointURL: String = getEnvVar("SMREGISTER_URL"),
     val smregisterScope: String = getEnvVar("SMREGISTER_SCOPE"),
     override val mqHostname: String = getEnvVar("MQ_HOST_NAME"),
     override val mqPort: Int = getEnvVar("MQ_PORT").toInt(),
