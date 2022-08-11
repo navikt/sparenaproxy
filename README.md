@@ -29,20 +29,19 @@ Om meldingen sendes, avbrytes eller evt utsettes kommer an på meldingstypen.
 
 #### 4-ukersmelding
 4-ukersmeldingen opprettes med utsendelsedato fire uker frem i tid fra startdato for syketilfellet. Meldingen sendes hvis bruker fortsatt er sykmeldt (uavhengig av grad) 
-ved utsendingstidspunktet, hvis ikke settes den til avbrutt. 
+ved utsendingstidspunktet og det ikke finnes noe nyere syketilfelle, hvis ikke settes den til avbrutt. 
 
 #### 8-ukersmelding
 8-ukersmeldingen opprettes med utsendelsedato åtte uker frem i tid fra startdato for syketilfellet. Meldingen sendes i utgangspunktet hvis bruker er 100% sykmeldt ved 
-utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men hvis det har blitt sendt stansmelding for syketilfellet så må vi også sjekke at det ikke har kommet noe nyere 
-syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
+utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi må også sjekke at det ikke har kommet noe nyere syketilfelle (nyere startdato) før vi sender 
+meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
 
 Hvis vi har avbrutt en 8-ukersmelding og det kommer en ny sykmelding som ikke er gradert for det samme syketilfellet så sendes 8-ukersmeldingen likevel. 
 
 #### 39-ukersmelding
 39-ukersmeldingen opprettes med utsendelsedato 39 uker frem i tid fra startdato for syketilfellet. 39-ukersmeldingen fungerer veldig likt som 8-ukersmeldingen: Meldingen sendes 
-i utgangspunktet hvis bruker er sykmeldt (uavhengig av grad) ved utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men hvis det har blitt sendt stansmelding 
-for syketilfellet så må vi også sjekke at det ikke har kommet noe nyere syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men 
-det er et nyere syketilfelle så avbrytes meldingen. 
+i utgangspunktet hvis bruker er sykmeldt (uavhengig av grad) ved utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi må også sjekke at det ikke har kommet 
+noe nyere syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
 
 Hvis vi har avbrutt en 39-ukersmelding og det kommer en ny sykmelding for det samme syketilfellet så sendes 39-ukersmeldingen likevel. 
 
