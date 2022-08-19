@@ -10,16 +10,17 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import java.util.Properties
 
-class KafkaClients(env: Environment, vaultSecrets: Serviceuser) {
-    private val baseConfig = getBaseConfig(vaultSecrets, env)
+class KafkaClients(env: Environment, serviceuser: Serviceuser) {
+    private val baseConfig = getBaseConfig(serviceuser, env)
 
     val personhendelserKafkaConsumer = getPersonhendelserKafkaConsumer(baseConfig, env)
     val aivenKafkaConsumer = getAivenKafkaConsumer(env)
 
-    private fun getBaseConfig(vaultSecrets: Serviceuser, env: Environment): Properties {
-        val kafkaBaseConfig = loadBaseConfig(env, vaultSecrets).envOverrides()
+    private fun getBaseConfig(serviceuser: Serviceuser, env: Environment): Properties {
+        val kafkaBaseConfig = loadBaseConfig(env, serviceuser).envOverrides()
         kafkaBaseConfig["auto.offset.reset"] = "none"
         kafkaBaseConfig["specific.avro.reader"] = false
+        kafkaBaseConfig["schema.registry.url"] = env.onPremSchemaRegistryUrl
         return kafkaBaseConfig
     }
 

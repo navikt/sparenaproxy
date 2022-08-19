@@ -12,9 +12,6 @@ data class Environment(
     val applicationName: String = getEnvVar("NAIS_APP_NAME", "sparenaproxy"),
     override val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-    val sparenaproxyDBURL: String = getEnvVar("SPARENAPROXY_DB_URL"),
-    val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
-    val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
     val utbetalingTopic: String = "tbd.utbetaling",
     val aktiverMeldingAivenTopic: String = "teamsykmelding.privat-aktiver-planlagtmelding",
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",
@@ -43,6 +40,7 @@ data class Environment(
     val dbHost: String = getEnvVar("NAIS_DATABASE_HOST"),
     val dbPort: String = getEnvVar("NAIS_DATABASE_PORT"),
     val dbName: String = getEnvVar("NAIS_DATABASE_DATABASE"),
+    val onPremSchemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
 ) : MqConfig, KafkaConfig {
     fun jdbcUrl(): String {
         return "jdbc:postgresql://$dbHost:$dbPort/$dbName"

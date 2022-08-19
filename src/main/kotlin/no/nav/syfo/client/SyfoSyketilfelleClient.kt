@@ -24,7 +24,7 @@ class SyfoSyketilfelleClient(
 
         if (startdato == null) {
             log.error("Fant ikke startdato for utbetaltEvent med id $sporingsId")
-            if (cluster == "dev-fss") {
+            if (cluster == "dev-gcp") {
                 log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", sporingsId)
                 return LocalDate.now().minusMonths(1)
             }
@@ -43,7 +43,7 @@ class SyfoSyketilfelleClient(
 
         if (aktueltSykeforloep == null) {
             log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", sporingsId)
-            if (cluster == "dev-fss") {
+            if (cluster == "dev-gcp") {
                 log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", sporingsId)
                 return LocalDate.now().minusMonths(1)
             }
@@ -68,7 +68,7 @@ class SyfoSyketilfelleClient(
         val sykeforloep = hentSykeforloep(fnr)
         if (sykeforloep.isEmpty()) {
             log.error("Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId")
-            if (cluster == "dev-fss") {
+            if (cluster == "dev-gcp") {
                 log.info("Siden dette er dev returnerer vi false, $planlagtMeldingId")
                 return false
             }

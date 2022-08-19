@@ -11,12 +11,6 @@ import java.net.SocketException
 import java.sql.Connection
 import java.sql.ResultSet
 
-enum class Role {
-    ADMIN, USER, READONLY;
-
-    override fun toString() = name.lowercase()
-}
-
 class Database(private val env: Environment, retries: Long = 30, sleepTime: Long = 1_000) : DatabaseInterface {
 
     private val dataSource: HikariDataSource

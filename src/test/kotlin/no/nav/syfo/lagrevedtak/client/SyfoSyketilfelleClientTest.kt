@@ -135,7 +135,7 @@ class SyfoSyketilfelleClientTest : FunSpec({
         accessTokenClientMock,
         "resource",
         httpClient,
-        "prod-fss"
+        "prod-gcp"
     )
 
     afterSpec {
@@ -159,13 +159,13 @@ class SyfoSyketilfelleClientTest : FunSpec({
                 }
             }
         }
-        test("Returnerer dato hvis sykmelding ikke er knyttet til syketilfelle og vi kjører i dev-fss") {
+        test("Returnerer dato hvis sykmelding ikke er knyttet til syketilfelle og vi kjører i dev-gcp") {
             val syfoSyketilfelleClientDev = SyfoSyketilfelleClient(
                 mockHttpServerUrl,
                 accessTokenClientMock,
                 "resource",
                 httpClient,
-                "dev-fss"
+                "dev-gcp"
             )
             val startDato = syfoSyketilfelleClientDev.finnStartdato(fnr2, sykmeldingUUID.toString(), UUID.randomUUID())
 
@@ -340,13 +340,13 @@ class SyfoSyketilfelleClientTest : FunSpec({
                 }
             }
         }
-        test("Returnerer false hvis det ikke finnes noen syketilfeller og vi kjører i dev-fss") {
+        test("Returnerer false hvis det ikke finnes noen syketilfeller og vi kjører i dev-gcp") {
             val syfoSyketilfelleClientDev = SyfoSyketilfelleClient(
                 mockHttpServerUrl,
                 accessTokenClientMock,
                 "resource",
                 httpClient,
-                "dev-fss"
+                "dev-gcp"
             )
 
             syfoSyketilfelleClientDev.harSykeforlopMedNyereStartdato(
