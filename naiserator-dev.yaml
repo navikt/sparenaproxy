@@ -20,6 +20,8 @@ spec:
         databases:
           - name: sparenaproxy
             envVarPrefix: NAIS_DATABASE
+            users:
+              - name: sparenajob
         diskAutoresize: true
         highAvailability: false
         diskType: SSD
