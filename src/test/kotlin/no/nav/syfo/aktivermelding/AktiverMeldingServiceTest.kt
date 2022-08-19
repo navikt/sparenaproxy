@@ -80,6 +80,7 @@ class AktiverMeldingServiceTest : FunSpec({
         test("Avbryter melding hvis bruker er død") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns false
             coEvery { pdlPersonService.isAlive("fnr", any()) } returns false
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
 
@@ -98,6 +99,7 @@ class AktiverMeldingServiceTest : FunSpec({
         test("Sender 8-ukersmelding og oppdaterer i db hvis bruker fortsatt er 100% sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns false
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id))
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -158,12 +160,46 @@ class AktiverMeldingServiceTest : FunSpec({
             planlagtMelding!!.avbrutt shouldNotBeEqualTo null
             planlagtMelding.sendt shouldBeEqualTo null
         }
+        test("Avbryter 8-ukersmelding hvis bruker er sykmeldt, men det er et nytt sykefravær også når stansmelding ikke er vurdert") {
+            val id = UUID.randomUUID()
+            coEvery { smregisterClient.er100ProsentSykmeldt("fnr", any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns true
+            testDb.connection.lagrePlanlagtMelding(
+                opprettPlanlagtMelding(
+                    id = id,
+                    fnr = "fnr",
+                    startdato = LocalDate.of(2020, 1, 10),
+                    type = AKTIVITETSKRAV_8_UKER_TYPE
+                )
+            )
+            testDb.connection.lagrePlanlagtMelding(
+                opprettPlanlagtMelding(
+                    id = UUID.randomUUID(),
+                    fnr = "fnr",
+                    startdato = LocalDate.of(2020, 1, 10),
+                    type = STANS_TYPE,
+                    avbrutt = null
+                )
+            )
+            testDb.connection.lagreUtbetaltEvent("fnr", LocalDate.of(2020, 1, 10), "aktorId")
+
+            aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
+
+            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
+            coVerify { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            val planlagtMelding = testDb.connection.hentPlanlagtMeldingMedId(id)
+            planlagtMelding!!.avbrutt shouldNotBeEqualTo null
+            planlagtMelding.sendt shouldBeEqualTo null
+        }
     }
 
     context("Aktivering 39-ukersmelding") {
         test("Sender 39-ukersmelding og oppdaterer i db hvis bruker fortsatt er sykmeldt") {
             val id = UUID.randomUUID()
             coEvery { smregisterClient.erSykmeldt("fnr", id) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns false
             testDb.connection.lagrePlanlagtMelding(opprettPlanlagtMelding(id = id, type = BREV_39_UKER_TYPE))
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
@@ -225,6 +261,7 @@ class AktiverMeldingServiceTest : FunSpec({
             val id = UUID.randomUUID()
             val id2 = UUID.randomUUID()
             coEvery { smregisterClient.erSykmeldt("fnr2", any()) } returns true
+            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr2", any(), any()) } returns false
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = id,

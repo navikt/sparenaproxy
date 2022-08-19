@@ -29,20 +29,19 @@ Om meldingen sendes, avbrytes eller evt utsettes kommer an på meldingstypen.
 
 #### 4-ukersmelding
 4-ukersmeldingen opprettes med utsendelsedato fire uker frem i tid fra startdato for syketilfellet. Meldingen sendes hvis bruker fortsatt er sykmeldt (uavhengig av grad) 
-ved utsendingstidspunktet, hvis ikke settes den til avbrutt. 
+ved utsendingstidspunktet og det ikke finnes noe nyere syketilfelle, hvis ikke settes den til avbrutt. 
 
 #### 8-ukersmelding
 8-ukersmeldingen opprettes med utsendelsedato åtte uker frem i tid fra startdato for syketilfellet. Meldingen sendes i utgangspunktet hvis bruker er 100% sykmeldt ved 
-utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men hvis det har blitt sendt stansmelding for syketilfellet så må vi også sjekke at det ikke har kommet noe nyere 
-syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
+utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi må også sjekke at det ikke har kommet noe nyere syketilfelle (nyere startdato) før vi sender 
+meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
 
 Hvis vi har avbrutt en 8-ukersmelding og det kommer en ny sykmelding som ikke er gradert for det samme syketilfellet så sendes 8-ukersmeldingen likevel. 
 
 #### 39-ukersmelding
 39-ukersmeldingen opprettes med utsendelsedato 39 uker frem i tid fra startdato for syketilfellet. 39-ukersmeldingen fungerer veldig likt som 8-ukersmeldingen: Meldingen sendes 
-i utgangspunktet hvis bruker er sykmeldt (uavhengig av grad) ved utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men hvis det har blitt sendt stansmelding 
-for syketilfellet så må vi også sjekke at det ikke har kommet noe nyere syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men 
-det er et nyere syketilfelle så avbrytes meldingen. 
+i utgangspunktet hvis bruker er sykmeldt (uavhengig av grad) ved utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi må også sjekke at det ikke har kommet 
+noe nyere syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
 
 Hvis vi har avbrutt en 39-ukersmelding og det kommer en ny sykmelding for det samme syketilfellet så sendes 39-ukersmeldingen likevel. 
 
@@ -70,10 +69,11 @@ This project contains the application code and infrastructure for sparenaproxy
 * Kotlin
 * Ktor
 * Gradle
+* Kotest
 
 ### Getting started
 #### Getting github-package-registry packages NAV-IT
-Some packages used in this repo is uploaded to the Github Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
+Some packages used in this repo is uploaded to the GitHub Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
 ```
 val githubUser: String by project
 val githubPassword: String by project
@@ -118,3 +118,14 @@ Creating a docker image should be as simple as `docker build -t "no.nav.syfo" .`
 
 ##### Running a docker image
 `docker run --rm -it -p 8080:8080 "no.nav.syfo"`
+
+### Upgrading the gradle wrapper
+Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
+
+```./gradlew wrapper --gradle-version $gradleVersjon```
+
+### Inquiries
+Questions related to the code or the project can be asked as issues here on GitHub
+
+### For NAV employees
+We are available at the Slack channel #team-sykmelding

@@ -58,7 +58,11 @@ class AktiverMeldingService(
             } else {
                 val skalSendeMelding = when (planlagtMelding.type) {
                     BREV_4_UKER_TYPE -> {
-                        smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                        if (smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
+                            gjelderSammeSykefravaer(planlagtMelding)
+                        } else {
+                            false
+                        }
                     }
                     AKTIVITETSKRAV_8_UKER_TYPE -> {
                         if (smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
@@ -123,9 +127,8 @@ class AktiverMeldingService(
     private suspend fun gjelderSammeSykefravaer(planlagtMelding: PlanlagtMeldingDbModel): Boolean {
         if (database.erStansmeldingSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
             log.info("Det er sendt/avbrutt stansmelding for sykefravær som melding med id ${planlagtMelding.id} tilhører")
-            return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.id)
         }
-        return true
+        return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.id)
     }
 
     private fun avbrytMelding(aktiverMelding: AktiverMelding) {
