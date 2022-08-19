@@ -12,20 +12,33 @@ spec:
     max: 2
     cpuThresholdPercentage: 90
   port: 8080
+  gcp:
+    sqlInstances:
+      - name: sparenaproxy-db-instance
+        type: POSTGRES_14
+        diskSize: 10
+        databases:
+          - name: sparenaproxy
+            envVarPrefix: NAIS_DATABASE
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
   liveness:
-    path: /is_alive
+    path: /internal/is_alive
     initialDelay: 10
     timeout: 5
     periodSeconds: 5
     failureThreshold: 30
   readiness:
-    path: /is_ready
+    path: /internal/is_ready
     initialDelay: 30
     periodSeconds: 5
     timeout: 1
   prometheus:
     enabled: true
-    path: /prometheus
+    path: /internal/prometheus
   resources:
     limits:
       cpu: 500m
@@ -39,21 +52,11 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
-  vault:
-    enabled: true
-    paths:
-      - kvPath: serviceuser/data/dev/srvsparenaproxy
-        mountPath: /secrets/serviceuser
-  ingresses:
-    - "https://sparenaproxy.nais.preprod.local"
-  webproxy: true
+  envFrom:
+    - secret: srvsparenaproxy-secrets
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
-    - name: MOUNT_PATH_VAULT
-      value: /postgresql/preprod-fss
-    - name: SPARENAPROXY_DB_URL
-      value: jdbc:postgresql://b27dbvl016.preprod.local:5432/sparenaproxy
     - name: SMREGISTER_SCOPE
       value: api://dev-gcp.teamsykmelding.syfosmregister/.default
     - name: SMREGISTER_URL
@@ -73,7 +76,7 @@ spec:
     - name: MQ_KVITTERING_BQ_QUEUE_NAME
       value: QA.Q1_SPARENAPROXY.MELD_KVITT_FRA_ARENA_BOQ
     - name: PDL_GRAPHQL_PATH
-      value: https://pdl-api.nais.preprod.local/graphql
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: KAFKA_CLIENT_ID
       value: "sparenaproxy"
     - name: PDL_SCOPE
@@ -82,3 +85,5 @@ spec:
       value: https://flex-syketilfelle.dev.intern.nav.no
     - name: SYKETILLFELLE_SCOPE
       value: api://dev-gcp.flex.flex-syketilfelle/.default
+    - name: KAFKA_SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais-q.adeo.no

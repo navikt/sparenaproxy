@@ -12,9 +12,6 @@ data class Environment(
     val applicationName: String = getEnvVar("NAIS_APP_NAME", "sparenaproxy"),
     override val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
-    val sparenaproxyDBURL: String = getEnvVar("SPARENAPROXY_DB_URL"),
-    val mountPathVault: String = getEnvVar("MOUNT_PATH_VAULT"),
-    val databaseName: String = getEnvVar("DATABASE_NAME", "sparenaproxy"),
     val utbetalingTopic: String = "tbd.utbetaling",
     val aktiverMeldingAivenTopic: String = "teamsykmelding.privat-aktiver-planlagtmelding",
     val pdlTopic: String = "aapen-person-pdl-leesah-v1",
@@ -37,12 +34,22 @@ data class Environment(
     val clientSecretV2: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
     val pdlScope: String = getEnvVar("PDL_SCOPE"),
     val okSykmeldingTopic: String = "teamsykmelding.ok-sykmelding",
-    val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding"
-) : MqConfig, KafkaConfig
+    val manuellSykmeldingTopic: String = "teamsykmelding.manuell-behandling-sykmelding",
+    val databaseUsername: String = getEnvVar("NAIS_DATABASE_USERNAME"),
+    val databasePassword: String = getEnvVar("NAIS_DATABASE_PASSWORD"),
+    val dbHost: String = getEnvVar("NAIS_DATABASE_HOST"),
+    val dbPort: String = getEnvVar("NAIS_DATABASE_PORT"),
+    val dbName: String = getEnvVar("NAIS_DATABASE_DATABASE"),
+    val onPremSchemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
+) : MqConfig, KafkaConfig {
+    fun jdbcUrl(): String {
+        return "jdbc:postgresql://$dbHost:$dbPort/$dbName"
+    }
+}
 
-data class VaultSecrets(
-    val serviceuserUsername: String = getFileAsString("/secrets/serviceuser/username"),
-    val serviceuserPassword: String = getFileAsString("/secrets/serviceuser/password")
+data class Serviceuser(
+    val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
+    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD")
 ) : KafkaCredentials {
     override val kafkaUsername: String = serviceuserUsername
     override val kafkaPassword: String = serviceuserPassword

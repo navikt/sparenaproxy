@@ -30,9 +30,7 @@ import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.db.Database
-import no.nav.syfo.application.db.VaultCredentialService
 import no.nav.syfo.application.exeption.ServiceUnavailableException
-import no.nav.syfo.application.vault.RenewVaultService
 import no.nav.syfo.client.AccessTokenClientV2
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.dodshendelser.DodshendelserService
@@ -46,10 +44,8 @@ import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
 import no.nav.syfo.mq.producerForQueue
 import no.nav.syfo.pdl.PdlFactory
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.ProxySelector
 import javax.jms.Session
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.sparenaproxy")
@@ -64,12 +60,11 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 @DelicateCoroutinesApi
 fun main() {
     val env = Environment()
-    val vaultSecrets = VaultSecrets()
+    val serviceuser = Serviceuser()
     DefaultExports.initialize()
     val applicationState = ApplicationState()
 
-    val vaultCredentialService = VaultCredentialService()
-    val database = Database(env, vaultCredentialService)
+    val database = Database(env)
 
     val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(ContentNegotiation) {
@@ -89,18 +84,9 @@ fun main() {
         }
     }
 
-    val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        config()
-        engine {
-            customizeClient {
-                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
-            }
-        }
-    }
-    val httpClientWithProxy = HttpClient(Apache, proxyConfig)
     val httpClient = HttpClient(Apache, config)
 
-    val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClientWithProxy)
+    val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClient)
     val syfoSyketilfelleClient = SyfoSyketilfelleClient(
         syketilfelleEndpointURL = env.syketilfelleEndpointURL,
         accessTokenClientV2 = accessTokenClientV2,
@@ -111,7 +97,7 @@ fun main() {
     val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClientV2, env.smregisterScope, httpClient)
     val pdlPersonService = PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)
 
-    val connection = connectionFactory(env).createConnection(vaultSecrets.serviceuserUsername, vaultSecrets.serviceuserPassword)
+    val connection = connectionFactory(env).createConnection(serviceuser.serviceuserUsername, serviceuser.serviceuserPassword)
 
     connection.start()
     val session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE)
@@ -121,7 +107,7 @@ fun main() {
     val arenaMqProducer = ArenaMqProducer(session, arenaProducer)
     val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
 
-    val kafkaClients = KafkaClients(env, vaultSecrets)
+    val kafkaClients = KafkaClients(env, serviceuser)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
     val utbetaltEventService = UtbetaltEventService(syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
@@ -143,17 +129,16 @@ fun main() {
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
-    RenewVaultService(vaultCredentialService, applicationState).startRenewTasks()
-
-    createListener(applicationState) {
-        dodshendelserService.start()
-    }
-    createListener(applicationState) {
-        kvitteringListener.start()
-    }
-    createListener(applicationState) {
-        commonAivenKafkaService.start()
-    }
+//
+//    createListener(applicationState) {
+//        dodshendelserService.start()
+//    }
+//    createListener(applicationState) {
+//        kvitteringListener.start()
+//    }
+//    createListener(applicationState) {
+//        commonAivenKafkaService.start()
+//    }
 
     applicationServer.start()
 }
