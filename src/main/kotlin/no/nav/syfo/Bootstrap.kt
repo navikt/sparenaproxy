@@ -129,16 +129,15 @@ fun main() {
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
-//
-//    createListener(applicationState) {
-//        dodshendelserService.start()
-//    }
-//    createListener(applicationState) {
-//        kvitteringListener.start()
-//    }
-//    createListener(applicationState) {
-//        commonAivenKafkaService.start()
-//    }
+    createListener(applicationState) {
+        dodshendelserService.start()
+    }
+    createListener(applicationState) {
+        kvitteringListener.start()
+    }
+    createListener(applicationState) {
+        commonAivenKafkaService.start()
+    }
 
     applicationServer.start()
 }
