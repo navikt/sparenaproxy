@@ -22,6 +22,7 @@ spec:
             envVarPrefix: NAIS_DATABASE
             users:
               - name: sparenajob
+              - name: macgyver
         diskAutoresize: true
         highAvailability: false
         pointInTimeRecovery: false
