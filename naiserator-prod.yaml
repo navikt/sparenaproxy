@@ -63,6 +63,10 @@ spec:
           cluster: prod-gcp
   envFrom:
     - secret: srvsparenaproxy-secrets
+    - secret: sparenaproxy-keystore-pwd
+  filesFrom:
+    - mountPath: /var/run/keystore
+      secret: sparenaproxy-keystore
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
@@ -96,3 +100,5 @@ spec:
       value: api://prod-gcp.flex.flex-syketilfelle/.default
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.adeo.no
+    - name: MQ_KEYSTORE_PATH
+      value: /var/run/keystore/sparenaproxy-keystore.jks

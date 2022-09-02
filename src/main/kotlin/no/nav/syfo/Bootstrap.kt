@@ -40,6 +40,7 @@ import no.nav.syfo.kafka.KafkaClients
 import no.nav.syfo.lagrevedtak.LagreUtbetaltEventOgPlanlagtMeldingService
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
+import no.nav.syfo.mq.MqTlsUtils
 import no.nav.syfo.mq.connectionFactory
 import no.nav.syfo.mq.consumerForQueue
 import no.nav.syfo.mq.producerForQueue
@@ -61,6 +62,7 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 fun main() {
     val env = Environment()
     val serviceuser = Serviceuser()
+    MqTlsUtils.getMqTlsConfig().forEach { key, value -> System.setProperty(key as String, value as String) }
     DefaultExports.initialize()
     val applicationState = ApplicationState()
 
