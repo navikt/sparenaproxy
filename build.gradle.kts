@@ -18,7 +18,7 @@ val mockkVersion = "1.12.7"
 val postgresVersion = "42.5.0"
 val flywayVersion = "9.2.0"
 val hikariVersion = "5.0.1"
-val confluentVersion = "7.0.1"
+val confluentVersion = "7.2.1"
 val kotlinVersion = "1.7.10"
 val testContainerVersion = "1.17.3"
 
