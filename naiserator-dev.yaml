@@ -54,6 +54,15 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+  accessPolicy:
+    outbound:
+      rules:
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: dev-gcp
+        - application: flex-syketilfelle
+          namespace: flex
+          cluster: dev-gcp
   envFrom:
     - secret: srvsparenaproxy-secrets
     - secret: sparenaproxy-keystore-pwd
@@ -65,8 +74,6 @@ spec:
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SMREGISTER_SCOPE
       value: api://dev-gcp.teamsykmelding.syfosmregister/.default
-    - name: SMREGISTER_URL
-      value: https://smregister.dev.nav.no
     - name: MQ_HOST_NAME
       value: b27apvl220.preprod.local
     - name: MQ_PORT
@@ -87,8 +94,6 @@ spec:
       value: "sparenaproxy"
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
-    - name: SYKETILLFELLE_ENDPOINT_URL
-      value: https://flex-syketilfelle.dev.intern.nav.no
     - name: SYKETILLFELLE_SCOPE
       value: api://dev-gcp.flex.flex-syketilfelle/.default
     - name: KAFKA_SCHEMA_REGISTRY_URL

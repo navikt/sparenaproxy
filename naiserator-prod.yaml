@@ -61,6 +61,9 @@ spec:
         - application: syfosmregister
           namespace: teamsykmelding
           cluster: prod-gcp
+        - application: flex-syketilfelle
+          namespace: flex
+          cluster: prod-gcp
   envFrom:
     - secret: srvsparenaproxy-secrets
     - secret: sparenaproxy-keystore-pwd
@@ -70,8 +73,6 @@ spec:
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
-    - name: SMREGISTER_URL
-      value: https://smregister.intern.nav.no
     - name: SMREGISTER_SCOPE
       value: api://prod-gcp.teamsykmelding.syfosmregister/.default
     - name: MQ_HOST_NAME
@@ -94,8 +95,6 @@ spec:
       value: "sparenaproxy"
     - name: PDL_SCOPE
       value: api://prod-fss.pdl.pdl-api/.default
-    - name: SYKETILLFELLE_ENDPOINT_URL
-      value: https://flex-syketilfelle.intern.nav.no
     - name: SYKETILLFELLE_SCOPE
       value: api://prod-gcp.flex.flex-syketilfelle/.default
     - name: KAFKA_SCHEMA_REGISTRY_URL
