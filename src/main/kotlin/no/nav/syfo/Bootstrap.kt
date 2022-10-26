@@ -109,7 +109,7 @@ fun main() {
     val arenaMqProducer = ArenaMqProducer(session, arenaProducer)
     val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
 
-    val kafkaClients = KafkaClients(env, serviceuser)
+    val kafkaClients = KafkaClients(env)
     val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
     val utbetaltEventService = UtbetaltEventService(syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
