@@ -26,7 +26,7 @@ class KafkaClients(env: Environment) {
             valueDeserializer = KafkaAvroDeserializer::class
         ).also {
             it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
-            it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "latest"
+            it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
             it["specific.avro.reader"] = false
         }
 
