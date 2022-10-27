@@ -27,7 +27,7 @@ class KafkaClients(env: Environment) {
         ).also {
             it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
             it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "latest"
-            it["specific.avro.reader"] = true
+            it["specific.avro.reader"] = false
         }
 
         val personhendelserKafkaConsumer = KafkaConsumer<String, GenericRecord>(properties)
