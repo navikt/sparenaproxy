@@ -36,7 +36,7 @@ data class Environment(
     val dbHost: String = getEnvVar("NAIS_DATABASE_HOST"),
     val dbPort: String = getEnvVar("NAIS_DATABASE_PORT"),
     val dbName: String = getEnvVar("NAIS_DATABASE_DATABASE"),
-    val schemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL"),
+    val schemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
     val kafkaSchemaRegistryUsername: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
     val kafkaSchemaRegistryPassword: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD")
 ) : MqConfig {

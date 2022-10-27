@@ -70,8 +70,6 @@ spec:
     - mountPath: /var/run/keystore
       secret: sparenaproxy-keystore
   env:
-    - name: KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: SMREGISTER_SCOPE
       value: api://dev-gcp.teamsykmelding.syfosmregister/.default
     - name: MQ_HOST_NAME
@@ -96,7 +94,5 @@ spec:
       value: api://dev-fss.pdl.pdl-api/.default
     - name: SYKETILLFELLE_SCOPE
       value: api://dev-gcp.flex.flex-syketilfelle/.default
-    - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais-q.adeo.no
     - name: MQ_KEYSTORE_PATH
       value: /var/run/keystore/sparenaproxy-keystore.jks
