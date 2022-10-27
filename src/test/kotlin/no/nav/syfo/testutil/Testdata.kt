@@ -96,7 +96,8 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         partnerreferanse = "",
         legeHelsepersonellkategori = null,
         legeHprNr = null,
-        vedlegg = null
+        vedlegg = null,
+        utenlandskSykmelding = null
     )
 }
 
