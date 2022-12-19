@@ -30,7 +30,6 @@ class SyfoSyketilfelleClient(
             }
             throw RuntimeException("Fant ikke startdato for utbetaltEvent med id $sporingsId")
         } else {
-
             return startdato
         }
     }
