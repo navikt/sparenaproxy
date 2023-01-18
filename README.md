@@ -62,18 +62,19 @@ vi har sendt 4-ukersmelding og bruker ikke lenger er sykmeldt sendes stansmeldin
 
 For alle meldinger, både planlagte meldinger og maksdatomeldinger, sjekker vi mot PDL at den sykmeldte ikke er død før meldingen sendes. 
 
-## Technical description
-This project contains the application code and infrastructure for sparenaproxy
+## Teknisk beskrivelse
+Dette prosjektet inneholder applikasjonskoden og infrastrukturen for sparenaproxy
 
-### Technologies used
+### Teknologier som brukes
 * Kotlin
 * Ktor
 * Gradle
 * Kotest
 
-### Getting started
-#### Getting github-package-registry packages NAV-IT
-Some packages used in this repo is uploaded to the GitHub Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
+### Komme i gang med utvikling
+### Hente github-package-registry pakker NAV-IT
+Noen pakker som brukes i denne repoen lastes opp til GitHub Package Registry som krever autentisering.
+Det kan for eksempel løses slik i Gradle:
 ```
 val githubUser: String by project
 val githubPassword: String by project
@@ -88,44 +89,48 @@ repositories {
 }
 ```
 
-`githubUser` and `githubPassword` can be put into a separate file `~/.gradle/gradle.properties` with the following content:
+`githubUser` og `githubPassword` kan legges inn i en egen fil `~/.gradle/gradle.properties` med følgende innhold:
 
 ```                                                     
 githubUser=x-access-token
 githubPassword=[token]
 ```
 
-Replace `[token]` with a personal access token with scope `read:packages`.
+Erstatt `[token]` med en personal access token med omfang `read:packages`.
+Se GitHubs guide [creating-a-personal-access-token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) på
+hvordan lage et personlig tilgangstoken.
 
-Alternatively, the variables can be configured via environment variables:
-
+Alternativt kan variablene konfigureres via miljøvariabler:
 * `ORG_GRADLE_PROJECT_githubUser`
 * `ORG_GRADLE_PROJECT_githubPassword`
 
-or the command line:
+eller kommandolinjen:
 
-```
+``` bash
 ./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
 ```
 
-#### Building the application
-##### Compile and package application
-To build locally and run the integration tests you can simply run `./gradlew shadowJar` or  on windows 
-`gradlew.bat shadowJar`
+#### Gradle kommandoer for bygg og test
+For å bygge lokalt og kjøre integrasjonstestene kan du ganske enkelt kjøre
+``` bash
+./gradlew clean build
+```
+eller på Windows
+`gradlew.bat clean build`
 
-##### Creating a docker image
-Creating a docker image should be as simple as `docker build -t "no.nav.syfo" .`
+## Oppgradering av gradle wrapper
+Finn nyeste versjon av gradle her: https://gradle.org/releases/
 
-##### Running a docker image
-`docker run --rm -it -p 8080:8080 "no.nav.syfo"`
+``` bash
+./gradlew wrapper --gradle-version $gradleVersjon
+```
 
-### Upgrading the gradle wrapper
-Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
+## Henvendelser
+Dette prosjeket er vedlikeholdt av [navikt/teamsykmelding](CODEOWNERS)
 
-```./gradlew wrapper --gradle-version $gradleVersjon```
+Spørsmål knyttet til koden eller prosjektet kan stilles som
+[issues](https://github.com/navikt/sparenaproxy/issues) her på GitHub
 
-### Inquiries
-Questions related to the code or the project can be asked as issues here on GitHub
+### For NAV-ansatte
 
-### For NAV employees
-We are available at the Slack channel #team-sykmelding
+Interne henvendelser kan sendes via Slack i kanalen [#team-sykmelding](https://nav-it.slack.com/archives/CMA3XV997)
