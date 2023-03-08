@@ -27,6 +27,9 @@ spec:
         diskType: SSD
         insights:
           enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
   liveness:
     path: /internal/is_alive
     initialDelay: 10
