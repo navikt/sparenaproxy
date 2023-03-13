@@ -24,7 +24,7 @@ import java.util.UUID
 fun opprettPlanlagtMelding(
     id: UUID,
     fnr: String = "fnr",
-    sendes: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(30),
+    sendes: OffsetDateTime = OffsetDateTime.of(2023, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC).minusMinutes(30),
     type: String = AKTIVITETSKRAV_8_UKER_TYPE,
     avbrutt: OffsetDateTime? = null,
     sendt: OffsetDateTime? = null,

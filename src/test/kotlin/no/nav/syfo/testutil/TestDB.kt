@@ -27,6 +27,7 @@ class TestDB private constructor() {
         val env = mockk<Environment>()
         val psqlContainer: PsqlContainer = PsqlContainer()
             .withExposedPorts(5432)
+            .withCommand("postgres", "-c", "wal_level=logical")
             .withUsername("username")
             .withPassword("password")
             .withDatabaseName("database")
