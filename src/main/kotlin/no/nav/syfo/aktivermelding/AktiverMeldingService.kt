@@ -14,7 +14,6 @@ import no.nav.syfo.application.metrics.AVBRUTT_MELDING
 import no.nav.syfo.application.metrics.IKKE_FUNNET_MELDING
 import no.nav.syfo.application.metrics.MOTTATT_AKTIVERMELDING
 import no.nav.syfo.application.metrics.SENDT_MELDING
-import no.nav.syfo.application.metrics.STOPPER_8_UKER_MELDING
 import no.nav.syfo.application.metrics.UTSATT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.db.fireukersmeldingErSendt
@@ -27,7 +26,6 @@ import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
 import no.nav.syfo.objectMapper
 import no.nav.syfo.pdl.service.PdlPersonService
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -67,15 +65,8 @@ class AktiverMeldingService(
                         }
                     }
                     AKTIVITETSKRAV_8_UKER_TYPE -> {
-                        val skalSendesTilArena = planlagtMelding.sendes.toLocalDate().isBefore(LocalDate.of(2023, 3, 11))
-                        if (!skalSendesTilArena) {
-                            STOPPER_8_UKER_MELDING.inc()
-                        }
-                        if (skalSendesTilArena && smregisterClient.er100ProsentSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
-                            gjelderSammeSykefravaer(planlagtMelding)
-                        } else {
-                            false
-                        }
+                        log.warn("skal ikke sende 8 ukersmelding for melding ${aktiverMelding.id}")
+                        false
                     }
                     BREV_39_UKER_TYPE -> {
                         if (smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
@@ -119,6 +110,10 @@ class AktiverMeldingService(
     }
 
     private suspend fun sendTilArena(planlagtMelding: PlanlagtMeldingDbModel) {
+        if (planlagtMelding.type == AKTIVITETSKRAV_8_UKER_TYPE) {
+            log.warn("Should not send 8 ukersmelding til arena ${planlagtMelding.id}")
+            return
+        }
         if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {
             log.info("Sender melding med id {} til Arena", planlagtMelding.id)
             val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)

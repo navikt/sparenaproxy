@@ -23,6 +23,7 @@ import no.nav.syfo.testutil.lagrePlanlagtMelding
 import no.nav.syfo.testutil.opprettPlanlagtMelding
 import no.nav.syfo.testutil.opprettReceivedSykmelding
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeEqualTo
 import java.time.Clock
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -161,7 +162,7 @@ class MottattSykmeldingServiceTest : FunSpec({
             mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
             coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
-            coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
             stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
         }
@@ -188,15 +189,15 @@ class MottattSykmeldingServiceTest : FunSpec({
             mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
             coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
-            coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
             meldinger.size shouldBeEqualTo 2
             val planlagtMelding8uker = meldinger.find { it.type == AKTIVITETSKRAV_8_UKER_TYPE }
             val planlagtStansmelding = meldinger.find { it.type == STANS_TYPE }
-            planlagtMelding8uker!!.avbrutt shouldBeEqualTo null
+            planlagtMelding8uker!!.avbrutt shouldNotBeEqualTo null
             planlagtStansmelding?.sendes shouldBeEqualTo LocalDate.now().plusWeeks(3).plusDays(17).atStartOfDay()
                 .atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime()
-            planlagtMelding8uker.jmsCorrelationId shouldBeEqualTo "correlationId"
+            planlagtMelding8uker.jmsCorrelationId shouldBeEqualTo null
         }
         test("Skal ikke sende ny 8-ukersmelding hvis melding er sent før") {
             coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 3, 25)
@@ -223,11 +224,11 @@ class MottattSykmeldingServiceTest : FunSpec({
             mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
             coVerify(exactly = 2) { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
-            coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val meldinger = testDb.connection.hentPlanlagtMelding("12345678910", LocalDate.of(2020, 3, 25))
             meldinger.size shouldBeEqualTo 2
             val planlagtMelding8uker = meldinger.find { it.type == AKTIVITETSKRAV_8_UKER_TYPE }
-            planlagtMelding8uker!!.avbrutt shouldBeEqualTo null
+            planlagtMelding8uker!!.avbrutt shouldNotBeEqualTo null
         }
         test("Ignorerer sykmelding som ikke har avbrutt 39-ukersmelding for samme sykeforløp") {
             coEvery { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) } returns LocalDate.of(2020, 6, 30)

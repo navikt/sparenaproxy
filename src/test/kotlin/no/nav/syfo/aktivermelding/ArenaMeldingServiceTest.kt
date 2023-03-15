@@ -3,7 +3,6 @@ package no.nav.syfo.aktivermelding
 import io.kotest.core.spec.style.FunSpec
 import io.mockk.mockk
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
-import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
@@ -41,29 +40,6 @@ class ArenaMeldingServiceTest : FunSpec({
             brev4Ukersmelding.n2830.versjon shouldBeEqualTo "014"
             brev4Ukersmelding.n2830.meldingsdata shouldBeEqualTo "02052020                                                                                  " // lengde 90
             brev4Ukersmelding.n2840.taglinje shouldBeEqualTo "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).     " // lengde 80
-        }
-
-        test("Test av oppretting av 8-ukersmelding") {
-            val now = OffsetDateTime.of(LocalDate.of(2020, 7, 2).atTime(15, 20), ZoneOffset.UTC)
-            val planlagtMeldingDbModel = PlanlagtMeldingDbModel(
-                id = UUID.randomUUID(),
-                fnr = "12345678910",
-                startdato = LocalDate.of(2020, 5, 2),
-                type = AKTIVITETSKRAV_8_UKER_TYPE,
-                opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
-                sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
-            )
-
-            val aktivitetskrav8UkerMelding = arenaMeldingService.til8Ukersmelding(planlagtMeldingDbModel, now)
-
-            aktivitetskrav8UkerMelding.n2810.dato shouldBeEqualTo "02072020"
-            aktivitetskrav8UkerMelding.n2810.klokke shouldBeEqualTo "152000"
-            aktivitetskrav8UkerMelding.n2810.fnr shouldBeEqualTo "12345678910"
-            aktivitetskrav8UkerMelding.n2810.meldKode shouldBeEqualTo "O"
-            aktivitetskrav8UkerMelding.n2830.meldingId shouldBeEqualTo "M-RK68-1  "
-            aktivitetskrav8UkerMelding.n2830.versjon shouldBeEqualTo "008"
-            aktivitetskrav8UkerMelding.n2830.meldingsdata shouldBeEqualTo "02052020                                                                                  " // lengde 90
-            aktivitetskrav8UkerMelding.n2840.taglinje shouldBeEqualTo "SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 80
         }
 
         test("Test av oppretting av 39-ukersmelding") {

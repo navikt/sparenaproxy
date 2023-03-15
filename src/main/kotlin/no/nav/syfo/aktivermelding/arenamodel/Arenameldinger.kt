@@ -9,13 +9,6 @@ data class Brev4UkerMelding(
     val n2840: N2840
 )
 
-data class Aktivitetskrav8UkerMelding(
-    val n2810: N2810,
-    val n2820: N2820,
-    val n2830: N2830,
-    val n2840: N2840
-)
-
 data class Brev39UkerMelding(
     val n2810: N2810,
     val n2820: N2820,
@@ -80,21 +73,6 @@ fun Brev4UkerMelding.tilMqMelding(): String {
         throw IllegalStateException("4-ukersmelding har feil lengde")
     }
     return brev4ukermeldingSomTekst
-}
-
-fun Aktivitetskrav8UkerMelding.tilMqMelding(): String {
-    val sb = StringBuilder()
-    sb.append(n2810.tilTekst())
-    sb.append(n2820.tilTekst())
-    sb.append(n2830.tilTekst())
-    sb.append(n2840.tilTekst())
-
-    val aktivitetskravmeldingSomTekst = sb.toString()
-    if (aktivitetskravmeldingSomTekst.length != 482) {
-        log.error("Aktivitetskravmelding har feil lengde: ${aktivitetskravmeldingSomTekst.length}")
-        throw IllegalStateException("Aktivitetskravmelding har feil lengde")
-    }
-    return aktivitetskravmeldingSomTekst
 }
 
 fun Brev39UkerMelding.tilMqMelding(): String {
