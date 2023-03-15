@@ -63,26 +63,6 @@ class AktiverMeldingServiceTest : FunSpec({
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
         }
-        test("Skal sende 8ukers melding til arena før 11.03.23") {
-            val id = UUID.randomUUID()
-
-            coEvery { smregisterClient.er100ProsentSykmeldt("fnr", id) } returns true
-            coEvery { syfosyketilfelleClient.harSykeforlopMedNyereStartdato("fnr", any(), any()) } returns false
-
-            testDb.connection.lagrePlanlagtMelding(
-                opprettPlanlagtMelding(
-                    id = id,
-                    sendes = OffsetDateTime.of(2023, 3, 10, 12, 0, 0, 0, ZoneOffset.UTC),
-                    avbrutt = null
-                )
-            )
-
-            aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
-
-            coVerify(exactly = 1) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
-            coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
-            coVerify(exactly = 1) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
-        }
         test("Ignorerer melding som er avbrutt") {
             val id = UUID.randomUUID()
             testDb.connection.lagrePlanlagtMelding(
@@ -122,7 +102,7 @@ class AktiverMeldingServiceTest : FunSpec({
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
 
-            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
@@ -140,13 +120,13 @@ class AktiverMeldingServiceTest : FunSpec({
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
 
-            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
-            coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
+            coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
-            planlagtMelding.sendt shouldNotBeEqualTo null
-            planlagtMelding.avbrutt shouldBeEqualTo null
-            planlagtMelding.jmsCorrelationId shouldBeEqualTo "correlationId"
+            planlagtMelding.sendt shouldBeEqualTo null
+            planlagtMelding.avbrutt shouldNotBeEqualTo null
+            planlagtMelding.jmsCorrelationId shouldBeEqualTo null
         }
         test("Avbryter 8-ukersmelding hvis bruker ikke lenger er sykmeldt") {
             val id = UUID.randomUUID()
@@ -155,7 +135,7 @@ class AktiverMeldingServiceTest : FunSpec({
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
 
-            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMelding("fnr", LocalDate.of(2020, 1, 14)).first()
@@ -188,9 +168,9 @@ class AktiverMeldingServiceTest : FunSpec({
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
 
-            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
-            coVerify { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMeldingMedId(id)
             planlagtMelding!!.avbrutt shouldNotBeEqualTo null
@@ -221,9 +201,9 @@ class AktiverMeldingServiceTest : FunSpec({
 
             aktiverMeldingService.behandleAktiverMelding(AktiverMelding(id))
 
-            coVerify { smregisterClient.er100ProsentSykmeldt(any(), any()) }
+            coVerify(exactly = 0) { smregisterClient.er100ProsentSykmeldt(any(), any()) }
             coVerify(exactly = 0) { smregisterClient.erSykmeldt(any(), any()) }
-            coVerify { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
+            coVerify(exactly = 0) { syfosyketilfelleClient.harSykeforlopMedNyereStartdato(any(), any(), any()) }
             coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
             val planlagtMelding = testDb.connection.hentPlanlagtMeldingMedId(id)
             planlagtMelding!!.avbrutt shouldNotBeEqualTo null

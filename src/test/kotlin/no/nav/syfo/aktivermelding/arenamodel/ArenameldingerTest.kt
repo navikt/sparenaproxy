@@ -18,12 +18,6 @@ class ArenameldingerTest : FunSpec({
     val n28408uker = N2840(
         taglinje = "SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 80
     )
-    val aktivitetskrav8UkerMelding = Aktivitetskrav8UkerMelding(
-        n2810 = n28108uker,
-        n2820 = N2820(),
-        n2830 = n28308uker,
-        n2840 = n28408uker
-    )
 
     val n281039uker = N2810(
         dato = "19062020",
@@ -66,14 +60,6 @@ class ArenameldingerTest : FunSpec({
             val n2840SomTekst = n28408uker.tilTekst()
 
             n2840SomTekst shouldBeEqualTo "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 93
-        }
-        test("Aktivitetskravmelding får riktig tekstverdi") {
-            val aktivitetskravMqMelding = aktivitetskrav8UkerMelding.tilMqMelding()
-
-            aktivitetskravMqMelding shouldBeEqualTo "N2810   SENDMELDINGSPEIL        0048219062020235157    12345678910  SPO " +
-                "N2820   00001                                                                                                                                                                                            " +
-                "N2830   00001M-RK68-1  00802052020                                                                                  " +
-                "N2840   00001SP: Aktivitetskrav ved 8 uker 100% sykmeldt                                     " // lengde 482
         }
     }
 

@@ -54,29 +54,8 @@ class MottattSykmeldingService(
         }
         val startdato = syfoSyketilfelleClient.finnStartdato(fnr = receivedSykmelding.personNrPasient, sykmeldingId = sykmeldingId, sporingsId = UUID.fromString(sykmeldingId))
 
-        sendAvbruttAktivitetskravmelding(receivedSykmelding, avbrutteAktivitetskravMeldinger.firstOrNull { it.startdato == startdato })
         sendAvbrutt39ukersmelding(receivedSykmelding, avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato })
         utsettStansmelding(receivedSykmelding, aktiveStansmeldinger.firstOrNull { it.startdato == startdato })
-    }
-
-    // En melding avbrytes kun hvis bruker enten er frisk eller har gradert sykmelding ved 8 uker. Derfor blir det
-    // riktig å sende melding hvis det kommer inn en ny sykmelding som ikke er gradert hvis det finnes avbrutt melding
-    // for samme sykeforløp (samme startdato).
-    fun sendAvbruttAktivitetskravmelding(receivedSykmelding: ReceivedSykmelding, avbruttMelding: PlanlagtMeldingDbModel?) {
-        val sykmeldingId = receivedSykmelding.sykmelding.id
-        if (inneholderGradertPeriode(receivedSykmelding.sykmelding.perioder)) {
-            log.info("Ignorerer gradert sykmelding med id {}", sykmeldingId)
-            return
-        }
-        if (avbruttMelding == null) {
-            log.info("Fant ingen matchende avbrutte aktivitetskravmeldinger, ignorerer sykmelding med id {}", sykmeldingId)
-        } else {
-            log.info("Sender aktivitetskravmelding med id {} for sykmeldingid {}", avbruttMelding.id, sykmeldingId)
-            database.resendAvbruttMelding(avbruttMelding.id)
-            val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
-            database.sendPlanlagtMelding(avbruttMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)
-            SENDT_AVBRUTT_MELDING.inc()
-        }
     }
 
     fun sendAvbrutt39ukersmelding(receivedSykmelding: ReceivedSykmelding, avbruttMelding: PlanlagtMeldingDbModel?) {

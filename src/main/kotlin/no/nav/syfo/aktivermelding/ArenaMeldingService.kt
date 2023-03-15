@@ -1,6 +1,5 @@
 package no.nav.syfo.aktivermelding
 
-import no.nav.syfo.aktivermelding.arenamodel.Aktivitetskrav8UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev39UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev4UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.K278M810Stans
@@ -42,12 +41,8 @@ class ArenaMeldingService(
                 )
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
-                return arenaMqProducer.sendTilArena(
-                    til8Ukersmelding(
-                        planlagtMeldingDbModel,
-                        OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
-                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
+                log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
+                return planlagtMeldingDbModel.id.toString()
             }
             BREV_39_UKER_TYPE -> {
                 return arenaMqProducer.sendTilArena(
@@ -93,30 +88,6 @@ class ArenaMeldingService(
             ),
             n2840 = N2840(
                 taglinje = "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).".padEnd(80, ' ')
-            )
-        )
-    }
-
-    fun til8Ukersmelding(
-        planlagtMeldingDbModel: PlanlagtMeldingDbModel,
-        now: OffsetDateTime
-    ): Aktivitetskrav8UkerMelding {
-        val nowFormatted = formatDateTime(now)
-        return Aktivitetskrav8UkerMelding(
-            n2810 = N2810(
-                dato = nowFormatted.split(',')[0],
-                klokke = nowFormatted.split(',')[1],
-                fnr = planlagtMeldingDbModel.fnr,
-                meldKode = "O"
-            ),
-            n2820 = N2820(),
-            n2830 = N2830(
-                meldingId = "M-RK68-1".padEnd(10, ' '),
-                versjon = "008",
-                meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
-            ),
-            n2840 = N2840(
-                taglinje = "SP: Aktivitetskrav ved 8 uker 100% sykmeldt".padEnd(80, ' ')
             )
         )
     }
