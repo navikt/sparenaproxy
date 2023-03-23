@@ -31,7 +31,7 @@ class KvitteringListener(
                 log.info("Mottatt kvittering med correlationId $correlationId")
                 kvitteringService.behandleKvittering(inputMessageText, correlationId)
             } catch (e: Exception) {
-                log.error("Noe gikk galt ved håndtering av kvitteringsmelding, sender melding til backout", e.message)
+                log.error("Noe gikk galt ved håndtering av kvitteringsmelding, sender melding til backout: ${e.message}")
                 backoutProducer.send(message)
                 KVITTERING_FEILET.inc()
             } finally {
