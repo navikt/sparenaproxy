@@ -41,9 +41,9 @@ class SyfoSyketilfelleClient(
         }
 
         if (aktueltSykeforloep == null) {
-            log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, {}", sporingsId)
+            log.error("Fant ikke sykeforløp for sykmelding med id $sykmeldingId, sporingsId: {}", sporingsId)
             if (cluster == "dev-gcp") {
-                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, {}", sporingsId)
+                log.info("Siden dette er dev setter vi startdato til å være 1 måned siden, sporingsId {}", sporingsId)
                 return LocalDate.now().minusMonths(1)
             }
             throw RuntimeException("Fant ikke sykeforløp for sykmelding med id $sykmeldingId")
