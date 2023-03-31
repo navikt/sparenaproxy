@@ -67,6 +67,13 @@ spec:
         - application: flex-syketilfelle
           namespace: flex
           cluster: prod-gcp
+      external:
+        - host: pdl-api.prod-fss-pub.nais.io
+        - host: mpls02.adeo.no
+          ports:
+            - name: mq
+              port: 1414
+              protocol: TCP
   envFrom:
     - secret: srvsparenaproxy-secrets
     - secret: sparenaproxy-keystore-pwd

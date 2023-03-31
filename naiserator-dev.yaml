@@ -66,6 +66,13 @@ spec:
         - application: flex-syketilfelle
           namespace: flex
           cluster: dev-gcp
+      external:
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: b27apvl220.preprod.local
+          ports:
+            - name: mq
+              port: 1413
+              protocol: TCP
   envFrom:
     - secret: srvsparenaproxy-secrets
     - secret: sparenaproxy-keystore-pwd
