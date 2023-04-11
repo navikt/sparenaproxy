@@ -19,7 +19,7 @@ val postgresVersion = "42.5.1"
 val flywayVersion = "9.10.0"
 val hikariVersion = "5.0.1"
 val confluentVersion = "7.2.1"
-val kotlinVersion = "1.8.10"
+val kotlinVersion = "1.8.20"
 val testContainerVersion = "1.17.6"
 val commonsCodecVersion = "1.15"
 
@@ -29,7 +29,7 @@ tasks.withType<Jar> {
 
 plugins {
     id("org.jmailen.kotlinter") version "3.12.0"
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
