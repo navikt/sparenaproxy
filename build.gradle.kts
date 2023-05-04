@@ -6,20 +6,20 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val coroutinesVersion = "1.6.4"
-val jacksonVersion = "2.14.2"
+val jacksonVersion = "2.15.0"
 val kluentVersion = "1.72"
-val ktorVersion = "2.2.4"
+val ktorVersion = "2.3.0"
 val logbackVersion = "1.4.5"
 val logstashEncoderVersion = "7.3"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.5.4"
-val smCommonVersion = "1.9df1108"
+val smCommonVersion = "1.0.1"
 val mockkVersion = "1.13.2"
 val postgresVersion = "42.5.1"
 val flywayVersion = "9.10.0"
 val hikariVersion = "5.0.1"
 val confluentVersion = "7.2.1"
-val kotlinVersion = "1.8.20"
+val kotlinVersion = "1.8.21"
 val testContainerVersion = "1.17.6"
 val commonsCodecVersion = "1.15"
 
@@ -29,7 +29,7 @@ tasks.withType<Jar> {
 
 plugins {
     id("org.jmailen.kotlinter") version "3.12.0"
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.8.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
