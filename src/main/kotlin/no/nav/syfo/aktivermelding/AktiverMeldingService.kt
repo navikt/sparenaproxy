@@ -1,6 +1,10 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.syfo.aktivermelding.client.SmregisterClient
 import no.nav.syfo.aktivermelding.db.avbrytPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.erStansmeldingSendt
@@ -26,10 +30,6 @@ import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
 import no.nav.syfo.objectMapper
 import no.nav.syfo.pdl.service.PdlPersonService
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 
 class AktiverMeldingService(
     private val database: DatabaseInterface,
@@ -49,37 +49,52 @@ class AktiverMeldingService(
         val planlagtMelding = database.hentPlanlagtMelding(aktiverMelding.id)
         if (planlagtMelding != null) {
             val finnesNyerePlanlagtMeldingMedAnnenStartdato =
-                database.finnesNyerePlanlagtMeldingMedAnnenStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.opprettet)
+                database.finnesNyerePlanlagtMeldingMedAnnenStartdato(
+                    planlagtMelding.fnr,
+                    planlagtMelding.startdato,
+                    planlagtMelding.opprettet
+                )
             if (finnesNyerePlanlagtMeldingMedAnnenStartdato) {
-                log.info("Det finnes nyere planlagte meldinger for sykefravær med annen startdato, avbryter melding med id ${planlagtMelding.id}")
+                log.info(
+                    "Det finnes nyere planlagte meldinger for sykefravær med annen startdato, avbryter melding med id ${planlagtMelding.id}"
+                )
                 avbrytMelding(aktiverMelding)
             } else if (planlagtMelding.type == STANS_TYPE) {
                 sendEllerUtsettStansmelding(planlagtMelding)
             } else {
-                val skalSendeMelding = when (planlagtMelding.type) {
-                    BREV_4_UKER_TYPE -> {
-                        if (smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
-                            gjelderSammeSykefravaer(planlagtMelding)
-                        } else {
+                val skalSendeMelding =
+                    when (planlagtMelding.type) {
+                        BREV_4_UKER_TYPE -> {
+                            if (
+                                smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                            ) {
+                                gjelderSammeSykefravaer(planlagtMelding)
+                            } else {
+                                false
+                            }
+                        }
+                        AKTIVITETSKRAV_8_UKER_TYPE -> {
+                            log.warn(
+                                "skal ikke sende 8 ukersmelding for melding ${aktiverMelding.id}"
+                            )
                             false
                         }
-                    }
-                    AKTIVITETSKRAV_8_UKER_TYPE -> {
-                        log.warn("skal ikke sende 8 ukersmelding for melding ${aktiverMelding.id}")
-                        false
-                    }
-                    BREV_39_UKER_TYPE -> {
-                        if (smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)) {
-                            gjelderSammeSykefravaer(planlagtMelding)
-                        } else {
-                            false
+                        BREV_39_UKER_TYPE -> {
+                            if (
+                                smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
+                            ) {
+                                gjelderSammeSykefravaer(planlagtMelding)
+                            } else {
+                                false
+                            }
+                        }
+                        else -> {
+                            log.error(
+                                "Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}"
+                            )
+                            throw IllegalStateException("Planlagt melding har ukjent type")
                         }
                     }
-                    else -> {
-                        log.error("Planlagt melding med id ${planlagtMelding.id} har ukjent type: ${planlagtMelding.type}")
-                        throw IllegalStateException("Planlagt melding har ukjent type")
-                    }
-                }
                 if (skalSendeMelding) {
                     sendTilArena(planlagtMelding)
                 } else {
@@ -87,24 +102,39 @@ class AktiverMeldingService(
                 }
             }
         } else {
-            log.warn("Fant ikke planlagt melding for id ${aktiverMelding.id} som ikke er sendt eller avbrutt fra før")
+            log.warn(
+                "Fant ikke planlagt melding for id ${aktiverMelding.id} som ikke er sendt eller avbrutt fra før"
+            )
             IKKE_FUNNET_MELDING.inc()
         }
     }
 
     private suspend fun sendEllerUtsettStansmelding(planlagtMelding: PlanlagtMeldingDbModel) {
-        val sykmeldtTom = smregisterClient.erSykmeldtTilOgMed(planlagtMelding.fnr, planlagtMelding.id)
+        val sykmeldtTom =
+            smregisterClient.erSykmeldtTilOgMed(planlagtMelding.fnr, planlagtMelding.id)
         if (sykmeldtTom == null) {
             if (database.fireukersmeldingErSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
-                log.info("Bruker er ikke lenger sykmeldt, aktiverer stansmelding ${planlagtMelding.id}")
+                log.info(
+                    "Bruker er ikke lenger sykmeldt, aktiverer stansmelding ${planlagtMelding.id}"
+                )
                 sendTilArena(planlagtMelding)
             } else {
-                log.info("Bruker er ikke lenger sykmeldt, men var sykmeldt mindre enn 4 uker/treffer ikke filter, stansmelding ${planlagtMelding.id}")
+                log.info(
+                    "Bruker er ikke lenger sykmeldt, men var sykmeldt mindre enn 4 uker/treffer ikke filter, stansmelding ${planlagtMelding.id}"
+                )
                 avbrytMelding(AktiverMelding(planlagtMelding.id))
             }
         } else {
             log.info("Bruker er fortsatt sykmeldt, utsetter stansmelding ${planlagtMelding.id}")
-            database.utsettPlanlagtMelding(planlagtMelding.id, sykmeldtTom.plusDays(17).atStartOfDay().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime())
+            database.utsettPlanlagtMelding(
+                planlagtMelding.id,
+                sykmeldtTom
+                    .plusDays(17)
+                    .atStartOfDay()
+                    .atZone(ZoneId.systemDefault())
+                    .withZoneSameInstant(ZoneOffset.UTC)
+                    .toOffsetDateTime()
+            )
             UTSATT_MELDING.inc()
         }
     }
@@ -117,7 +147,11 @@ class AktiverMeldingService(
         if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {
             log.info("Sender melding med id {} til Arena", planlagtMelding.id)
             val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
-            database.sendPlanlagtMelding(planlagtMelding.id, OffsetDateTime.now(ZoneOffset.UTC), correlationId)
+            database.sendPlanlagtMelding(
+                planlagtMelding.id,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                correlationId
+            )
             SENDT_MELDING.inc()
         } else {
             log.info("Person er død, avbryter alle planlagte meldinger ${planlagtMelding.id}")
@@ -127,9 +161,15 @@ class AktiverMeldingService(
 
     private suspend fun gjelderSammeSykefravaer(planlagtMelding: PlanlagtMeldingDbModel): Boolean {
         if (database.erStansmeldingSendt(planlagtMelding.fnr, planlagtMelding.startdato)) {
-            log.info("Det er sendt/avbrutt stansmelding for sykefravær som melding med id ${planlagtMelding.id} tilhører")
+            log.info(
+                "Det er sendt/avbrutt stansmelding for sykefravær som melding med id ${planlagtMelding.id} tilhører"
+            )
         }
-        return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(planlagtMelding.fnr, planlagtMelding.startdato, planlagtMelding.id)
+        return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
+            planlagtMelding.fnr,
+            planlagtMelding.startdato,
+            planlagtMelding.id
+        )
     }
 
     private fun avbrytMelding(aktiverMelding: AktiverMelding) {
@@ -139,7 +179,11 @@ class AktiverMeldingService(
     }
 
     private fun avbrytPgaDodsfall(fnr: String, meldingId: UUID) {
-        val antallAvbrutteMeldinger = database.avbrytPlanlagteMeldingerVedDodsfall(listOf(fnr), OffsetDateTime.now(ZoneOffset.UTC))
+        val antallAvbrutteMeldinger =
+            database.avbrytPlanlagteMeldingerVedDodsfall(
+                listOf(fnr),
+                OffsetDateTime.now(ZoneOffset.UTC)
+            )
         if (antallAvbrutteMeldinger > 0) {
             log.info("Avbrøt $antallAvbrutteMeldinger melding(er) fordi bruker er død, $meldingId")
             AVBRUTT_MELDING.inc(antallAvbrutteMeldinger.toDouble())

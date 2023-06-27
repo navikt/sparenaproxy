@@ -15,6 +15,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.serialization.jackson.jackson
 import io.prometheus.client.hotspot.DefaultExports
+import javax.jms.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -48,22 +49,24 @@ import no.nav.syfo.mq.producerForQueue
 import no.nav.syfo.pdl.PdlFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import javax.jms.Session
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.sparenaproxy")
 
-val objectMapper: ObjectMapper = ObjectMapper().apply {
-    registerKotlinModule()
-    registerModule(JavaTimeModule())
-    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-}
+val objectMapper: ObjectMapper =
+    ObjectMapper().apply {
+        registerKotlinModule()
+        registerModule(JavaTimeModule())
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    }
 
 @DelicateCoroutinesApi
 fun main() {
     val env = Environment()
     val serviceuser = Serviceuser()
-    MqTlsUtils.getMqTlsConfig().forEach { key, value -> System.setProperty(key as String, value as String) }
+    MqTlsUtils.getMqTlsConfig().forEach { key, value ->
+        System.setProperty(key as String, value as String)
+    }
     DefaultExports.initialize()
     val applicationState = ApplicationState()
 
@@ -81,7 +84,8 @@ fun main() {
         HttpResponseValidator {
             handleResponseExceptionWithRequest { exception, _ ->
                 when (exception) {
-                    is SocketTimeoutException -> throw ServiceUnavailableException(exception.message)
+                    is SocketTimeoutException ->
+                        throw ServiceUnavailableException(exception.message)
                 }
             }
         }
@@ -93,7 +97,9 @@ fun main() {
             }
             retryIf(maxRetries) { request, response ->
                 if (response.status.value.let { it in 500..599 }) {
-                    log.warn("Retrying for statuscode ${response.status.value}, for url ${request.url}")
+                    log.warn(
+                        "Retrying for statuscode ${response.status.value}, for url ${request.url}"
+                    )
                     true
                 } else {
                     false
@@ -104,18 +110,34 @@ fun main() {
 
     val httpClient = HttpClient(Apache, config)
 
-    val accessTokenClientV2 = AccessTokenClientV2(env.aadAccessTokenV2Url, clientId = env.clientIdV2, clientSecret = env.clientSecretV2, httpClient = httpClient)
-    val syfoSyketilfelleClient = SyfoSyketilfelleClient(
-        syketilfelleEndpointURL = env.syketilfelleEndpointURL,
-        accessTokenClientV2 = accessTokenClientV2,
-        resourceId = env.syketilfelleScope,
-        httpClient = httpClient,
-        cluster = env.cluster
-    )
-    val smregisterClient = SmregisterClient(env.smregisterEndpointURL, accessTokenClientV2, env.smregisterScope, httpClient)
-    val pdlPersonService = PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)
+    val accessTokenClientV2 =
+        AccessTokenClientV2(
+            env.aadAccessTokenV2Url,
+            clientId = env.clientIdV2,
+            clientSecret = env.clientSecretV2,
+            httpClient = httpClient
+        )
+    val syfoSyketilfelleClient =
+        SyfoSyketilfelleClient(
+            syketilfelleEndpointURL = env.syketilfelleEndpointURL,
+            accessTokenClientV2 = accessTokenClientV2,
+            resourceId = env.syketilfelleScope,
+            httpClient = httpClient,
+            cluster = env.cluster
+        )
+    val smregisterClient =
+        SmregisterClient(
+            env.smregisterEndpointURL,
+            accessTokenClientV2,
+            env.smregisterScope,
+            httpClient
+        )
+    val pdlPersonService =
+        PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)
 
-    val connection = connectionFactory(env).createConnection(serviceuser.serviceuserUsername, serviceuser.serviceuserPassword)
+    val connection =
+        connectionFactory(env)
+            .createConnection(serviceuser.serviceuserUsername, serviceuser.serviceuserPassword)
 
     connection.start()
     val session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE)
@@ -126,42 +148,65 @@ fun main() {
     val arenaMeldingService = ArenaMeldingService(arenaMqProducer)
 
     val kafkaClients = KafkaClients(env)
-    val lagreUtbetaltEventOgPlanlagtMeldingService = LagreUtbetaltEventOgPlanlagtMeldingService(database)
+    val lagreUtbetaltEventOgPlanlagtMeldingService =
+        LagreUtbetaltEventOgPlanlagtMeldingService(database)
     val maksdatoService = MaksdatoService(arenaMqProducer, pdlPersonService)
-    val utbetaltEventService = UtbetaltEventService(syfoSyketilfelleClient, lagreUtbetaltEventOgPlanlagtMeldingService, maksdatoService)
+    val utbetaltEventService =
+        UtbetaltEventService(
+            syfoSyketilfelleClient,
+            lagreUtbetaltEventOgPlanlagtMeldingService,
+            maksdatoService
+        )
 
-    val aktiverMeldingService = AktiverMeldingService(database, smregisterClient, arenaMeldingService, pdlPersonService, syfoSyketilfelleClient)
+    val aktiverMeldingService =
+        AktiverMeldingService(
+            database,
+            smregisterClient,
+            arenaMeldingService,
+            pdlPersonService,
+            syfoSyketilfelleClient
+        )
 
-    val kvitteringListener = KvitteringListener(applicationState, kvitteringConsumer, backoutProducer, KvitteringService(database))
+    val kvitteringListener =
+        KvitteringListener(
+            applicationState,
+            kvitteringConsumer,
+            backoutProducer,
+            KvitteringService(database)
+        )
 
-    val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
+    val mottattSykmeldingService =
+        MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
 
     val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
-    val dodshendelserService = DodshendelserService(applicationState, personhendelserConsumer, database)
+    val dodshendelserService =
+        DodshendelserService(applicationState, personhendelserConsumer, database)
 
-    val commonAivenKafkaService = CommonAivenKafkaService(applicationState, kafkaClients.aivenKafkaConsumer, env, utbetaltEventService, mottattSykmeldingService, aktiverMeldingService)
+    val commonAivenKafkaService =
+        CommonAivenKafkaService(
+            applicationState,
+            kafkaClients.aivenKafkaConsumer,
+            env,
+            utbetaltEventService,
+            mottattSykmeldingService,
+            aktiverMeldingService
+        )
 
-    val applicationEngine = createApplicationEngine(
-        env,
-        applicationState
-    )
+    val applicationEngine = createApplicationEngine(env, applicationState)
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
-    createListener(applicationState) {
-        dodshendelserService.start()
-    }
-    createListener(applicationState) {
-        kvitteringListener.start()
-    }
-    createListener(applicationState) {
-        commonAivenKafkaService.start()
-    }
+    createListener(applicationState) { dodshendelserService.start() }
+    createListener(applicationState) { kvitteringListener.start() }
+    createListener(applicationState) { commonAivenKafkaService.start() }
 
     applicationServer.start()
 }
 
 @DelicateCoroutinesApi
-fun createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
+fun createListener(
+    applicationState: ApplicationState,
+    action: suspend CoroutineScope.() -> Unit
+): Job =
     GlobalScope.launch {
         try {
             action()

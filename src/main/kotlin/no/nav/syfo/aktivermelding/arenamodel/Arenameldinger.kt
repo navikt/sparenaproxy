@@ -2,12 +2,7 @@ package no.nav.syfo.aktivermelding.arenamodel
 
 import no.nav.syfo.log
 
-data class Brev4UkerMelding(
-    val n2810: N2810,
-    val n2820: N2820,
-    val n2830: N2830,
-    val n2840: N2840
-)
+data class Brev4UkerMelding(val n2810: N2810, val n2820: N2820, val n2830: N2830, val n2840: N2840)
 
 data class Brev39UkerMelding(
     val n2810: N2810,

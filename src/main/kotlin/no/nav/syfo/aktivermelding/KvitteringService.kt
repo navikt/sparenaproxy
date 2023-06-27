@@ -16,11 +16,15 @@ class KvitteringService(private val database: DatabaseInterface) {
             KVITTERING_SENDT.inc()
         } else {
             KVITTERING_MED_FEIL.inc()
-            log.error("Melding med id $correlationId har feilet i Arena, statusOk: ${kvittering.statusOk}, feilkode: ${kvittering.feilkode}, feilmelding ${kvittering.feilmelding}")
+            log.error(
+                "Melding med id $correlationId har feilet i Arena, statusOk: ${kvittering.statusOk}, feilkode: ${kvittering.feilkode}, feilmelding ${kvittering.feilmelding}"
+            )
             val antallResendteMeldinger = database.resendPlanlagtMelding(correlationId)
             if (antallResendteMeldinger < 1) {
                 log.error("Fant ikke melding med id $correlationId, kan ikke resende")
-                throw RuntimeException("Melding med id $correlationId har feilet i Arena: ${kvittering.feilkode} og kan ikke resendes")
+                throw RuntimeException(
+                    "Melding med id $correlationId har feilet i Arena: ${kvittering.feilkode} og kan ikke resendes"
+                )
             } else {
                 log.info("Resender melding med id $correlationId")
             }

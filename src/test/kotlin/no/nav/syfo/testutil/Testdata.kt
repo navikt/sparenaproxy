@@ -1,5 +1,12 @@
 package no.nav.syfo.testutil
 
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.Adresse
@@ -13,18 +20,12 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.Sykmelding
-import java.time.Clock
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.UUID
 
 fun opprettPlanlagtMelding(
     id: UUID,
     fnr: String = "fnr",
-    sendes: OffsetDateTime = OffsetDateTime.of(2023, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC).minusMinutes(30),
+    sendes: OffsetDateTime =
+        OffsetDateTime.of(2023, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC).minusMinutes(30),
     type: String = AKTIVITETSKRAV_8_UKER_TYPE,
     avbrutt: OffsetDateTime? = null,
     sendt: OffsetDateTime? = null,
@@ -46,39 +47,42 @@ fun opprettPlanlagtMelding(
 
 fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSykmelding {
     return ReceivedSykmelding(
-        sykmelding = Sykmelding(
-            id = UUID.randomUUID().toString(),
-            behandletTidspunkt = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
-            behandler = Behandler(
-                fornavn = "fornavn",
-                adresse = Adresse(null, null, null, null, null),
-                fnr = "12345678901",
-                etternavn = "etternavn",
-                aktoerId = "aktorId",
-                her = null,
-                tlf = null,
-                hpr = null,
-                mellomnavn = null
+        sykmelding =
+            Sykmelding(
+                id = UUID.randomUUID().toString(),
+                behandletTidspunkt = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
+                behandler =
+                    Behandler(
+                        fornavn = "fornavn",
+                        adresse = Adresse(null, null, null, null, null),
+                        fnr = "12345678901",
+                        etternavn = "etternavn",
+                        aktoerId = "aktorId",
+                        her = null,
+                        tlf = null,
+                        hpr = null,
+                        mellomnavn = null
+                    ),
+                arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, null, null, null),
+                andreTiltak = null,
+                avsenderSystem = AvsenderSystem("avsender", "1"),
+                kontaktMedPasient = KontaktMedPasient(LocalDate.now(), null),
+                medisinskVurdering =
+                    MedisinskVurdering(null, emptyList(), false, false, null, null),
+                meldingTilArbeidsgiver = null,
+                meldingTilNAV = null,
+                msgId = "1",
+                navnFastlege = null,
+                pasientAktoerId = "1234",
+                perioder = perioder,
+                prognose = null,
+                signaturDato = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
+                skjermesForPasient = false,
+                syketilfelleStartDato = LocalDate.now(),
+                tiltakArbeidsplassen = null,
+                tiltakNAV = null,
+                utdypendeOpplysninger = emptyMap()
             ),
-            arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, null, null, null),
-            andreTiltak = null,
-            avsenderSystem = AvsenderSystem("avsender", "1"),
-            kontaktMedPasient = KontaktMedPasient(LocalDate.now(), null),
-            medisinskVurdering = MedisinskVurdering(null, emptyList(), false, false, null, null),
-            meldingTilArbeidsgiver = null,
-            meldingTilNAV = null,
-            msgId = "1",
-            navnFastlege = null,
-            pasientAktoerId = "1234",
-            perioder = perioder,
-            prognose = null,
-            signaturDato = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
-            skjermesForPasient = false,
-            syketilfelleStartDato = LocalDate.now(),
-            tiltakArbeidsplassen = null,
-            tiltakNAV = null,
-            utdypendeOpplysninger = emptyMap()
-        ),
         msgId = "1",
         fellesformat = "",
         legekontorHerId = null,

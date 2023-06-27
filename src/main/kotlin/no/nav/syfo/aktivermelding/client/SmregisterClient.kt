@@ -8,10 +8,10 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.syfo.client.AccessTokenClientV2
-import no.nav.syfo.log
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.syfo.client.AccessTokenClientV2
+import no.nav.syfo.log
 
 class SmregisterClient(
     private val smregisterEndpointURL: String,
@@ -26,18 +26,27 @@ class SmregisterClient(
             val sykmeldingstatus = hentSykmeldingstatus(fnr)
             return sykmeldingstatus.erSykmeldt && sykmeldingstatus.gradert == false
         } catch (e: Exception) {
-            log.error("Feil ved henting av sykmeldingstatus for planlagtMelding $planlagtMeldingId {}", e.message)
+            log.error(
+                "Feil ved henting av sykmeldingstatus for planlagtMelding $planlagtMeldingId {}",
+                e.message
+            )
             throw e
         }
     }
 
     suspend fun erSykmeldt(fnr: String, planlagtMeldingId: UUID): Boolean {
-        log.info("Henter sykmeldingstatus uavhengig av grad for planlagtMelding {}", planlagtMeldingId)
+        log.info(
+            "Henter sykmeldingstatus uavhengig av grad for planlagtMelding {}",
+            planlagtMeldingId
+        )
         try {
             val sykmeldingstatus = hentSykmeldingstatus(fnr)
             return sykmeldingstatus.erSykmeldt
         } catch (e: Exception) {
-            log.error("Feil ved henting av sykmeldingstatus uavhengig av grad for planlagtMelding $planlagtMeldingId {}", e.message)
+            log.error(
+                "Feil ved henting av sykmeldingstatus uavhengig av grad for planlagtMelding $planlagtMeldingId {}",
+                e.message
+            )
             throw e
         }
     }
@@ -52,27 +61,27 @@ class SmregisterClient(
             }
             return sykmeldingstatus.tom
         } catch (e: Exception) {
-            log.error("Feil ved henting av sykmeldingstatus uavhengig av grad for stansmelding $planlagtMeldingId {}", e.message)
+            log.error(
+                "Feil ved henting av sykmeldingstatus uavhengig av grad for stansmelding $planlagtMeldingId {}",
+                e.message
+            )
             throw e
         }
     }
 
     private suspend fun hentSykmeldingstatus(fnr: String): SykmeldtStatus =
-        httpClient.post("$smregisterEndpointURL/api/v2/sykmelding/sykmeldtStatus") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
-            headers {
-                append("Authorization", "Bearer $accessToken")
+        httpClient
+            .post("$smregisterEndpointURL/api/v2/sykmelding/sykmeldtStatus") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
+                headers { append("Authorization", "Bearer $accessToken") }
+                setBody(StatusRequest(fnr = fnr))
             }
-            setBody(StatusRequest(fnr = fnr))
-        }.body<SykmeldtStatus>()
+            .body<SykmeldtStatus>()
 }
 
-data class StatusRequest(
-    val fnr: String,
-    val dato: LocalDate = LocalDate.now()
-)
+data class StatusRequest(val fnr: String, val dato: LocalDate = LocalDate.now())
 
 data class SykmeldtStatus(
     val erSykmeldt: Boolean,

@@ -1,5 +1,9 @@
 package no.nav.syfo.aktivermelding
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import no.nav.syfo.aktivermelding.arenamodel.Brev39UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev4UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.K278M810Stans
@@ -19,14 +23,8 @@ import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
-class ArenaMeldingService(
-    private val arenaMqProducer: ArenaMqProducer
-) {
+class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
 
@@ -35,9 +33,10 @@ class ArenaMeldingService(
             BREV_4_UKER_TYPE -> {
                 return arenaMqProducer.sendTilArena(
                     til4Ukersmelding(
-                        planlagtMeldingDbModel,
-                        OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
+                            planlagtMeldingDbModel,
+                            OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                        )
+                        .tilMqMelding()
                 )
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
@@ -45,20 +44,34 @@ class ArenaMeldingService(
                 return planlagtMeldingDbModel.id.toString()
             }
             BREV_39_UKER_TYPE -> {
-                return arenaMqProducer.sendTilArena(
-                    til39Ukersmelding(
-                        planlagtMeldingDbModel,
-                        OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
-                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
+                return arenaMqProducer
+                    .sendTilArena(
+                        til39Ukersmelding(
+                                planlagtMeldingDbModel,
+                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                            )
+                            .tilMqMelding()
+                    )
+                    .also {
+                        log.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
+                        )
+                    }
             }
             STANS_TYPE -> {
-                return arenaMqProducer.sendTilArena(
-                    tilStansmelding(
-                        planlagtMeldingDbModel,
-                        OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                    ).tilMqMelding()
-                ).also { log.info("Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}") }
+                return arenaMqProducer
+                    .sendTilArena(
+                        tilStansmelding(
+                                planlagtMeldingDbModel,
+                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                            )
+                            .tilMqMelding()
+                    )
+                    .also {
+                        log.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
+                        )
+                    }
             }
             else -> {
                 log.error(
@@ -66,68 +79,85 @@ class ArenaMeldingService(
                     planlagtMeldingDbModel.id,
                     planlagtMeldingDbModel.type
                 )
-                throw IllegalStateException("Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}")
+                throw IllegalStateException(
+                    "Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}"
+                )
             }
         }
     }
 
-    fun til4Ukersmelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel, now: OffsetDateTime): Brev4UkerMelding {
+    fun til4Ukersmelding(
+        planlagtMeldingDbModel: PlanlagtMeldingDbModel,
+        now: OffsetDateTime
+    ): Brev4UkerMelding {
         val nowFormatted = formatDateTime(now)
         return Brev4UkerMelding(
-            n2810 = N2810(
-                dato = nowFormatted.split(',')[0],
-                klokke = nowFormatted.split(',')[1],
-                fnr = planlagtMeldingDbModel.fnr,
-                meldKode = "I"
-            ),
+            n2810 =
+                N2810(
+                    dato = nowFormatted.split(',')[0],
+                    klokke = nowFormatted.split(',')[1],
+                    fnr = planlagtMeldingDbModel.fnr,
+                    meldKode = "I"
+                ),
             n2820 = N2820(),
-            n2830 = N2830(
-                meldingId = "M-F234-1".padEnd(10, ' '),
-                versjon = "014",
-                meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
-            ),
-            n2840 = N2840(
-                taglinje = "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).".padEnd(80, ' ')
-            )
+            n2830 =
+                N2830(
+                    meldingId = "M-F234-1".padEnd(10, ' '),
+                    versjon = "014",
+                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
+                ),
+            n2840 =
+                N2840(
+                    taglinje =
+                        "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
+                            .padEnd(80, ' ')
+                )
         )
     }
 
-    fun til39Ukersmelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel, now: OffsetDateTime): Brev39UkerMelding {
+    fun til39Ukersmelding(
+        planlagtMeldingDbModel: PlanlagtMeldingDbModel,
+        now: OffsetDateTime
+    ): Brev39UkerMelding {
         val nowFormatted = formatDateTime(now)
         return Brev39UkerMelding(
-            n2810 = N2810(
-                dato = nowFormatted.split(',')[0],
-                klokke = nowFormatted.split(',')[1],
-                fnr = planlagtMeldingDbModel.fnr,
-                meldKode = "I"
-            ),
+            n2810 =
+                N2810(
+                    dato = nowFormatted.split(',')[0],
+                    klokke = nowFormatted.split(',')[1],
+                    fnr = planlagtMeldingDbModel.fnr,
+                    meldKode = "I"
+                ),
             n2820 = N2820(),
-            n2830 = N2830(
-                meldingId = "M-F226-1".padEnd(10, ' '),
-                versjon = "015",
-                meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
-            ),
-            n2840 = N2840(
-                taglinje = "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).".padEnd(
-                    80,
-                    ' '
+            n2830 =
+                N2830(
+                    meldingId = "M-F226-1".padEnd(10, ' '),
+                    versjon = "015",
+                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
+                ),
+            n2840 =
+                N2840(
+                    taglinje =
+                        "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
+                            .padEnd(80, ' ')
                 )
-            )
         )
     }
 
-    fun tilStansmelding(planlagtMeldingDbModel: PlanlagtMeldingDbModel, now: OffsetDateTime): Stansmelding {
+    fun tilStansmelding(
+        planlagtMeldingDbModel: PlanlagtMeldingDbModel,
+        now: OffsetDateTime
+    ): Stansmelding {
         val nowFormatted = formatDateTime(now)
         return Stansmelding(
-            k278M810 = K278M810Stans(
-                dato = nowFormatted.split(',')[0],
-                klokke = nowFormatted.split(',')[1],
-                fnr = planlagtMeldingDbModel.fnr
-            ),
+            k278M810 =
+                K278M810Stans(
+                    dato = nowFormatted.split(',')[0],
+                    klokke = nowFormatted.split(',')[1],
+                    fnr = planlagtMeldingDbModel.fnr
+                ),
             k278M815 = K278M815Stans(),
-            k278M830 = K278M830Stans(
-                startdato = formatDate(planlagtMeldingDbModel.startdato)
-            ),
+            k278M830 = K278M830Stans(startdato = formatDate(planlagtMeldingDbModel.startdato)),
             k278M840 = K278M840Stans()
         )
     }

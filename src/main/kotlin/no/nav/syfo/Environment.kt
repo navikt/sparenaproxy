@@ -1,10 +1,10 @@
 package no.nav.syfo
 
-import no.nav.syfo.kafka.KafkaCredentials
-import no.nav.syfo.mq.MqConfig
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import no.nav.syfo.kafka.KafkaCredentials
+import no.nav.syfo.mq.MqConfig
 
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
@@ -13,7 +13,8 @@ data class Environment(
     val utbetalingTopic: String = "tbd.utbetaling",
     val aktiverMeldingAivenTopic: String = "teamsykmelding.privat-aktiver-planlagtmelding",
     val pdlTopic: String = "pdl.leesah-v1",
-    val syketilfelleEndpointURL: String = getEnvVar("SYKETILLFELLE_ENDPOINT_URL", "http://flex-syketilfelle.flex"),
+    val syketilfelleEndpointURL: String =
+        getEnvVar("SYKETILLFELLE_ENDPOINT_URL", "http://flex-syketilfelle.flex"),
     val syketilfelleScope: String = getEnvVar("SYKETILLFELLE_SCOPE"),
     val smregisterEndpointURL: String = getEnvVar("SMREGISTER_URL", "http://syfosmregister"),
     val smregisterScope: String = getEnvVar("SMREGISTER_SCOPE"),
@@ -54,6 +55,8 @@ data class Serviceuser(
 }
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
-    System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+    System.getenv(varName)
+        ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
-fun getFileAsString(filePath: String) = String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8)
+fun getFileAsString(filePath: String) =
+    String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8)

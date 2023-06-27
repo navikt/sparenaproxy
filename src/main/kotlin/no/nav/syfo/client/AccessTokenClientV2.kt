@@ -10,11 +10,11 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
+import java.time.Instant
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Instant
 
 class AccessTokenClientV2(
     private val aadAccessTokenUrl: String,
@@ -25,50 +25,48 @@ class AccessTokenClientV2(
     private val log: Logger = LoggerFactory.getLogger("azureadtokenclient")
     private val mutex = Mutex()
 
-    @Volatile
-    private var tokenMap = HashMap<String, AadAccessTokenMedExpiry>()
+    @Volatile private var tokenMap = HashMap<String, AadAccessTokenMedExpiry>()
 
     suspend fun getAccessTokenV2(resource: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
-            (
-                tokenMap[resource]
-                    ?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
+            (tokenMap[resource]?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
                     ?: run {
                         log.debug("Henter nytt token fra Azure AD")
-                        val response: AadAccessTokenV2 = httpClient.post(aadAccessTokenUrl) {
-                            accept(ContentType.Application.Json)
-                            method = HttpMethod.Post
-                            setBody(
-                                FormDataContent(
-                                    Parameters.build {
-                                        append("client_id", clientId)
-                                        append("scope", resource)
-                                        append("grant_type", "client_credentials")
-                                        append("client_secret", clientSecret)
-                                    }
-                                )
+                        val response: AadAccessTokenV2 =
+                            httpClient
+                                .post(aadAccessTokenUrl) {
+                                    accept(ContentType.Application.Json)
+                                    method = HttpMethod.Post
+                                    setBody(
+                                        FormDataContent(
+                                            Parameters.build {
+                                                append("client_id", clientId)
+                                                append("scope", resource)
+                                                append("grant_type", "client_credentials")
+                                                append("client_secret", clientSecret)
+                                            }
+                                        )
+                                    )
+                                }
+                                .body()
+                        val tokenMedExpiry =
+                            AadAccessTokenMedExpiry(
+                                access_token = response.access_token,
+                                expires_in = response.expires_in,
+                                expiresOn = Instant.now().plusSeconds(response.expires_in.toLong())
                             )
-                        }.body()
-                        val tokenMedExpiry = AadAccessTokenMedExpiry(
-                            access_token = response.access_token,
-                            expires_in = response.expires_in,
-                            expiresOn = Instant.now().plusSeconds(response.expires_in.toLong())
-                        )
                         tokenMap[resource] = tokenMedExpiry
                         log.debug("Har hentet accesstoken")
                         return@run tokenMedExpiry
-                    }
-                ).access_token
+                    })
+                .access_token
         }
     }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class AadAccessTokenV2(
-    val access_token: String,
-    val expires_in: Int
-)
+data class AadAccessTokenV2(val access_token: String, val expires_in: Int)
 
 data class AadAccessTokenMedExpiry(
     val access_token: String,

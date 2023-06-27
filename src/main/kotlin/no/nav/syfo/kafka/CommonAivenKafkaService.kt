@@ -1,5 +1,6 @@
 package no.nav.syfo.kafka
 
+import java.time.Duration
 import kotlinx.coroutines.delay
 import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
@@ -8,7 +9,6 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import java.time.Duration
 
 class CommonAivenKafkaService(
     private val applicationState: ApplicationState,
@@ -35,10 +35,16 @@ class CommonAivenKafkaService(
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
-                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
-                        env.manuellSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
-                        env.aktiverMeldingAivenTopic -> aktiverMeldingService.mottaAktiverMelding(it.value())
-                        else -> throw IllegalStateException("Har mottatt melding på ukjent topic: ${it.topic()}")
+                        env.okSykmeldingTopic ->
+                            mottattSykmeldingService.mottaNySykmelding(it.value())
+                        env.manuellSykmeldingTopic ->
+                            mottattSykmeldingService.mottaNySykmelding(it.value())
+                        env.aktiverMeldingAivenTopic ->
+                            aktiverMeldingService.mottaAktiverMelding(it.value())
+                        else ->
+                            throw IllegalStateException(
+                                "Har mottatt melding på ukjent topic: ${it.topic()}"
+                            )
                     }
                 }
             }

@@ -13,22 +13,34 @@ class KafkaClients(env: Environment) {
     val personhendelserKafkaConsumer = getPersonhendelserKafkaConsumer(env)
     val aivenKafkaConsumer = getAivenKafkaConsumer(env)
 
-    private fun getPersonhendelserKafkaConsumer(env: Environment): KafkaConsumer<String, GenericRecord> {
-        val properties = KafkaUtils.getAivenKafkaConfig().apply {
-            setProperty(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, env.schemaRegistryUrl)
-            setProperty(
-                KafkaAvroSerializerConfig.USER_INFO_CONFIG,
-                "${env.kafkaSchemaRegistryUsername}:${env.kafkaSchemaRegistryPassword}"
-            )
-            setProperty(KafkaAvroSerializerConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
-        }.toConsumerConfig(
-            "${env.applicationName}-consumer",
-            valueDeserializer = KafkaAvroDeserializer::class
-        ).also {
-            it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
-            it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
-            it["specific.avro.reader"] = false
-        }
+    private fun getPersonhendelserKafkaConsumer(
+        env: Environment
+    ): KafkaConsumer<String, GenericRecord> {
+        val properties =
+            KafkaUtils.getAivenKafkaConfig()
+                .apply {
+                    setProperty(
+                        KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                        env.schemaRegistryUrl
+                    )
+                    setProperty(
+                        KafkaAvroSerializerConfig.USER_INFO_CONFIG,
+                        "${env.kafkaSchemaRegistryUsername}:${env.kafkaSchemaRegistryPassword}"
+                    )
+                    setProperty(
+                        KafkaAvroSerializerConfig.BASIC_AUTH_CREDENTIALS_SOURCE,
+                        "USER_INFO"
+                    )
+                }
+                .toConsumerConfig(
+                    "${env.applicationName}-consumer",
+                    valueDeserializer = KafkaAvroDeserializer::class
+                )
+                .also {
+                    it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
+                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
+                    it["specific.avro.reader"] = false
+                }
 
         val personhendelserKafkaConsumer = KafkaConsumer<String, GenericRecord>(properties)
         personhendelserKafkaConsumer.subscribe(listOf(env.pdlTopic))
@@ -36,14 +48,16 @@ class KafkaClients(env: Environment) {
     }
 
     private fun getAivenKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
-        val properties = KafkaUtils.getAivenKafkaConfig()
-            .toConsumerConfig(
-                "${env.applicationName}-consumer",
-                valueDeserializer = StringDeserializer::class
-            ).also {
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
-                it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
-            }
+        val properties =
+            KafkaUtils.getAivenKafkaConfig()
+                .toConsumerConfig(
+                    "${env.applicationName}-consumer",
+                    valueDeserializer = StringDeserializer::class
+                )
+                .also {
+                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
+                    it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
+                }
 
         return KafkaConsumer(properties)
     }
