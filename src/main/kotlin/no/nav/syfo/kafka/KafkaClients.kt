@@ -17,7 +17,7 @@ class KafkaClients(env: Environment) {
         env: Environment
     ): KafkaConsumer<String, GenericRecord> {
         val properties =
-            KafkaUtils.getAivenKafkaConfig("person-hendelse-consumer")
+            KafkaUtils.getAivenKafkaConfig()
                 .apply {
                     setProperty(
                         KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG,
@@ -33,7 +33,7 @@ class KafkaClients(env: Environment) {
                     )
                 }
                 .toConsumerConfig(
-                    env.applicationName,
+                    "${env.applicationName}-consumer",
                     valueDeserializer = KafkaAvroDeserializer::class
                 )
                 .also {
@@ -49,9 +49,9 @@ class KafkaClients(env: Environment) {
 
     private fun getAivenKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
         val properties =
-            KafkaUtils.getAivenKafkaConfig("kafka-consumer")
+            KafkaUtils.getAivenKafkaConfig()
                 .toConsumerConfig(
-                    env.applicationName,
+                    "${env.applicationName}-consumer",
                     valueDeserializer = StringDeserializer::class
                 )
                 .also {
