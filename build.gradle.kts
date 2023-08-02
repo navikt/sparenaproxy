@@ -21,7 +21,7 @@ val hikariVersion = "5.0.1"
 val confluentVersion = "7.2.1"
 val kotlinVersion = "1.9.0"
 val testContainerVersion = "1.17.6"
-val commonsCodecVersion = "1.15"
+val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 val jvmVerison = "17"
 
