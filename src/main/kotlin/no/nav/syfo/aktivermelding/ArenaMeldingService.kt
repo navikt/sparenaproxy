@@ -23,6 +23,7 @@ import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
+import no.nav.syfo.securelog
 
 class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
     private val dateFormat = "ddMMyyyy"
@@ -31,15 +32,27 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
     fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel): String {
         when (planlagtMeldingDbModel.type) {
             BREV_4_UKER_TYPE -> {
-                return arenaMqProducer.sendTilArena(
-                    til4Ukersmelding(
-                            planlagtMeldingDbModel,
-                            OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                return arenaMqProducer
+                    .sendTilArena(
+                        til4Ukersmelding(
+                                planlagtMeldingDbModel,
+                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                            )
+                            .tilMqMelding()
+                    )
+                    .also {
+                        securelog.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
                         )
-                        .tilMqMelding()
-                )
+                        log.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
+                        )
+                    }
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
+                securelog.info(
+                    "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}"
+                )
                 log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
                 return planlagtMeldingDbModel.id.toString()
             }
@@ -53,6 +66,9 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                             .tilMqMelding()
                     )
                     .also {
+                        securelog.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
+                        )
                         log.info(
                             "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
                         )
@@ -68,6 +84,9 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                             .tilMqMelding()
                     )
                     .also {
+                        securelog.info(
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
+                        )
                         log.info(
                             "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
                         )

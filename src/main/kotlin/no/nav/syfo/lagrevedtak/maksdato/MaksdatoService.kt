@@ -11,6 +11,7 @@ import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
 import no.nav.syfo.pdl.service.PdlPersonService
+import no.nav.syfo.securelog
 
 class MaksdatoService(
     private val arenaMqProducer: ArenaMqProducer,
@@ -37,6 +38,13 @@ class MaksdatoService(
                 utbetaltEvent.utbetalteventid,
                 correlationId
             )
+            securelog.info(
+                "Har sendt maksdatomelding for utbetaltevent {}, correlationId: {}, fnr: {}",
+                utbetaltEvent.utbetalteventid,
+                correlationId,
+                utbetaltEvent.fnr
+            )
+
             SENDT_MAKSDATOMELDING.inc()
         }
     }

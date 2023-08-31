@@ -80,6 +80,8 @@ spec:
   filesFrom:
     - mountPath: /var/run/keystore
       secret: sparenaproxy-keystore
+  secureLogs:
+    enabled: true
   env:
     - name: SMREGISTER_SCOPE
       value: api://prod-gcp.teamsykmelding.syfosmregister/.default
