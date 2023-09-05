@@ -6,6 +6,7 @@ import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KVITTERING_MED_FEIL
 import no.nav.syfo.application.metrics.KVITTERING_SENDT
 import no.nav.syfo.log
+import no.nav.syfo.securelog
 
 class KvitteringService(private val database: DatabaseInterface) {
     fun behandleKvittering(kvitteringsmelding: String, correlationId: String) {
@@ -16,6 +17,7 @@ class KvitteringService(private val database: DatabaseInterface) {
             KVITTERING_SENDT.inc()
         } else {
             KVITTERING_MED_FEIL.inc()
+            securelog.info("Kvittering: $kvittering melding med id $correlationId")
             log.error(
                 "Melding med id $correlationId har feilet i Arena, statusOk: ${kvittering.statusOk}, feilkode: ${kvittering.feilkode}, feilmelding ${kvittering.feilmelding}"
             )
