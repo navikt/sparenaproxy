@@ -1,7 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 group = "no.nav.syfo"
 version = "1.0.0"
 
@@ -25,20 +21,16 @@ val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 val jvmVerison = "17"
 
-tasks.withType<Jar> {
-    manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
-}
-
 plugins {
+    id("application")
     id("com.diffplug.spotless") version "6.20.0"
     kotlin("jvm") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.cyclonedx.bom") version "1.7.4"
 }
 
-buildscript {
-    dependencies {
-    }
+application {
+    mainClass.set("no.nav.syfo.BootstrapKt")
 }
 
 val githubUser: String by project
@@ -107,20 +99,21 @@ dependencies {
 
 tasks {
 
-    create("printVersion") {
-        println(project.version)
-    }
-
-    withType<ShadowJar> {
-        transform(ServiceFileTransformer::class.java) {
-            setPath("META-INF/cxf")
-            include("bus-extensions.txt")
+    shadowJar {
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        isZip64 = true
+        manifest {
+            attributes(
+                mapOf(
+                    "Main-Class" to "no.nav.syfo.BootstrapKt",
+                ),
+            )
         }
     }
 
-    withType<Test> {
-        useJUnitPlatform {
-        }
+    test {
+        useJUnitPlatform {}
         testLogging.showStandardStreams = true
     }
 
