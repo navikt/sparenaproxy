@@ -14,6 +14,7 @@ class KvitteringService(private val database: DatabaseInterface) {
 
         if (kvittering.statusOk == "J") {
             log.info("Mottatt ok-kvittering fra Arena")
+            securelog.info("Kvittering: $kvittering melding med id $correlationId")
             KVITTERING_SENDT.inc()
         } else {
             KVITTERING_MED_FEIL.inc()
