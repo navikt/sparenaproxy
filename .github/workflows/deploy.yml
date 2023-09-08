@@ -3,10 +3,11 @@ on: push
 
 permissions:
   actions: read
-  contents: write
+  contents: read
   security-events: write
   packages: write
   id-token: write
+  checks: write
 
 jobs:
   jar-app:
