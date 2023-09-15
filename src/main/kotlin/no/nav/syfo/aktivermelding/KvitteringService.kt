@@ -19,7 +19,7 @@ class KvitteringService(private val database: DatabaseInterface) {
         } else {
             KVITTERING_MED_FEIL.inc()
             securelog.info("Kvittering: $kvittering melding med id $correlationId")
-            log.error(
+            log.warn(
                 "Melding med id $correlationId har feilet i Arena, statusOk: ${kvittering.statusOk}, feilkode: ${kvittering.feilkode}, feilmelding ${kvittering.feilmelding}"
             )
             val antallResendteMeldinger = database.resendPlanlagtMelding(correlationId)
