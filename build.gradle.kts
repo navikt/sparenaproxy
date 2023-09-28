@@ -19,6 +19,7 @@ val kotlinVersion = "1.9.10"
 val testContainerVersion = "1.19.0"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
+val snappyJavaVersion = "1.1.10.5"
 
 plugins {
     id("application")
@@ -63,6 +64,11 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
     implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
+    constraints {
+        implementation("org.xerial.snappy:snappy-java:$snappyJavaVersion") {
+            because("override transient from org.apache.kafka:kafka_2.12")
+        }
+    }
     implementation("no.nav.helse:syfosm-common-mq:$smCommonVersion")
     implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
 
