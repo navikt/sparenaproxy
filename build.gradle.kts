@@ -20,6 +20,7 @@ val testContainerVersion = "1.19.1"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.5"
+val avroVersion = "1.11.3"
 
 plugins {
     id("application")
@@ -85,7 +86,11 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-
+    constraints {
+        implementation("org.apache.avro:avro:$avroVersion") {
+            because("override transient from io.confluent:kafka-avro-serializer")
+        }
+    }
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
