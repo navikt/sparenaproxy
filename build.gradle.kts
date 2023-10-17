@@ -21,6 +21,8 @@ val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.5"
 val avroVersion = "1.11.3"
+val jsonVersion = "20231013"
+
 
 plugins {
     id("application")
@@ -71,6 +73,11 @@ dependencies {
         }
     }
     implementation("no.nav.helse:syfosm-common-mq:$smCommonVersion")
+    constraints {
+        implementation("org.json:json:$jsonVersion") {
+            because("override transient from com.ibm.mq:com.ibm.mq.allclient")
+        }
+    }
     implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
