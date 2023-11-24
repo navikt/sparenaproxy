@@ -17,7 +17,7 @@ class KvitteringListener(
 ) {
     suspend fun start() {
         while (applicationState.ready) {
-            val message = kvitteringConsumer.receiveNoWait()
+            val message = kvitteringConsumer.receive(100)
             if (message == null) {
                 delay(100)
                 continue
