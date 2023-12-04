@@ -2,21 +2,21 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val coroutinesVersion = "1.7.3"
-val jacksonVersion = "2.15.3"
+val jacksonVersion = "2.16.0"
 val kluentVersion = "1.73"
-val ktorVersion = "2.3.5"
-val logbackVersion = "1.4.11"
+val ktorVersion = "2.3.6"
+val logbackVersion = "1.4.14"
 val logstashEncoderVersion = "7.4"
 val prometheusVersion = "0.16.0"
-val kotestVersion = "5.7.2"
-val smCommonVersion = "2.0.4"
+val kotestVersion = "5.8.0"
+val smCommonVersion = "2.0.6"
 val mockkVersion = "1.13.8"
-val postgresVersion = "42.6.0"
-val flywayVersion = "9.22.3"
-val hikariVersion = "5.0.1"
-val confluentVersion = "7.5.1"
-val kotlinVersion = "1.9.10"
-val testContainerVersion = "1.19.1"
+val postgresVersion = "42.7.0"
+val flywayVersion = "10.1.0"
+val hikariVersion = "5.1.0"
+val confluentVersion = "7.5.2"
+val kotlinVersion = "1.9.21"
+val testContainerVersion = "1.19.3"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.5"
@@ -26,8 +26,8 @@ val jsonVersion = "20231013"
 
 plugins {
     id("application")
-    id("com.diffplug.spotless") version "6.22.0"
-    kotlin("jvm") version "1.9.10"
+    id("com.diffplug.spotless") version "6.23.2"
+    kotlin("jvm") version "1.9.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -85,7 +85,8 @@ dependencies {
 
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    compileOnly("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
