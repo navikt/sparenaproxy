@@ -3,6 +3,7 @@ package no.nav.syfo.dodshendelser
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.AVBRUTT_MELDING_DODSFALL
@@ -11,6 +12,7 @@ import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.log
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
+import kotlin.time.Duration.Companion.seconds
 
 class DodshendelserService(
     private val applicationState: ApplicationState,
@@ -21,6 +23,9 @@ class DodshendelserService(
     suspend fun start() {
         while (applicationState.ready) {
             val personhendelse = personhendelserConsumer.poll()
+            if(personhendelse.isEmpty()) {
+                delay(1.seconds)
+            }
             personhendelse.forEach {
                 if (it.hendelseGjelderDodsfall()) {
                     log.info(
@@ -29,7 +34,7 @@ class DodshendelserService(
                     handleDodsfall(it.hentPersonidenter())
                 }
             }
-            delay(1)
+            yield()
         }
     }
 

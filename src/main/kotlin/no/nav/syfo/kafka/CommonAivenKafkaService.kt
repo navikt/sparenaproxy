@@ -2,6 +2,7 @@ package no.nav.syfo.kafka
 
 import java.time.Duration
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
@@ -9,6 +10,8 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 class CommonAivenKafkaService(
     private val applicationState: ApplicationState,
@@ -30,7 +33,10 @@ class CommonAivenKafkaService(
 
         log.info("Starter Aiven Kafka consumer")
         while (applicationState.ready) {
-            val records = kafkaConsumer.poll(Duration.ofMillis(0))
+            val records = kafkaConsumer.poll(10.seconds.toJavaDuration())
+            if (records.isEmpty) {
+                delay(1.seconds)
+            }
             records.forEach {
                 if (it.value() != null) {
                     when (it.topic()) {
@@ -48,7 +54,7 @@ class CommonAivenKafkaService(
                     }
                 }
             }
-            delay(1)
+            yield()
         }
     }
 }

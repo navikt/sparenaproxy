@@ -14,10 +14,12 @@ import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.serialization.jackson.jackson
+import io.ktor.util.reflect.instanceOf
 import io.prometheus.client.hotspot.DefaultExports
 import javax.jms.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -208,7 +210,7 @@ fun createListener(
     applicationState: ApplicationState,
     action: suspend CoroutineScope.() -> Unit
 ): Job =
-    GlobalScope.launch {
+    GlobalScope.launch(Dispatchers.IO) {
         try {
             action()
         } catch (ex: Exception) {
