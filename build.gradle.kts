@@ -15,7 +15,7 @@ val postgresVersion = "42.7.1"
 val flywayVersion = "10.4.0"
 val hikariVersion = "5.1.0"
 val confluentVersion = "7.5.2"
-val kotlinVersion = "1.9.21"
+val kotlinVersion = "1.9.22"
 val testContainerVersion = "1.19.3"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
@@ -27,7 +27,7 @@ val jsonVersion = "20231013"
 plugins {
     id("application")
     id("com.diffplug.spotless") version "6.23.3"
-    kotlin("jvm") version "1.9.21"
+    kotlin("jvm") version "1.9.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
