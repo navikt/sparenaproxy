@@ -10,9 +10,9 @@ val logstashEncoderVersion = "7.4"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.8.0"
 val smCommonVersion = "2.0.8"
-val mockkVersion = "1.13.8"
+val mockkVersion = "1.13.9"
 val postgresVersion = "42.7.1"
-val flywayVersion = "10.4.1"
+val flywayVersion = "10.6.0"
 val hikariVersion = "5.1.0"
 val confluentVersion = "7.5.3"
 val kotlinVersion = "1.9.22"
@@ -26,7 +26,7 @@ val jsonVersion = "20231013"
 
 plugins {
     id("application")
-    id("com.diffplug.spotless") version "6.23.3"
+    id("com.diffplug.spotless") version "6.24.0"
     kotlin("jvm") version "1.9.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
