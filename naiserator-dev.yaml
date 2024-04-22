@@ -69,7 +69,7 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: b27apvl220.preprod.local
           ports:
-              port: 1413
+            - port: 1413
   envFrom:
     - secret: srvsparenaproxy-secrets
     - secret: sparenaproxy-keystore-pwd
