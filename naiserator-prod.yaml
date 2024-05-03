@@ -51,10 +51,10 @@ spec:
       runtime: java
   resources:
     limits:
-      memory: 2Gi
+      memory: 3Gi
     requests:
       cpu: 50m
-      memory: 712Mi
+      memory: 812Mi
   kafka:
     pool: nav-prod
   azure:
