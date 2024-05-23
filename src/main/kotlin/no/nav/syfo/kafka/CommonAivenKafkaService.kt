@@ -1,5 +1,7 @@
 package no.nav.syfo.kafka
 
+import io.opentelemetry.api.GlobalOpenTelemetry.getTracerProvider
+import io.opentelemetry.api.trace.Tracer
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.delay
@@ -32,11 +34,18 @@ class CommonAivenKafkaService(
 
         log.info("Starter Aiven Kafka consumer")
         while (applicationState.ready) {
+            val tracer: Tracer =
+                getTracerProvider().get("${CommonAivenKafkaService::class}:kafka-consumer-root")
+            val lp = tracer.spanBuilder("long-poll").startSpan()
             val records = kafkaConsumer.poll(10.seconds.toJavaDuration())
+            lp.end()
+
             if (records.isEmpty) {
                 delay(1.seconds)
             }
+
             records.forEach {
+                val span = tracer.spanBuilder("Records.forEach").startSpan()
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
@@ -46,12 +55,16 @@ class CommonAivenKafkaService(
                             mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.aktiverMeldingAivenTopic ->
                             aktiverMeldingService.mottaAktiverMelding(it.value())
-                        else ->
+                        else -> {
+                            span.addEvent("Ukjent topic")
+                            span.end()
                             throw IllegalStateException(
                                 "Har mottatt melding på ukjent topic: ${it.topic()}"
                             )
+                        }
                     }
                 }
+                span.end()
             }
             yield()
         }
