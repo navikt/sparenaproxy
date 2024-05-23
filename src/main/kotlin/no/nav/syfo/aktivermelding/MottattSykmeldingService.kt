@@ -1,6 +1,7 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -29,6 +30,8 @@ class MottattSykmeldingService(
     private val arenaMeldingService: ArenaMeldingService,
     private val skalVenteLitt: Boolean = true
 ) {
+
+    @WithSpan
     suspend fun mottaNySykmelding(record: String) {
         val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
         if (receivedSykmelding.merknader?.any { it.type == "UNDER_BEHANDLING" } == true) {

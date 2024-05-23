@@ -1,5 +1,6 @@
 package no.nav.syfo.lagrevedtak
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.client.SyfoSyketilfelleClient
@@ -15,6 +16,8 @@ class UtbetaltEventService(
         LagreUtbetaltEventOgPlanlagtMeldingService,
     private val maksdatoService: MaksdatoService
 ) {
+
+    @WithSpan
     suspend fun mottaUtbetaltEvent(record: String) {
         val jsonNode = toJsonNode(record)
         if (jsonNode["event"]?.asText() == "utbetaling_utbetalt") {

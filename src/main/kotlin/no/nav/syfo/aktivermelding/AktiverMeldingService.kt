@@ -1,6 +1,7 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -38,6 +39,8 @@ class AktiverMeldingService(
     private val pdlPersonService: PdlPersonService,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient
 ) {
+
+    @WithSpan
     suspend fun mottaAktiverMelding(record: String) {
         val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
         log.info("Behandler melding med id {}", aktiverMelding.id)

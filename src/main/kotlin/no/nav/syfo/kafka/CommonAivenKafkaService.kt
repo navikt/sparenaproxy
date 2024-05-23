@@ -1,6 +1,7 @@
 package no.nav.syfo.kafka
 
-import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import no.nav.syfo.Environment
@@ -10,8 +11,6 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
 
 class CommonAivenKafkaService(
     private val applicationState: ApplicationState,

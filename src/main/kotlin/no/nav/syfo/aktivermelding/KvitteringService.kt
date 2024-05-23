@@ -1,5 +1,6 @@
 package no.nav.syfo.aktivermelding
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.syfo.aktivermelding.arenamodel.tilKvittering
 import no.nav.syfo.aktivermelding.db.resendPlanlagtMelding
 import no.nav.syfo.application.db.DatabaseInterface
@@ -9,6 +10,8 @@ import no.nav.syfo.log
 import no.nav.syfo.securelog
 
 class KvitteringService(private val database: DatabaseInterface) {
+
+    @WithSpan
     fun behandleKvittering(kvitteringsmelding: String, correlationId: String) {
         val kvittering = tilKvittering(kvitteringsmelding)
 

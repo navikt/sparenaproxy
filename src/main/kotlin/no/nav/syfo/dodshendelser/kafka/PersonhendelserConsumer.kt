@@ -1,9 +1,9 @@
 package no.nav.syfo.dodshendelser.kafka
 
-import org.apache.avro.generic.GenericRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
+import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.KafkaConsumer
 
 class PersonhendelserConsumer(
     private val kafkaPersonhendelserConsumer: KafkaConsumer<String, GenericRecord>

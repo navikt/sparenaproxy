@@ -1,10 +1,12 @@
 package no.nav.syfo.dodshendelser.db
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.OffsetDateTime
 import no.nav.syfo.application.db.DatabaseInterface
 
+@WithSpan
 fun DatabaseInterface.avbrytPlanlagteMeldingerVedDodsfall(
     personidenter: List<String>,
     avbrutt: OffsetDateTime

@@ -1,7 +1,9 @@
 package no.nav.syfo.dodshendelser
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import no.nav.syfo.application.ApplicationState
@@ -12,7 +14,6 @@ import no.nav.syfo.dodshendelser.kafka.PersonhendelserConsumer
 import no.nav.syfo.log
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
-import kotlin.time.Duration.Companion.seconds
 
 class DodshendelserService(
     private val applicationState: ApplicationState,
@@ -23,7 +24,7 @@ class DodshendelserService(
     suspend fun start() {
         while (applicationState.ready) {
             val personhendelse = personhendelserConsumer.poll()
-            if(personhendelse.isEmpty()) {
+            if (personhendelse.isEmpty()) {
                 delay(1.seconds)
             }
             personhendelse.forEach {
@@ -38,6 +39,7 @@ class DodshendelserService(
         }
     }
 
+    @WithSpan
     fun handleDodsfall(personidenter: List<String>) {
         val antallAvbrutteMeldinger =
             database.avbrytPlanlagteMeldingerVedDodsfall(
