@@ -6,6 +6,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.syfo.log
@@ -18,6 +19,7 @@ class SyfoSyketilfelleClient(
     private val cluster: String
 ) {
 
+    @WithSpan
     suspend fun finnStartdato(
         fnr: String,
         fom: LocalDate,
@@ -42,6 +44,7 @@ class SyfoSyketilfelleClient(
         }
     }
 
+    @WithSpan
     suspend fun finnStartdato(fnr: String, sykmeldingId: String, sporingsId: UUID): LocalDate {
         val sykeforloep = hentSykeforloep(fnr)
         val aktueltSykeforloep =
@@ -67,6 +70,7 @@ class SyfoSyketilfelleClient(
         }
     }
 
+    @WithSpan
     fun finnStartdatoGittFomOgTom(
         fom: LocalDate,
         tom: LocalDate,
@@ -87,6 +91,7 @@ class SyfoSyketilfelleClient(
         return aktueltSykeforloep?.oppfolgingsdato
     }
 
+    @WithSpan
     suspend fun harSykeforlopMedNyereStartdato(
         fnr: String,
         startdato: LocalDate,
@@ -107,6 +112,7 @@ class SyfoSyketilfelleClient(
         }
     }
 
+    @WithSpan
     private suspend fun hentSykeforloep(fnr: String): List<Sykeforloep> =
         httpClient
             .get("$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true") {

@@ -1,6 +1,7 @@
 package no.nav.syfo.aktivermelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -38,6 +39,7 @@ class MottattSykmeldingService(
             log.info(
                 "Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}",
             )
+            Span.current().addEvent("Ignorerer sykmelding som er til manuell behandling")
         } else {
             behandleMottattSykmelding(receivedSykmelding)
         }
@@ -62,6 +64,7 @@ class MottattSykmeldingService(
             log.info(
                 "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
             )
+            Span.current().addEvent("Ingen relevante planlagte meldinger")
             return
         }
         if (skalVenteLitt) {
