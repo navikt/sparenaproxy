@@ -1,34 +1,28 @@
-package no.nav.syfo.lagrevedtak.client
+package no.nav.syfo.client
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.core.spec.style.FunSpec
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.call
-import io.ktor.server.application.install
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.response.respond
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import org.amshove.kluent.shouldBeEqualTo
 import java.net.ServerSocket
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
-import kotlinx.coroutines.runBlocking
-import no.nav.syfo.client.AccessTokenClientV2
-import no.nav.syfo.client.SimpleSykmelding
-import no.nav.syfo.client.SyfoSyketilfelleClient
-import no.nav.syfo.client.Sykeforloep
-import org.amshove.kluent.shouldBeEqualTo
 
 class SyfoSyketilfelleClientTest :
     FunSpec({
@@ -149,24 +143,23 @@ class SyfoSyketilfelleClientTest :
 
         beforeTest { coEvery { accessTokenClientMock.getAccessTokenV2(any()) } returns "token" }
 
-        context("Test av SyfoSyketilfelleClient - finnStartDato") {
+        context("Test av SyfoSyketilfelleClient - getStartDatoForSykmelding") {
             test("Henter riktig startdato fra syfosyketilfelle") {
                 val startDato =
-                    syfoSyketilfelleClient.finnStartdato(
+                    syfoSyketilfelleClient.getStartDatoForSykmelding(
                         fnr1,
                         sykmeldingUUID.toString(),
-                        UUID.randomUUID()
                     )
 
                 startDato shouldBeEqualTo oppfolgingsdato2
             }
+
             test("Kaster feil hvis sykmelding ikke er knyttet til syketilfelle") {
                 assertFailsWith<RuntimeException> {
                     runBlocking {
-                        syfoSyketilfelleClient.finnStartdato(
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             fnr2,
                             sykmeldingUUID.toString(),
-                            UUID.randomUUID()
                         )
                     }
                 }
@@ -183,17 +176,16 @@ class SyfoSyketilfelleClientTest :
                         "dev-gcp"
                     )
                 val startDato =
-                    syfoSyketilfelleClientDev.finnStartdato(
+                    syfoSyketilfelleClientDev.getStartDatoForSykmelding(
                         fnr2,
                         sykmeldingUUID.toString(),
-                        UUID.randomUUID()
                     )
 
                 startDato shouldBeEqualTo LocalDate.now().minusMonths(1)
             }
         }
 
-        context("Test av SyfoSyketilfelleClient - finnStartdatoGittFomOgTom") {
+        context("Test av SyfoSyketilfelleClient - getStartdatoByFomTom") {
             val sykeforloep =
                 listOf(
                     Sykeforloep(
@@ -239,7 +231,7 @@ class SyfoSyketilfelleClientTest :
                 )
             test("Finner riktig startdato når fom og tom er en sykmeldingsperiode") {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato2,
                         tom = oppfolgingsdato2.plusWeeks(4),
                         sykeforloep = sykeforloep
@@ -249,7 +241,7 @@ class SyfoSyketilfelleClientTest :
             }
             test("Finner riktig startdato når fom og tom er en del av en sykmeldingsperiode") {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato3.plusWeeks(1),
                         tom = oppfolgingsdato3.plusWeeks(3),
                         sykeforloep = sykeforloep
@@ -261,7 +253,7 @@ class SyfoSyketilfelleClientTest :
                 "Finner riktig startdato når fom er første utbetalingsdag og tom er en del av en senere sykmeldingsperiode"
             ) {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato1,
                         tom = oppfolgingsdato1.plusWeeks(18),
                         sykeforloep = sykeforloep
@@ -273,7 +265,7 @@ class SyfoSyketilfelleClientTest :
                 "Finner riktig startdato når fom er før startdato og tom er en del av en senere sykmeldingsperiode"
             ) {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato1.minusWeeks(1),
                         tom = oppfolgingsdato1.plusWeeks(18),
                         sykeforloep = sykeforloep
@@ -283,7 +275,7 @@ class SyfoSyketilfelleClientTest :
             }
             test("Finner riktig startdato når fom er siste dag i siste sykmeldingsperiode") {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato3.plusWeeks(8),
                         tom = oppfolgingsdato3.plusWeeks(10),
                         sykeforloep = sykeforloep
@@ -295,7 +287,7 @@ class SyfoSyketilfelleClientTest :
                 "Finner riktig startdato når fom og tom overlapper med opphold i sykmeldingsperioder"
             ) {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato1.plusWeeks(7).plusDays(1),
                         tom = oppfolgingsdato1.plusWeeks(7).plusDays(5),
                         sykeforloep = sykeforloep
@@ -307,7 +299,7 @@ class SyfoSyketilfelleClientTest :
                 "Finner ikke startdato når fom er dagen etter siste dag i siste sykmeldingsperiode"
             ) {
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato1.plusWeeks(19).plusDays(1),
                         tom = oppfolgingsdato1.plusWeeks(20),
                         sykeforloep = sykeforloep
@@ -342,7 +334,7 @@ class SyfoSyketilfelleClientTest :
                         )
                     )
                 val startdato =
-                    syfoSyketilfelleClient.finnStartdatoGittFomOgTom(
+                    getStartdatoByFomTom(
                         fom = oppfolgingsdato4.plusWeeks(2),
                         tom = oppfolgingsdato4.plusWeeks(3),
                         sykeforloep = sykeforloepMedOverlapp

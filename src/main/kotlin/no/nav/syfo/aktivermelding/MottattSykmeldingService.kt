@@ -7,8 +7,6 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.util.UUID
-import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAktivStansmelding
 import no.nav.syfo.aktivermelding.db.finnAvbrutt39ukersmelding
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
@@ -29,7 +27,6 @@ class MottattSykmeldingService(
     private val database: DatabaseInterface,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val arenaMeldingService: ArenaMeldingService,
-    private val skalVenteLitt: Boolean = true
 ) {
 
     @WithSpan
@@ -67,14 +64,11 @@ class MottattSykmeldingService(
             Span.current().addEvent("Ingen relevante planlagte meldinger")
             return
         }
-        if (skalVenteLitt) {
-            delay(5000) // Venter slik at sykmeldingen kommer inn i syfosyketilfelle...
-        }
+
         val startdato =
-            syfoSyketilfelleClient.finnStartdato(
+            syfoSyketilfelleClient.getStartDatoForSykmelding(
                 fnr = receivedSykmelding.personNrPasient,
                 sykmeldingId = sykmeldingId,
-                sporingsId = UUID.fromString(sykmeldingId),
             )
 
         sendAvbrutt39ukersmelding(
