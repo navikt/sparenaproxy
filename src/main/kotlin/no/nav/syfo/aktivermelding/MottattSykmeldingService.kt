@@ -36,13 +36,14 @@ class MottattSykmeldingService(
         val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
         if (receivedSykmelding.merknader?.any { it.type == "UNDER_BEHANDLING" } == true) {
             log.info(
-                "Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}"
+                "Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}",
             )
         } else {
             behandleMottattSykmelding(receivedSykmelding)
         }
     }
 
+    @WithSpan
     suspend fun behandleMottattSykmelding(receivedSykmelding: ReceivedSykmelding) {
         val sykmeldingId = receivedSykmelding.sykmelding.id
 
@@ -59,7 +60,7 @@ class MottattSykmeldingService(
                 avbrutte39ukersMeldinger.isEmpty()
         ) {
             log.info(
-                "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId"
+                "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
             )
             return
         }
@@ -70,19 +71,20 @@ class MottattSykmeldingService(
             syfoSyketilfelleClient.finnStartdato(
                 fnr = receivedSykmelding.personNrPasient,
                 sykmeldingId = sykmeldingId,
-                sporingsId = UUID.fromString(sykmeldingId)
+                sporingsId = UUID.fromString(sykmeldingId),
             )
 
         sendAvbrutt39ukersmelding(
             receivedSykmelding,
-            avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato }
+            avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato },
         )
         utsettStansmelding(
             receivedSykmelding,
-            aktiveStansmeldinger.firstOrNull { it.startdato == startdato }
+            aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
         )
     }
 
+    @WithSpan
     fun sendAvbrutt39ukersmelding(
         receivedSykmelding: ReceivedSykmelding,
         avbruttMelding: PlanlagtMeldingDbModel?
@@ -91,25 +93,26 @@ class MottattSykmeldingService(
         if (avbruttMelding == null) {
             log.info(
                 "Fant ingen matchende avbrutte 39-ukersmeldinger, ignorerer sykmelding med id {}",
-                sykmeldingId
+                sykmeldingId,
             )
         } else {
             log.info(
                 "Sender 39-ukersmelding med id {} for sykmeldingid {}",
                 avbruttMelding.id,
-                sykmeldingId
+                sykmeldingId,
             )
             database.resendAvbruttMelding(avbruttMelding.id)
             val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
             database.sendPlanlagtMelding(
                 avbruttMelding.id,
                 OffsetDateTime.now(ZoneOffset.UTC),
-                correlationId
+                correlationId,
             )
             SENDT_AVBRUTT_MELDING.inc()
         }
     }
 
+    @WithSpan
     fun utsettStansmelding(
         receivedSykmelding: ReceivedSykmelding,
         stansmelding: PlanlagtMeldingDbModel?
@@ -118,7 +121,7 @@ class MottattSykmeldingService(
         if (stansmelding == null) {
             log.info(
                 "Fant ingen matchende stansmeldinger, ignorerer sykmelding med id {}",
-                sykmeldingId
+                sykmeldingId,
             )
         } else {
             val oppdatertSendes =
@@ -130,20 +133,16 @@ class MottattSykmeldingService(
                     .toOffsetDateTime()
             if (oppdatertSendes.isAfter(stansmelding.sendes)) {
                 log.info(
-                    "Mottatt sykmelding med nyeste tomdato senere en utsendingstidspunkt, utsetter stansmelding ${stansmelding.id}"
+                    "Mottatt sykmelding med nyeste tomdato senere en utsendingstidspunkt, utsetter stansmelding ${stansmelding.id}",
                 )
                 database.utsettPlanlagtMelding(stansmelding.id, oppdatertSendes)
                 UTSATT_MELDING.inc()
             }
         }
     }
+}
 
-    fun inneholderGradertPeriode(perioder: List<Periode>): Boolean {
-        return perioder.firstOrNull { it.gradert != null }?.gradert != null
-    }
-
-    private fun finnSisteTom(perioder: List<Periode>): LocalDate {
-        return perioder.maxByOrNull { it.tom }?.tom
-            ?: throw IllegalStateException("Skal ikke kunne ha periode uten tom")
-    }
+private fun finnSisteTom(perioder: List<Periode>): LocalDate {
+    return perioder.maxByOrNull { it.tom }?.tom
+        ?: throw IllegalStateException("Skal ikke kunne ha periode uten tom")
 }

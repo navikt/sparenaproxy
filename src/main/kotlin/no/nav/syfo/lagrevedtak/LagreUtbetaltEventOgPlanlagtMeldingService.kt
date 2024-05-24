@@ -1,5 +1,6 @@
 package no.nav.syfo.lagrevedtak
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -24,6 +25,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
         return database.erBehandletTidligere(utbetalingId)
     }
 
+    @WithSpan
     fun lagreUtbetaltEventOgPlanlagtMelding(utbetaltEvent: UtbetaltEvent) {
         val planlagtStansmelding =
             lagPlanlagtMeldingDbModelForUtbetaling(

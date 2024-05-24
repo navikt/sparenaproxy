@@ -29,6 +29,7 @@ class UtbetaltEventService(
 
     private fun toJsonNode(record: String) = objectMapper.readTree(record)
 
+    @WithSpan
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage) {
         if (
             lagreUtbetaltEventOgPlanlagtMeldingService.erBehandletTidligere(
