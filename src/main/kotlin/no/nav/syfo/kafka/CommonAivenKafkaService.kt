@@ -34,18 +34,16 @@ class CommonAivenKafkaService(
 
         log.info("Starter Aiven Kafka consumer")
         while (applicationState.ready) {
-            val tracer: Tracer =
-                getTracerProvider().get("${CommonAivenKafkaService::class}:kafka-consumer-root")
-            val lp = tracer.spanBuilder("long-poll").startSpan()
             val records = kafkaConsumer.poll(10.seconds.toJavaDuration())
-            lp.end()
-
             if (records.isEmpty) {
                 delay(1.seconds)
             }
 
+            val tracer: Tracer =
+                getTracerProvider().get("${CommonAivenKafkaService::class}:kafka-consumer-root")
+
             records.forEach {
-                val span = tracer.spanBuilder("Records.forEach").startSpan()
+                val span = tracer.spanBuilder("kafka-consumer-root.records.message").startSpan()
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
