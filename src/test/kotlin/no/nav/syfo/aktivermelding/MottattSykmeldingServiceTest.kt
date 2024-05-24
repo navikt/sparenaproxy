@@ -42,7 +42,6 @@ class MottattSykmeldingServiceTest :
                     testDb,
                     syfoSyketilfelleClient,
                     arenaMeldingService,
-                    skalVenteLitt = false,
                 )
             val idAvbrutt = UUID.randomUUID()
             val idAvbrutt2 = UUID.randomUUID()
@@ -155,8 +154,7 @@ class MottattSykmeldingServiceTest :
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
                     coVerify(exactly = 0) {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -167,8 +165,7 @@ class MottattSykmeldingServiceTest :
                     "Sender ikke avbrutt aktivitetskravmelding for gradert sykmelding, utsetter stansmelding",
                 ) {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -199,7 +196,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
                     stansmelding?.sendes shouldBeEqualTo
@@ -213,8 +210,7 @@ class MottattSykmeldingServiceTest :
                 }
                 test("Ignorerer sykmelding som ikke har avbrutt melding for samme sykeforløp") {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -245,7 +241,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
                     stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
@@ -254,8 +250,7 @@ class MottattSykmeldingServiceTest :
                     "Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det som er satt",
                 ) {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -286,7 +281,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val stansmelding = testDb.hentPlanlagtMelding(idStansmelding)
                     stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
@@ -295,8 +290,7 @@ class MottattSykmeldingServiceTest :
                     "Oppdaterer og sender tidligere avbrutt melding for samme sykeforløp hvis sykmelding ikke er gradert, utsetter stansmelding",
                 ) {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -327,7 +321,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val meldinger =
                         testDb.connection.hentPlanlagtMelding(
@@ -351,8 +345,7 @@ class MottattSykmeldingServiceTest :
                 }
                 test("Skal ikke sende ny 8-ukersmelding hvis melding er sent før") {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -390,8 +383,7 @@ class MottattSykmeldingServiceTest :
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
                     coVerify(exactly = 2) {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -411,8 +403,7 @@ class MottattSykmeldingServiceTest :
                     "Ignorerer sykmelding som ikke har avbrutt 39-ukersmelding for samme sykeforløp"
                 ) {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -443,7 +434,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify(exactly = 0) { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val stansmelding = testDb.hentPlanlagtMelding(idStansmelding2)
                     stansmelding?.sendes shouldBeEqualTo utsendingStansmelding
@@ -452,8 +443,7 @@ class MottattSykmeldingServiceTest :
                     "Oppdaterer og sender tidligere avbrutt 39-ukersmelding for samme sykeforløp, utsetter stansmelding",
                 ) {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -484,7 +474,7 @@ class MottattSykmeldingServiceTest :
 
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
-                    coVerify { syfoSyketilfelleClient.finnStartdato(any(), any(), any()) }
+                    coVerify { syfoSyketilfelleClient.getStartDatoForSykmelding(any(), any()) }
                     coVerify { arenaMeldingService.sendPlanlagtMeldingTilArena(any()) }
                     val meldinger =
                         testDb.connection.hentPlanlagtMelding(
@@ -507,8 +497,7 @@ class MottattSykmeldingServiceTest :
                 }
                 test("Skal ikke sende ny 39-ukersmelding hvis melding er sent før") {
                     coEvery {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )
@@ -546,8 +535,7 @@ class MottattSykmeldingServiceTest :
                     mottattSykmeldingService.behandleMottattSykmelding(receivedSykmelding)
 
                     coVerify(exactly = 2) {
-                        syfoSyketilfelleClient.finnStartdato(
-                            any(),
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
                             any(),
                             any(),
                         )

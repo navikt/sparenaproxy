@@ -45,7 +45,7 @@ class UtbetaltEventService(
         log.info("Behandler utbetaling med id ${utbetaltEventKafkaMessage.utbetalingId}")
 
         val startdato =
-            syfoSyketilfelleClient.finnStartdato(
+            syfoSyketilfelleClient.getStartdato(
                 fnr = utbetaltEventKafkaMessage.fnr,
                 fom = utbetaltEventKafkaMessage.fom,
                 tom = utbetaltEventKafkaMessage.tom,
