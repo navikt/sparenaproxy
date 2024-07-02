@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAktivStansmelding
 import no.nav.syfo.aktivermelding.db.finnAvbrutt39ukersmelding
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
@@ -22,6 +23,7 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.objectMapper
+import org.postgresql.util.PSQLException
 
 class MottattSykmeldingService(
     private val database: DatabaseInterface,
@@ -38,7 +40,25 @@ class MottattSykmeldingService(
             )
             Span.current().addEvent("Ignorerer sykmelding som er til manuell behandling")
         } else {
-            behandleMottattSykmelding(receivedSykmelding)
+            retry(4) { behandleMottattSykmelding(receivedSykmelding) }
+        }
+    }
+
+    private suspend fun retry(maxRetry: Int, function: suspend () -> Unit) {
+        var currentRetry = 0
+        val retryBackoff = mapOf(0 to 10, 1 to 50, 2 to 100, 3 to 1000)
+        while (currentRetry < maxRetry) {
+            try {
+                function()
+                return
+            } catch (e: PSQLException) {
+                currentRetry++
+                log.warn("Error handling received sykmelding, retrying $currentRetry", e)
+                if (currentRetry == maxRetry) {
+                    throw e
+                }
+                delay(retryBackoff[currentRetry]?.toLong() ?: 1000)
+            }
         }
     }
 
@@ -64,7 +84,6 @@ class MottattSykmeldingService(
             Span.current().addEvent("Ingen relevante planlagte meldinger")
             return
         }
-
         val startdato =
             syfoSyketilfelleClient.getStartDatoForSykmelding(
                 fnr = receivedSykmelding.personNrPasient,
