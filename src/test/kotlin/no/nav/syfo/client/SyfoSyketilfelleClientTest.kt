@@ -16,13 +16,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import org.amshove.kluent.shouldBeEqualTo
 import java.net.ServerSocket
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.runBlocking
+import org.amshove.kluent.shouldBeEqualTo
 
 class SyfoSyketilfelleClientTest :
     FunSpec({
