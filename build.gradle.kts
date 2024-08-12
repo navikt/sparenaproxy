@@ -9,7 +9,6 @@ val logbackVersion = "1.5.6"
 val logstashEncoderVersion = "8.0"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
-val smCommonVersion = "2.0.8"
 val mockkVersion = "1.13.12"
 val postgresVersion = "42.7.3"
 val flywayVersion = "10.17.0"
@@ -23,6 +22,9 @@ val snappyJavaVersion = "1.1.10.6"
 val avroVersion = "1.12.0"
 val jsonVersion = "20240303"
 val opentelemetryVersion = "2.6.0"
+val kafkaVersion = "3.8.0"
+val ibmMqVersion = "9.3.4.1"
+
 
 plugins {
     id("application")
@@ -67,19 +69,18 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
-    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     constraints {
         implementation("org.xerial.snappy:snappy-java:$snappyJavaVersion") {
             because("override transient from org.apache.kafka:kafka_2.12")
         }
     }
-    implementation("no.nav.helse:syfosm-common-mq:$smCommonVersion")
+    implementation("com.ibm.mq:com.ibm.mq.allclient:$ibmMqVersion")
     constraints {
         implementation("org.json:json:$jsonVersion") {
             because("override transient from com.ibm.mq:com.ibm.mq.allclient")
         }
     }
-    implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
