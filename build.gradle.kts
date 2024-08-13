@@ -11,7 +11,7 @@ val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
 val mockkVersion = "1.13.12"
 val postgresVersion = "42.7.3"
-val flywayVersion = "10.17.0"
+val flywayVersion = "10.17.1"
 val hikariVersion = "5.1.0"
 val confluentVersion = "7.7.0"
 val kotlinVersion = "2.0.10"
@@ -23,7 +23,7 @@ val avroVersion = "1.12.0"
 val jsonVersion = "20240303"
 val opentelemetryVersion = "2.6.0"
 val kafkaVersion = "3.8.0"
-val ibmMqVersion = "9.3.4.1"
+val ibmMqVersion = "9.4.0.0"
 
 
 plugins {
