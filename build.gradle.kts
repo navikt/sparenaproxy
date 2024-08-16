@@ -75,12 +75,7 @@ dependencies {
             because("override transient from org.apache.kafka:kafka_2.12")
         }
     }
-    implementation("com.ibm.mq:com.ibm.mq.allclient:$ibmMqVersion")
-    constraints {
-        implementation("org.json:json:$jsonVersion") {
-            because("override transient from com.ibm.mq:com.ibm.mq.allclient")
-        }
-    }
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:$ibmMqVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")

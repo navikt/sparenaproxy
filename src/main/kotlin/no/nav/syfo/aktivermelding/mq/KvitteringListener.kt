@@ -1,8 +1,8 @@
 package no.nav.syfo.aktivermelding.mq
 
-import javax.jms.MessageConsumer
-import javax.jms.MessageProducer
-import javax.jms.TextMessage
+import jakarta.jms.MessageConsumer
+import jakarta.jms.MessageProducer
+import jakarta.jms.TextMessage
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
