@@ -1,8 +1,8 @@
 package no.nav.syfo.aktivermelding.mq
 
-import javax.jms.MessageProducer
-import javax.jms.Session
-import javax.jms.TextMessage
+import jakarta.jms.MessageProducer
+import jakarta.jms.Session
+import jakarta.jms.TextMessage
 
 class ArenaMqProducer(private val session: Session, private val messageProducer: MessageProducer) {
 
