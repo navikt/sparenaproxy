@@ -21,7 +21,7 @@ val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.6"
 val avroVersion = "1.12.0"
 val jsonVersion = "20240303"
-val opentelemetryVersion = "2.6.0"
+val opentelemetryVersion = "2.7.0"
 val kafkaVersion = "3.8.0"
 val ibmMqVersion = "9.4.0.0"
 
