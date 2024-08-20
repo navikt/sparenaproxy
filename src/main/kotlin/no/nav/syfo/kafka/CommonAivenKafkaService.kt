@@ -10,6 +10,7 @@ import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.application.ApplicationState
+import no.nav.syfo.client.SykeforlopNotFoundException
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -23,16 +24,28 @@ class CommonAivenKafkaService(
     private val aktiverMeldingService: AktiverMeldingService
 ) {
     suspend fun start() {
-        kafkaConsumer.subscribe(
-            listOf(
-                env.utbetalingTopic,
-                env.okSykmeldingTopic,
-                env.manuellSykmeldingTopic,
-                env.aktiverMeldingAivenTopic
-            )
-        )
 
         log.info("Starter Aiven Kafka consumer")
+        while (applicationState.ready) {
+            try {
+                kafkaConsumer.subscribe(
+                    listOf(
+                        env.utbetalingTopic,
+                        env.okSykmeldingTopic,
+                        env.manuellSykmeldingTopic,
+                        env.aktiverMeldingAivenTopic
+                    )
+                )
+                consumeMessages()
+            } catch (ex: SykeforlopNotFoundException) {
+                log.warn("Sykeforlop not found, unsubscribing and waiting 60s: ${ex.message}", ex)
+                kafkaConsumer.unsubscribe()
+                delay(60.seconds)
+            }
+        }
+    }
+
+    private suspend fun consumeMessages() {
         while (applicationState.ready) {
             val records = kafkaConsumer.poll(10.seconds.toJavaDuration())
             if (records.isEmpty) {
@@ -47,8 +60,7 @@ class CommonAivenKafkaService(
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
-                        env.okSykmeldingTopic ->
-                            mottattSykmeldingService.mottaNySykmelding(it.value())
+                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.manuellSykmeldingTopic ->
                             mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.aktiverMeldingAivenTopic ->
@@ -57,7 +69,7 @@ class CommonAivenKafkaService(
                             span.addEvent("Ukjent topic")
                             span.end()
                             throw IllegalStateException(
-                                "Har mottatt melding på ukjent topic: ${it.topic()}"
+                                "Har mottatt melding på ukjent topic: ${it.topic()}",
                             )
                         }
                     }

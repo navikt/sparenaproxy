@@ -121,7 +121,7 @@ class SyfoSyketilfelleClient(
         if (response.status != HttpStatusCode.OK) {
             if (attempt > retryBackoff.size) {
                 log.error("Retried $attempt times without success")
-                throw RuntimeException("Failed to get sykeforloep")
+                throw SykeforlopNotFoundException("Failed to get sykeforloep")
             }
 
             log.info("Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms")
