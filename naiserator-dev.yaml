@@ -30,6 +30,7 @@ spec:
         flags:
           - name: cloudsql.logical_decoding
             value: "on"
+        tier: db-f1-micro
   liveness:
     path: /internal/is_alive
     initialDelay: 10
