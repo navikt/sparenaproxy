@@ -82,10 +82,6 @@ spec:
             - port: 1414
   envFrom:
     - secret: srvsparenaproxy-secrets
-    - secret: sparenaproxy-keystore-pwd
-  filesFrom:
-    - mountPath: /var/run/keystore
-      secret: sparenaproxy-keystore
   secureLogs:
     enabled: true
   env:
@@ -113,5 +109,3 @@ spec:
       value: api://prod-fss.pdl.pdl-api/.default
     - name: SYKETILLFELLE_SCOPE
       value: api://prod-gcp.flex.flex-syketilfelle/.default
-    - name: MQ_KEYSTORE_PATH
-      value: /var/run/keystore/sparenaproxy-keystore.jks
