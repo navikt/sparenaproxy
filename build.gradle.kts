@@ -1,7 +1,7 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.8.1"
+val coroutinesVersion = "1.9.0"
 val jacksonVersion = "2.17.2"
 val kluentVersion = "1.73"
 val ktorVersion = "2.3.12"
@@ -21,7 +21,7 @@ val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.7"
 val avroVersion = "1.12.0"
 val jsonVersion = "20240303"
-val opentelemetryVersion = "2.7.0"
+val opentelemetryVersion = "2.8.0"
 val kafkaVersion = "3.8.0"
 val ibmMqVersion = "9.4.0.5"
 
