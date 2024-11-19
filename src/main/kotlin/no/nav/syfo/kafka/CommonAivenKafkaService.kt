@@ -60,7 +60,8 @@ class CommonAivenKafkaService(
                 if (it.value() != null) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
-                        env.okSykmeldingTopic -> mottattSykmeldingService.mottaNySykmelding(it.value())
+                        env.okSykmeldingTopic ->
+                            mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.manuellSykmeldingTopic ->
                             mottattSykmeldingService.mottaNySykmelding(it.value())
                         env.aktiverMeldingAivenTopic ->
