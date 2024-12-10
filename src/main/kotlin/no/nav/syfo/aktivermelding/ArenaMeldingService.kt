@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import no.nav.syfo.aktivermelding.arenamodel.Brev39UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.Brev4UkerMelding
 import no.nav.syfo.aktivermelding.arenamodel.K278M810Stans
 import no.nav.syfo.aktivermelding.arenamodel.K278M815Stans
@@ -19,7 +18,6 @@ import no.nav.syfo.aktivermelding.arenamodel.tilMqMelding
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -55,24 +53,6 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 )
                 log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
                 return planlagtMeldingDbModel.id.toString()
-            }
-            BREV_39_UKER_TYPE -> {
-                return arenaMqProducer
-                    .sendTilArena(
-                        til39Ukersmelding(
-                                planlagtMeldingDbModel,
-                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                            )
-                            .tilMqMelding()
-                    )
-                    .also {
-                        securelog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
-                        )
-                        log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
-                        )
-                    }
             }
             STANS_TYPE -> {
                 return arenaMqProducer
@@ -129,35 +109,6 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 N2840(
                     taglinje =
                         "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
-                            .padEnd(80, ' ')
-                )
-        )
-    }
-
-    fun til39Ukersmelding(
-        planlagtMeldingDbModel: PlanlagtMeldingDbModel,
-        now: OffsetDateTime
-    ): Brev39UkerMelding {
-        val nowFormatted = formatDateTime(now)
-        return Brev39UkerMelding(
-            n2810 =
-                N2810(
-                    dato = nowFormatted.split(',')[0],
-                    klokke = nowFormatted.split(',')[1],
-                    fnr = planlagtMeldingDbModel.fnr,
-                    meldKode = "I"
-                ),
-            n2820 = N2820(),
-            n2830 =
-                N2830(
-                    meldingId = "M-F226-1".padEnd(10, ' '),
-                    versjon = "015",
-                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
-                ),
-            n2840 =
-                N2840(
-                    taglinje =
-                        "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
                             .padEnd(80, ' ')
                 )
         )
