@@ -7,7 +7,6 @@ riktig oppfølging. Tidligere ble dette håndtert av Infotrygd, og Sparenaproxy 
 sendte. Sparenaproxy kan sende disse meldingene: 
 * 4-ukersmelding
 * 8-ukersmelding (aktivitetskravmelding)
-* 39-ukersmelding
 * maksdatomelding (start/gjenåpning av syketilfelle i Arena, og justering av maksdato)
 * stansmelding (stans av syketilfelle i Arena)
 
@@ -37,18 +36,6 @@ utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi m�
 meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
 
 Hvis vi har avbrutt en 8-ukersmelding og det kommer en ny sykmelding som ikke er gradert for det samme syketilfellet så sendes 8-ukersmeldingen likevel. 
-
-#### 39-ukersmelding
-39-ukersmeldingen opprettes med utsendelsedato 39 uker frem i tid fra startdato for syketilfellet. 39-ukersmeldingen fungerer veldig likt som 8-ukersmeldingen: Meldingen sendes 
-i utgangspunktet hvis bruker er sykmeldt (uavhengig av grad) ved utsendingstidspunktet og avbrytes hvis bruker ikke lenger er sykmeldt, men vi må også sjekke at det ikke har kommet 
-noe nyere syketilfelle (nyere startdato) før vi sender meldingen til Arena. Hvis bruker fortsatt er sykmeldt, men det er et nyere syketilfelle så avbrytes meldingen. 
-
-Hvis vi har avbrutt en 39-ukersmelding og det kommer en ny sykmelding for det samme syketilfellet så sendes 39-ukersmeldingen likevel. 
-
-Hvis vi mottar en utbetalingsmelding der antall gjenstående sykedager er mindre enn 66 (dvs, ved 39-ukerstidspunktet), og det ikke er sendt 39-ukersmelding for dette syketilfellet så skal 
-39-ukersmeldingen sendes umiddelbart. Dette gjør vi for å dekke de tilfellene der antall sykedager kan være redusert som følge av tidligere sykefravær. 
-
-At nettopp 39-ukersmeldingen sendes til rett tid er kanskje det aller viktigste fordi den sørger for at den sykmeldte får beskjed om at det snart er slutt på sykepengene og at de evt. må søke AAP. 
 
 #### Stansmelding
 Stansmelding opprettes med utsendelsesdato som er 17 dager etter tom-dato i utbetalingsmeldingen. Hvis stansmelding for dette syketilfellet finnes fra før settes nytt utsendingstidspunkt 

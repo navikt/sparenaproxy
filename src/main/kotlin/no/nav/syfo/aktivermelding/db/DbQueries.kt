@@ -68,12 +68,6 @@ fun DatabaseInterface.finnAvbruttAktivitetskravmelding(fnr: String): List<Planla
     }
 }
 
-fun DatabaseInterface.finnAvbrutt39ukersmelding(fnr: String): List<PlanlagtMeldingDbModel> {
-    connection.use { connection ->
-        return connection.finnAvbrutt39ukersmelding(fnr)
-    }
-}
-
 fun DatabaseInterface.finnAktivStansmelding(fnr: String): List<PlanlagtMeldingDbModel> {
     connection.use { connection ->
         return connection.finnAktiveStansmeldinger(fnr)
@@ -177,17 +171,6 @@ private fun Connection.finnAvbruttAktivitetskravmelding(fnr: String): List<Planl
     this.prepareStatement(
             """
             SELECT * FROM planlagt_melding WHERE fnr=? AND type='8UKER' AND avbrutt is not null;
-            """
-        )
-        .use {
-            it.setString(1, fnr)
-            it.executeQuery().toList { toPlanlagtMeldingDbModel() }
-        }
-
-private fun Connection.finnAvbrutt39ukersmelding(fnr: String): List<PlanlagtMeldingDbModel> =
-    this.prepareStatement(
-            """
-            SELECT * FROM planlagt_melding WHERE fnr=? AND type='39UKER' AND avbrutt is not null;
             """
         )
         .use {

@@ -1,15 +1,12 @@
 package no.nav.syfo.lagrevedtak
 
 import io.kotest.core.spec.style.FunSpec
-import java.time.Clock
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -35,9 +32,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
         context("Test av lagring av vedtaksinfo og planlagte meldinger") {
             val startdato = LocalDate.of(2020, 6, 1)
             val tom = LocalDate.of(2020, 7, 15)
-            test(
-                "Lagrer vedtak, stansmelding og planlagt melding 4, 8, 39 uker for nytt tilfelle"
-            ) {
+            test("Lagrer vedtak, stansmelding og planlagt melding 4, 8 for nytt tilfelle") {
                 val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
 
                 lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(
@@ -47,14 +42,12 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                 val planlagtMeldingFraDbListe =
                     testDb.connection.hentPlanlagtMelding("fnr", startdato)
                 val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
+                planlagtMeldingFraDbListe.size shouldBeEqualTo 3
                 utbetaltEventFraDbListe.size shouldBeEqualTo 1
                 val planlagtMelding4uker =
                     planlagtMeldingFraDbListe.find { it.type == BREV_4_UKER_TYPE }
                 val planlagtMelding8uker =
                     planlagtMeldingFraDbListe.find { it.type == AKTIVITETSKRAV_8_UKER_TYPE }
-                val planlagtMelding39uker =
-                    planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
                 val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
                 val utbetaltEventFraDb = utbetaltEventFraDbListe.first()
 
@@ -83,20 +76,6 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                         .toOffsetDateTime()
                 planlagtMelding8uker?.sendt shouldBeEqualTo null
                 planlagtMelding8uker?.avbrutt shouldBeEqualTo null
-
-                planlagtMelding39uker?.fnr shouldBeEqualTo "fnr"
-                planlagtMelding39uker?.startdato shouldBeEqualTo startdato
-                planlagtMelding39uker?.type shouldBeEqualTo BREV_39_UKER_TYPE
-                planlagtMelding39uker?.sendes shouldBeEqualTo
-                    startdato
-                        .plusWeeks(39)
-                        .atStartOfDay()
-                        .atZone(ZoneId.systemDefault())
-                        .withZoneSameInstant(ZoneOffset.UTC)
-                        .toOffsetDateTime()
-                planlagtMelding39uker?.sendt shouldBeEqualTo null
-                planlagtMelding39uker?.avbrutt shouldBeEqualTo null
-
                 planlagtStansmelding?.fnr shouldBeEqualTo "fnr"
                 planlagtStansmelding?.startdato shouldBeEqualTo startdato
                 planlagtStansmelding?.type shouldBeEqualTo STANS_TYPE
@@ -110,36 +89,6 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                 planlagtStansmelding?.avbrutt shouldBeEqualTo null
 
                 utbetaltEventFraDb shouldBeEqualTo utbetaltEvent
-            }
-            test(
-                "39-ukersmelding sendes umiddelbart for nytt tilfelle hvis antall gjenstående sykedager er mindre enn 66"
-            ) {
-                val utbetaltEvent =
-                    lagUtbetaltEvent(
-                        utbetaltEventId,
-                        startdato,
-                        "fnr",
-                        tom,
-                        gjenstaendeSykedager = 60
-                    )
-
-                lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(
-                    utbetaltEvent
-                )
-
-                val planlagtMeldingFraDbListe =
-                    testDb.connection.hentPlanlagtMelding("fnr", startdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
-                val planlagtMelding39uker =
-                    planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
-
-                planlagtMelding39uker?.fnr shouldBeEqualTo "fnr"
-                planlagtMelding39uker?.startdato shouldBeEqualTo startdato
-                planlagtMelding39uker?.type shouldBeEqualTo BREV_39_UKER_TYPE
-                planlagtMelding39uker?.sendes?.toLocalDate() shouldBeEqualTo
-                    OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate()
-                planlagtMelding39uker?.sendt shouldBeEqualTo null
-                planlagtMelding39uker?.avbrutt shouldBeEqualTo null
             }
             test(
                 "Lagrer kun vedtak og oppdaterer stansmelding, hvis planlagte meldinger finnes for syketilfellet fra før"
@@ -158,7 +107,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                 val planlagtMeldingFraDbListe =
                     testDb.connection.hentPlanlagtMelding("fnr", startdato)
                 val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
+                planlagtMeldingFraDbListe.size shouldBeEqualTo 3
                 utbetaltEventFraDbListe.size shouldBeEqualTo 2
                 val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
                 planlagtStansmelding?.sendes shouldBeEqualTo
@@ -168,36 +117,6 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                         .atZone(ZoneId.systemDefault())
                         .withZoneSameInstant(ZoneOffset.UTC)
                         .toOffsetDateTime()
-            }
-            test(
-                "Oppdaterer 39-ukersmelding hvis finnes og ikke sendt for syketilfellet fra før og antall gjenstående sykedager er mindre enn 66"
-            ) {
-                val utbetaltEvent = lagUtbetaltEvent(utbetaltEventId, startdato, "fnr", tom)
-                val nesteUtbetaltEvent =
-                    lagUtbetaltEvent(
-                        UUID.randomUUID(),
-                        startdato,
-                        "fnr",
-                        tom.plusWeeks(1),
-                        gjenstaendeSykedager = 60
-                    )
-
-                lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(
-                    utbetaltEvent
-                )
-                lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(
-                    nesteUtbetaltEvent
-                )
-
-                val planlagtMeldingFraDbListe =
-                    testDb.connection.hentPlanlagtMelding("fnr", startdato)
-                val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
-                utbetaltEventFraDbListe.size shouldBeEqualTo 2
-                val planlagt39ukersmelding =
-                    planlagtMeldingFraDbListe.find { it.type == BREV_39_UKER_TYPE }
-                planlagt39ukersmelding?.sendes?.toLocalDate() shouldBeEqualTo
-                    OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).toLocalDate()
             }
             test(
                 "Oppdaterer ikke stansmelding hvis nytt utsendingstidspunkt er tidligere enn det forrige"
@@ -215,7 +134,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
 
                 val planlagtMeldingFraDbListe =
                     testDb.connection.hentPlanlagtMelding("fnr", startdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
+                planlagtMeldingFraDbListe.size shouldBeEqualTo 3
                 val planlagtStansmelding = planlagtMeldingFraDbListe.find { it.type == STANS_TYPE }
                 planlagtStansmelding?.sendes shouldBeEqualTo
                     tom.plusDays(17)
@@ -321,8 +240,8 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                 val utbetaltEventFraDbListe = testDb.connection.hentUtbetaltEvent("fnr", startdato)
                 val nesteUtbetaltEventFraDbListe =
                     testDb.connection.hentUtbetaltEvent("fnr", nesteStartdato)
-                planlagtMeldingFraDbListe.size shouldBeEqualTo 4
-                nestePlanlagtMeldingFraDbListe.size shouldBeEqualTo 4
+                planlagtMeldingFraDbListe.size shouldBeEqualTo 3
+                nestePlanlagtMeldingFraDbListe.size shouldBeEqualTo 3
                 utbetaltEventFraDbListe.size shouldBeEqualTo 1
                 nesteUtbetaltEventFraDbListe.size shouldBeEqualTo 1
             }

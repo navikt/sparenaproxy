@@ -4,13 +4,6 @@ import no.nav.syfo.log
 
 data class Brev4UkerMelding(val n2810: N2810, val n2820: N2820, val n2830: N2830, val n2840: N2840)
 
-data class Brev39UkerMelding(
-    val n2810: N2810,
-    val n2820: N2820,
-    val n2830: N2830,
-    val n2840: N2840
-)
-
 data class N2810(
     val copyId: String = "N2810".padEnd(8, ' '), // lengde 8
     val aksjon: String = "SENDMELDING", // lengde 11
@@ -68,21 +61,6 @@ fun Brev4UkerMelding.tilMqMelding(): String {
         throw IllegalStateException("4-ukersmelding har feil lengde")
     }
     return brev4ukermeldingSomTekst
-}
-
-fun Brev39UkerMelding.tilMqMelding(): String {
-    val sb = StringBuilder()
-    sb.append(n2810.tilTekst())
-    sb.append(n2820.tilTekst())
-    sb.append(n2830.tilTekst())
-    sb.append(n2840.tilTekst())
-
-    val brev39ukermeldingSomTekst = sb.toString()
-    if (brev39ukermeldingSomTekst.length != 482) {
-        log.error("39-ukersmelding har feil lengde: ${brev39ukermeldingSomTekst.length}")
-        throw IllegalStateException("39-ukersmelding har feil lengde")
-    }
-    return brev39ukermeldingSomTekst
 }
 
 fun N2810.tilTekst(): String {

@@ -25,7 +25,6 @@ import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.dodshendelser.db.avbrytPlanlagteMeldingerVedDodsfall
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -81,15 +80,6 @@ class AktiverMeldingService(
                                 "skal ikke sende 8 ukersmelding for melding ${aktiverMelding.id}"
                             )
                             false
-                        }
-                        BREV_39_UKER_TYPE -> {
-                            if (
-                                smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
-                            ) {
-                                gjelderSammeSykefravaer(planlagtMelding)
-                            } else {
-                                false
-                            }
                         }
                         else -> {
                             log.error(

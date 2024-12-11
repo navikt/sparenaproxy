@@ -7,7 +7,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
-import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -45,33 +44,6 @@ class ArenaMeldingServiceTest :
                     "02052020                                                                                  " // lengde 90
                 brev4Ukersmelding.n2840.taglinje shouldBeEqualTo
                     "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).     " // lengde 80
-            }
-
-            test("Test av oppretting av 39-ukersmelding") {
-                val now = OffsetDateTime.of(LocalDate.of(2020, 7, 2).atTime(15, 20), ZoneOffset.UTC)
-                val planlagtMeldingDbModel =
-                    PlanlagtMeldingDbModel(
-                        id = UUID.randomUUID(),
-                        fnr = "12345678910",
-                        startdato = LocalDate.of(2020, 5, 2),
-                        type = BREV_39_UKER_TYPE,
-                        opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
-                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
-                    )
-
-                val brev39Ukersmelding =
-                    arenaMeldingService.til39Ukersmelding(planlagtMeldingDbModel, now)
-
-                brev39Ukersmelding.n2810.dato shouldBeEqualTo "02072020"
-                brev39Ukersmelding.n2810.klokke shouldBeEqualTo "152000"
-                brev39Ukersmelding.n2810.fnr shouldBeEqualTo "12345678910"
-                brev39Ukersmelding.n2810.meldKode shouldBeEqualTo "I"
-                brev39Ukersmelding.n2830.meldingId shouldBeEqualTo "M-F226-1  "
-                brev39Ukersmelding.n2830.versjon shouldBeEqualTo "015"
-                brev39Ukersmelding.n2830.meldingsdata shouldBeEqualTo
-                    "02052020                                                                                  " // lengde 90
-                brev39Ukersmelding.n2840.taglinje shouldBeEqualTo
-                    "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen).    " // lengde 80
             }
 
             test("Test av oppretting av stansmelding") {
