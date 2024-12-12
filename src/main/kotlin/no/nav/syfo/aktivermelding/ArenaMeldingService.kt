@@ -19,6 +19,7 @@ import no.nav.syfo.aktivermelding.arenamodel.tilMqMelding
 import no.nav.syfo.aktivermelding.mq.ArenaMqProducer
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
+import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -35,59 +36,50 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                     .sendTilArena(
                         til4Ukersmelding(
                                 planlagtMeldingDbModel,
-                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                                OffsetDateTime.now(ZoneId.of("Europe/Oslo")),
                             )
-                            .tilMqMelding()
+                            .tilMqMelding(),
                     )
                     .also {
                         securelog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
                         )
                         log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
                         )
                     }
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
                 securelog.info(
-                    "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}"
+                    "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}",
                 )
                 log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
                 return planlagtMeldingDbModel.id.toString()
             }
-            /* BREV_39_UKER_TYPE -> {
-                return arenaMqProducer
-                    .sendTilArena(
-                        til39Ukersmelding(
-                                planlagtMeldingDbModel,
-                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
-                            )
-                            .tilMqMelding()
-                    )
-                    .also {
-                        securelog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
-                        )
-                        log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
-                        )
-                    }
-            } */
+            BREV_39_UKER_TYPE -> {
+                securelog.info(
+                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
+                )
+                log.warn(
+                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
+                )
+                return planlagtMeldingDbModel.id.toString()
+            }
             STANS_TYPE -> {
                 return arenaMqProducer
                     .sendTilArena(
                         tilStansmelding(
                                 planlagtMeldingDbModel,
-                                OffsetDateTime.now(ZoneId.of("Europe/Oslo"))
+                                OffsetDateTime.now(ZoneId.of("Europe/Oslo")),
                             )
-                            .tilMqMelding()
+                            .tilMqMelding(),
                     )
                     .also {
                         securelog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
                         )
                         log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
                         )
                     }
             }
@@ -95,10 +87,10 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 log.error(
                     "Planlagt melding {} har ukjent type: {}",
                     planlagtMeldingDbModel.id,
-                    planlagtMeldingDbModel.type
+                    planlagtMeldingDbModel.type,
                 )
                 throw IllegalStateException(
-                    "Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}"
+                    "Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}",
                 )
             }
         }
@@ -115,21 +107,21 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                     dato = nowFormatted.split(',')[0],
                     klokke = nowFormatted.split(',')[1],
                     fnr = planlagtMeldingDbModel.fnr,
-                    meldKode = "I"
+                    meldKode = "I",
                 ),
             n2820 = N2820(),
             n2830 =
                 N2830(
                     meldingId = "M-F234-1".padEnd(10, ' '),
                     versjon = "014",
-                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
+                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' '),
                 ),
             n2840 =
                 N2840(
                     taglinje =
                         "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
-                            .padEnd(80, ' ')
-                )
+                            .padEnd(80, ' '),
+                ),
         )
     }
 
@@ -144,21 +136,21 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                     dato = nowFormatted.split(',')[0],
                     klokke = nowFormatted.split(',')[1],
                     fnr = planlagtMeldingDbModel.fnr,
-                    meldKode = "I"
+                    meldKode = "I",
                 ),
             n2820 = N2820(),
             n2830 =
                 N2830(
                     meldingId = "M-F226-1".padEnd(10, ' '),
                     versjon = "015",
-                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' ')
+                    meldingsdata = formatDate(planlagtMeldingDbModel.startdato).padEnd(90, ' '),
                 ),
             n2840 =
                 N2840(
                     taglinje =
                         "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
-                            .padEnd(80, ' ')
-                )
+                            .padEnd(80, ' '),
+                ),
         )
     }
 
@@ -172,11 +164,11 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 K278M810Stans(
                     dato = nowFormatted.split(',')[0],
                     klokke = nowFormatted.split(',')[1],
-                    fnr = planlagtMeldingDbModel.fnr
+                    fnr = planlagtMeldingDbModel.fnr,
                 ),
             k278M815 = K278M815Stans(),
             k278M830 = K278M830Stans(startdato = formatDate(planlagtMeldingDbModel.startdato)),
-            k278M840 = K278M840Stans()
+            k278M840 = K278M840Stans(),
         )
     }
 
