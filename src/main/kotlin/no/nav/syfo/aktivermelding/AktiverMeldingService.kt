@@ -83,13 +83,10 @@ class AktiverMeldingService(
                             false
                         }
                         BREV_39_UKER_TYPE -> {
-                            if (
-                                smregisterClient.erSykmeldt(planlagtMelding.fnr, aktiverMelding.id)
-                            ) {
-                                gjelderSammeSykefravaer(planlagtMelding)
-                            } else {
-                                false
-                            }
+                            log.info(
+                                "skal ikke sende 39 ukersmelding for melding ${aktiverMelding.id}, siden dette skal sendes fra Arena"
+                            )
+                            false
                         }
                         else -> {
                             log.error(
