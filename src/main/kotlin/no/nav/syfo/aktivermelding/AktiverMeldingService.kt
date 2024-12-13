@@ -84,7 +84,7 @@ class AktiverMeldingService(
                         }
                         BREV_39_UKER_TYPE -> {
                             log.info(
-                                "skal ikke sende 39 ukersmelding for melding ${aktiverMelding.id}, siden dette skal sendes fra Arena"
+                                "skal ikke sende 39 ukersmelding for melding ${aktiverMelding.id}, siden dette skal sendes fra Modia"
                             )
                             false
                         }
