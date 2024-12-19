@@ -90,10 +90,13 @@ class MottattSykmeldingService(
                 sykmeldingId = sykmeldingId,
             )
 
-        sendAvbrutt39ukersmelding(
+        log.info(
+            "Sender ikke avbrutt 39 ukers melding $sykmeldingId",
+        )
+        /*     sendAvbrutt39ukersmelding(
             receivedSykmelding,
             avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato },
-        )
+        )*/
         utsettStansmelding(
             receivedSykmelding,
             aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
