@@ -83,7 +83,6 @@ class AktiverMeldingService(
                             false
                         }
                         BREV_39_UKER_TYPE -> {
-                            false
                             log.info(
                                 "skal ikke sende 39 ukersmelding for melding ${aktiverMelding.id}, siden dette skal sendes fra Modia"
                             )
