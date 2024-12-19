@@ -75,8 +75,8 @@ class MottattSykmeldingService(
 
         if (
             aktiveStansmeldinger.isEmpty() &&
-                avbrutteAktivitetskravMeldinger.isEmpty() &&
-                avbrutte39ukersMeldinger.isEmpty()
+            avbrutteAktivitetskravMeldinger.isEmpty() &&
+            avbrutte39ukersMeldinger.isEmpty()
         ) {
             log.info(
                 "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
@@ -90,10 +90,13 @@ class MottattSykmeldingService(
                 sykmeldingId = sykmeldingId,
             )
 
-        sendAvbrutt39ukersmelding(
-            receivedSykmelding,
-            avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato },
+        log.info(
+            "Sender ikke avbrutt 39 ukers melding $sykmeldingId",
         )
+        /*     sendAvbrutt39ukersmelding(
+                 receivedSykmelding,
+                 avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato },
+             )*/
         utsettStansmelding(
             receivedSykmelding,
             aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
