@@ -144,6 +144,10 @@ class AktiverMeldingService(
             log.warn("Should not send 8 ukersmelding til arena ${planlagtMelding.id}")
             return
         }
+        if (planlagtMelding.type == BREV_39_UKER_TYPE) {
+            log.warn("Should not send 39 ukersmelding til arena ${planlagtMelding.id}")
+            return
+        }
         if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {
             log.info("Sender melding med id {} til Arena", planlagtMelding.id)
             val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(planlagtMelding)
