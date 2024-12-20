@@ -70,13 +70,10 @@ class MottattSykmeldingService(
             database.finnAktivStansmelding(receivedSykmelding.personNrPasient)
         val avbrutteAktivitetskravMeldinger =
             database.finnAvbruttAktivitetskravmelding(receivedSykmelding.personNrPasient)
-        val avbrutte39ukersMeldinger =
-            database.finnAvbrutt39ukersmelding(receivedSykmelding.personNrPasient)
 
         if (
             aktiveStansmeldinger.isEmpty() &&
-                avbrutteAktivitetskravMeldinger.isEmpty() &&
-                avbrutte39ukersMeldinger.isEmpty()
+                avbrutteAktivitetskravMeldinger.isEmpty()
         ) {
             log.info(
                 "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
@@ -93,42 +90,11 @@ class MottattSykmeldingService(
         log.info(
             "Sender ikke avbrutt 39 ukers melding $sykmeldingId",
         )
-        /*     sendAvbrutt39ukersmelding(
-            receivedSykmelding,
-            avbrutte39ukersMeldinger.firstOrNull { it.startdato == startdato },
-        )*/
+
         utsettStansmelding(
             receivedSykmelding,
             aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
         )
-    }
-
-    @WithSpan
-    fun sendAvbrutt39ukersmelding(
-        receivedSykmelding: ReceivedSykmelding,
-        avbruttMelding: PlanlagtMeldingDbModel?
-    ) {
-        val sykmeldingId = receivedSykmelding.sykmelding.id
-        if (avbruttMelding == null) {
-            log.info(
-                "Fant ingen matchende avbrutte 39-ukersmeldinger, ignorerer sykmelding med id {}",
-                sykmeldingId,
-            )
-        } else {
-            log.info(
-                "Sender 39-ukersmelding med id {} for sykmeldingid {}",
-                avbruttMelding.id,
-                sykmeldingId,
-            )
-            database.resendAvbruttMelding(avbruttMelding.id)
-            val correlationId = arenaMeldingService.sendPlanlagtMeldingTilArena(avbruttMelding)
-            database.sendPlanlagtMelding(
-                avbruttMelding.id,
-                OffsetDateTime.now(ZoneOffset.UTC),
-                correlationId,
-            )
-            SENDT_AVBRUTT_MELDING.inc()
-        }
     }
 
     @WithSpan
