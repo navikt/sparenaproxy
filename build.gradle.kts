@@ -19,7 +19,7 @@ val testContainerVersion = "1.20.4"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.7"
 val avroVersion = "1.12.0"
-val opentelemetryVersion = "2.12.0"
+val opentelemetryVersion = "2.13.0"
 val kafkaVersion = "3.9.0"
 val ibmMqVersion = "9.4.1.1"
 
