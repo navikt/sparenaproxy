@@ -57,10 +57,6 @@ class SyfoSyketilfelleClient(
             }
 
         if (aktueltSykeforloep == null) {
-            log.error(
-                "Fant ikke sykeforløp for sykmelding med id $sykmeldingId, sporingsId: {}",
-                sykmeldingId,
-            )
             if (cluster == "dev-gcp") {
                 log.info(
                     "Siden dette er dev setter vi startdato til å være 1 måned siden, sporingsId {}",
@@ -119,30 +115,29 @@ class SyfoSyketilfelleClient(
             }
 
         if (response.status != HttpStatusCode.OK) {
-            if (attempt > retryBackoff.size) {
-                log.error("Retried $attempt times without success")
-                throw SykeforlopNotFoundException("Failed to get sykeforloep")
-            }
-
-            log.info("Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms")
+            log.info(
+                "Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms, sykmeldingId $sykmeldingId"
+            )
             delay(retryBackoff[attempt].toLong())
             return fetchSykeforloepUntilSykmeldingFound(fnr, sykmeldingId, attempt + 1)
         }
 
         val result = response.body<List<Sykeforloep>>()
         if (attempt >= retryBackoff.size) {
-            log.error("Retried $attempt times without finding sykmelding $sykmeldingId")
+            log.info("Retried $attempt times without finding sykmelding $sykmeldingId")
             return result
         }
 
         val relevantSykmelding = result.flatMap { it.sykmeldinger }.find { it.id == sykmeldingId }
         if (relevantSykmelding == null) {
-            log.info("Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms")
+            log.info(
+                "Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms, sykmeldingId $sykmeldingId"
+            )
             delay(retryBackoff[attempt].toLong())
             return fetchSykeforloepUntilSykmeldingFound(fnr, sykmeldingId, attempt + 1)
         }
 
-        log.info("Found sykeforloep after $attempt attempts")
+        log.info("Found sykeforloep after $attempt attempts, sykmeldingId $sykmeldingId")
         return result
     }
 
