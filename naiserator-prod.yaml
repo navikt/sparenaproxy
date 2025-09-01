@@ -10,7 +10,9 @@ spec:
   replicas:
     min: 2
     max: 4
-    cpuThresholdPercentage: 95
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 95
   port: 8080
   gcp:
     sqlInstances:
@@ -59,7 +61,7 @@ spec:
       memory: 3Gi
     requests:
       cpu: 50m
-      memory: 750Mi
+      memory: 850Mi
   kafka:
     pool: nav-prod
   azure:
