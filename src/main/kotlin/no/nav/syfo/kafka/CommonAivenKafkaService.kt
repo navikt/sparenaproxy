@@ -10,7 +10,6 @@ import no.nav.syfo.Environment
 import no.nav.syfo.aktivermelding.AktiverMeldingService
 import no.nav.syfo.aktivermelding.MottattSykmeldingService
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.client.SykeforlopNotFoundException
 import no.nav.syfo.lagrevedtak.UtbetaltEventService
 import no.nav.syfo.log
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -37,8 +36,11 @@ class CommonAivenKafkaService(
                     )
                 )
                 consumeMessages()
-            } catch (ex: SykeforlopNotFoundException) {
-                log.warn("Sykeforlop not found, unsubscribing and waiting 60s: ${ex.message}", ex)
+            } catch (ex: Exception) {
+                log.error(
+                    "Error prosessing message, unsubscribing and waiting 60s: ${ex.message}",
+                    ex
+                )
                 kafkaConsumer.unsubscribe()
                 delay(60.seconds)
             }

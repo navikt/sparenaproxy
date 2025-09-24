@@ -1,6 +1,5 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -99,6 +98,3 @@ class MaksdatoService(
         return formatter.format(date)
     }
 }
-
-private fun LocalDate.erHelg(): Boolean =
-    dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY

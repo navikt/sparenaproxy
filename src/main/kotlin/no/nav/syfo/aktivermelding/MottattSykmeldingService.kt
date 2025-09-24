@@ -4,18 +4,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import kotlinx.coroutines.delay
 import no.nav.syfo.aktivermelding.db.finnAktivStansmelding
-import no.nav.syfo.aktivermelding.db.finnAvbrutt39ukersmelding
 import no.nav.syfo.aktivermelding.db.finnAvbruttAktivitetskravmelding
-import no.nav.syfo.aktivermelding.db.resendAvbruttMelding
-import no.nav.syfo.aktivermelding.db.sendPlanlagtMelding
 import no.nav.syfo.aktivermelding.db.utsettPlanlagtMelding
 import no.nav.syfo.application.db.DatabaseInterface
-import no.nav.syfo.application.metrics.SENDT_AVBRUTT_MELDING
 import no.nav.syfo.application.metrics.UTSATT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.log
@@ -28,7 +23,6 @@ import org.postgresql.util.PSQLException
 class MottattSykmeldingService(
     private val database: DatabaseInterface,
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
-    private val arenaMeldingService: ArenaMeldingService,
 ) {
 
     @WithSpan
@@ -71,10 +65,7 @@ class MottattSykmeldingService(
         val avbrutteAktivitetskravMeldinger =
             database.finnAvbruttAktivitetskravmelding(receivedSykmelding.personNrPasient)
 
-        if (
-            aktiveStansmeldinger.isEmpty() &&
-                avbrutteAktivitetskravMeldinger.isEmpty()
-        ) {
+        if (aktiveStansmeldinger.isEmpty() && avbrutteAktivitetskravMeldinger.isEmpty()) {
             log.info(
                 "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
             )
@@ -86,11 +77,9 @@ class MottattSykmeldingService(
                 fnr = receivedSykmelding.personNrPasient,
                 sykmeldingId = sykmeldingId,
             )
-
         log.info(
             "Sender ikke avbrutt 39 ukers melding $sykmeldingId",
         )
-
         utsettStansmelding(
             receivedSykmelding,
             aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
@@ -116,6 +105,7 @@ class MottattSykmeldingService(
                     .atZone(ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneOffset.UTC)
                     .toOffsetDateTime()
+
             if (oppdatertSendes.isAfter(stansmelding.sendes)) {
                 log.info(
                     "Mottatt sykmelding med nyeste tomdato senere en utsendingstidspunkt, utsetter stansmelding ${stansmelding.id}",

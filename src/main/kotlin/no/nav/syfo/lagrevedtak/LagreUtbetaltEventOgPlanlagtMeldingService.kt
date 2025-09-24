@@ -13,8 +13,6 @@ import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgOppdaterStansmelding
 import no.nav.syfo.lagrevedtak.db.lagreUtbetaltEventOgPlanlagtMelding
 import no.nav.syfo.lagrevedtak.db.planlagtMeldingFinnes
 import no.nav.syfo.log
-import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
-import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
@@ -51,8 +49,6 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                 utbetaltEvent.utbetalteventid
             )
             OPPRETTET_PLANLAGT_MELDING.labels(BREV_4_UKER_TYPE).inc()
-            OPPRETTET_PLANLAGT_MELDING.labels(AKTIVITETSKRAV_8_UKER_TYPE).inc()
-            OPPRETTET_PLANLAGT_MELDING.labels(BREV_39_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(STANS_TYPE).inc()
             database.lagreUtbetaltEventOgPlanlagtMelding(
                 utbetaltEvent,
@@ -67,40 +63,11 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                             .withZoneSameInstant(ZoneOffset.UTC)
                             .toOffsetDateTime()
                     ),
-                    lagPlanlagtMeldingDbModelForUtbetaling(
-                        utbetaltEvent,
-                        AKTIVITETSKRAV_8_UKER_TYPE,
-                        utbetaltEvent.startdato
-                            .plusWeeks(8)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault())
-                            .withZoneSameInstant(ZoneOffset.UTC)
-                            .toOffsetDateTime()
-                    ),
-                    lagPlanlagtMeldingDbModelForUtbetaling(
-                        utbetaltEvent,
-                        BREV_39_UKER_TYPE,
-                        finnUtsendingstidspunkt39Ukersmelding(utbetaltEvent)
-                    ),
                     planlagtStansmelding
                 )
             )
         }
     }
-
-    private fun finnUtsendingstidspunkt39Ukersmelding(
-        utbetaltEvent: UtbetaltEvent
-    ): OffsetDateTime =
-        if (utbetaltEvent.gjenstaendeSykedager < 66) {
-            OffsetDateTime.now(ZoneOffset.UTC)
-        } else {
-            utbetaltEvent.startdato
-                .plusWeeks(39)
-                .atStartOfDay()
-                .atZone(ZoneId.systemDefault())
-                .withZoneSameInstant(ZoneOffset.UTC)
-                .toOffsetDateTime()
-        }
 
     private fun lagPlanlagtMeldingDbModelForUtbetaling(
         utbetaltEvent: UtbetaltEvent,

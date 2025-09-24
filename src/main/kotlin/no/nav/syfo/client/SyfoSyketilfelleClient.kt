@@ -17,7 +17,8 @@ class SyfoSyketilfelleClient(
     private val accessTokenClientV2: AccessTokenClientV2,
     private val resourceId: String,
     private val httpClient: HttpClient,
-    private val cluster: String
+    private val cluster: String,
+    private val retryBackoff: List<Long> = listOf(10, 50, 100, 1000, 1000, 1000, 1000, 1000)
 ) {
 
     @WithSpan
@@ -100,29 +101,29 @@ class SyfoSyketilfelleClient(
         /* We assume that most cases the processing is flex-syketilfelle is pretty fast. But for
         cases where the old 5s implementation actually required 5s, let's back off, so it waits
         at least 5s */
-        val retryBackoff = listOf(10, 50, 100, 1000, 1000, 1000, 1000, 1000)
 
-        val response =
-            httpClient.get(
-                "$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true"
-            ) {
-                accept(ContentType.Application.Json)
-                val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
-                headers {
-                    append("Authorization", "Bearer $accessToken")
-                    append("fnr", fnr)
+        val result =
+            httpClient
+                .get("$syketilfelleEndpointURL/api/v1/sykeforloep?inkluderPapirsykmelding=true") {
+                    accept(ContentType.Application.Json)
+                    val accessToken = accessTokenClientV2.getAccessTokenV2(resourceId)
+                    headers {
+                        append("Authorization", "Bearer $accessToken")
+                        append("fnr", fnr)
+                    }
                 }
-            }
+                .let {
+                    when (it.status) {
+                        HttpStatusCode.OK -> it.body<List<Sykeforloep>>()
+                        else -> {
+                            log.warn(
+                                "Syketilfelle returned ${it.status} for sykmeldingId $sykmeldingId"
+                            )
+                            emptyList()
+                        }
+                    }
+                }
 
-        if (response.status != HttpStatusCode.OK) {
-            log.info(
-                "Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms, sykmeldingId $sykmeldingId"
-            )
-            delay(retryBackoff[attempt].toLong())
-            return fetchSykeforloepUntilSykmeldingFound(fnr, sykmeldingId, attempt + 1)
-        }
-
-        val result = response.body<List<Sykeforloep>>()
         if (attempt >= retryBackoff.size) {
             log.info("Retried $attempt times without finding sykmelding $sykmeldingId")
             return result
@@ -133,7 +134,7 @@ class SyfoSyketilfelleClient(
             log.info(
                 "Failed to get sykeforloep, retrying in ${retryBackoff[attempt]}ms, sykmeldingId $sykmeldingId"
             )
-            delay(retryBackoff[attempt].toLong())
+            delay(retryBackoff[attempt])
             return fetchSykeforloepUntilSykmeldingFound(fnr, sykmeldingId, attempt + 1)
         }
 

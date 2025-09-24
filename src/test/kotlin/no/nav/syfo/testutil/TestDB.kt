@@ -184,23 +184,23 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              """
             )
-            .use {
-                it.setObject(1, UUID.randomUUID())
-                it.setObject(2, startdato)
-                it.setString(3, aktorId)
-                it.setString(4, fnr)
-                it.setString(5, "9090880")
-                it.setObject(6, LocalDate.now().minusMonths(1))
-                it.setObject(7, LocalDate.now().minusDays(10))
-                it.setInt(8, 20)
-                it.setInt(9, 250)
-                it.setTimestamp(
+            .use { ps ->
+                ps.setObject(1, UUID.randomUUID())
+                ps.setObject(2, startdato)
+                ps.setString(3, aktorId)
+                ps.setString(4, fnr)
+                ps.setString(5, "9090880")
+                ps.setObject(6, LocalDate.now().minusMonths(1))
+                ps.setObject(7, LocalDate.now().minusDays(10))
+                ps.setInt(8, 20)
+                ps.setInt(9, 250)
+                ps.setTimestamp(
                     10,
                     Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())))
                 )
-                it.setObject(11, LocalDate.now().plusDays(250))
-                it.setObject(12, UUID.randomUUID())
-                it.execute()
+                ps.setObject(11, LocalDate.now().plusDays(250))
+                ps.setObject(12, UUID.randomUUID())
+                ps.execute()
             }
         it.commit()
     }

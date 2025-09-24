@@ -3,8 +3,6 @@ package no.nav.syfo.aktivermelding.mq
 import jakarta.jms.MessageConsumer
 import jakarta.jms.MessageProducer
 import jakarta.jms.TextMessage
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import no.nav.syfo.aktivermelding.KvitteringService
 import no.nav.syfo.application.ApplicationState
@@ -21,7 +19,7 @@ class KvitteringListener(
         while (applicationState.ready) {
             val message = kvitteringConsumer.receive(1000)
             if (message == null) {
-                delay(1.seconds)
+                yield()
                 continue
             }
             try {

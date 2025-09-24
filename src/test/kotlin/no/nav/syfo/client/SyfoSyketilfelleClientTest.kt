@@ -8,6 +8,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -34,6 +35,7 @@ class SyfoSyketilfelleClientTest :
         val fnr1 = "123456"
         val fnr2 = "654321"
         val fnr3 = "111222"
+        val errorFnr = "error"
 
         val accessTokenClientMock = mockk<AccessTokenClientV2>()
         val httpClient =
@@ -124,6 +126,7 @@ class SyfoSyketilfelleClientTest :
                                         )
                                     )
                                 fnr3 -> call.respond(emptyList<Sykeforloep>())
+                                errorFnr -> call.respond(HttpStatusCode.InternalServerError)
                             }
                         }
                     }
@@ -136,7 +139,8 @@ class SyfoSyketilfelleClientTest :
                 accessTokenClientMock,
                 "resource",
                 httpClient,
-                "prod-gcp"
+                "prod-gcp",
+                emptyList(),
             )
 
         afterSpec { mockServer.stop(TimeUnit.SECONDS.toMillis(1), TimeUnit.SECONDS.toMillis(1)) }
@@ -164,6 +168,16 @@ class SyfoSyketilfelleClientTest :
                     }
                 }
             }
+            test("Kaster feil når syketilfellet får feilmelding") {
+                assertFailsWith<RuntimeException> {
+                    runBlocking {
+                        syfoSyketilfelleClient.getStartDatoForSykmelding(
+                            errorFnr,
+                            sykmeldingUUID.toString(),
+                        )
+                    }
+                }
+            }
             test(
                 "Returnerer dato hvis sykmelding ikke er knyttet til syketilfelle og vi kjører i dev-gcp"
             ) {
@@ -173,7 +187,8 @@ class SyfoSyketilfelleClientTest :
                         accessTokenClientMock,
                         "resource",
                         httpClient,
-                        "dev-gcp"
+                        "dev-gcp",
+                        emptyList(),
                     )
                 val startDato =
                     syfoSyketilfelleClientDev.getStartDatoForSykmelding(

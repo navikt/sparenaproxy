@@ -97,23 +97,9 @@ val KVITTERING_SENDT: Counter =
         .help("Planlagt melding som det er mottatt ok kvittering for")
         .register()
 
-val SENDT_AVBRUTT_MELDING: Counter =
-    Counter.build()
-        .namespace(METRICS_NS)
-        .name("sendt_avbrutt_counter")
-        .help("Avbrutt melding som sendes ved økning av grad")
-        .register()
-
 val AVBRUTT_MELDING_DODSFALL: Counter =
     Counter.build()
         .namespace(METRICS_NS)
         .name("avbrutt_melding_dodsfall_counter")
         .help("Antall avbrutte meldinger pga dødsfall")
-        .register()
-
-val STOPPER_8_UKER_MELDING: Counter =
-    Counter.build()
-        .namespace(METRICS_NS)
-        .name("stopper_8_uker_melding_til_arena_counter")
-        .help("Antall 8 ukers meldinger stoppet til arena")
         .register()

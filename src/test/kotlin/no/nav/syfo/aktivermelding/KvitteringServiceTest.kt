@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.FunSpec
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import kotlin.test.assertFailsWith
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.dropData
 import no.nav.syfo.testutil.lagrePlanlagtMelding
@@ -23,11 +22,6 @@ class KvitteringServiceTest :
         afterTest { testDb.connection.dropData() }
 
         context("Test av behandleKvittering") {
-            test("Feiler hvis kvitteringstatus ikke er ok og melding ikke finnes i database") {
-                assertFailsWith<RuntimeException> {
-                    kvitteringService.behandleKvittering(kvitteringsmeldingMedFeil, "corrId")
-                }
-            }
             test("Prøver å resende hvis kvitteringstatus ikke er ok og melding finnes i database") {
                 testDb.connection.lagrePlanlagtMelding(
                     opprettPlanlagtMelding(

@@ -55,22 +55,9 @@ fun DatabaseInterface.resendPlanlagtMelding(correlationId: String): Int {
     }
 }
 
-fun DatabaseInterface.resendAvbruttMelding(id: UUID) {
-    connection.use { connection ->
-        connection.resendAvbruttMelding(id)
-        connection.commit()
-    }
-}
-
 fun DatabaseInterface.finnAvbruttAktivitetskravmelding(fnr: String): List<PlanlagtMeldingDbModel> {
     connection.use { connection ->
         return connection.finnAvbruttAktivitetskravmelding(fnr)
-    }
-}
-
-fun DatabaseInterface.finnAvbrutt39ukersmelding(fnr: String): List<PlanlagtMeldingDbModel> {
-    connection.use { connection ->
-        return connection.finnAvbrutt39ukersmelding(fnr)
     }
 }
 

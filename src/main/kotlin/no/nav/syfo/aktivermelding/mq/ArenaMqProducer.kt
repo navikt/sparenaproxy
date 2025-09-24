@@ -8,6 +8,7 @@ class ArenaMqProducer(private val session: Session, private val messageProducer:
 
     fun sendTilArena(melding: String): String {
         val message = session.createTextMessage().apply(createMessage(melding))
+
         messageProducer.send(message)
         return message.jmsMessageID
     }

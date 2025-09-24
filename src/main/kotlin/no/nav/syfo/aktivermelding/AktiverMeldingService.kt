@@ -77,15 +77,9 @@ class AktiverMeldingService(
                             }
                         }
                         AKTIVITETSKRAV_8_UKER_TYPE -> {
-                            log.warn(
-                                "skal ikke sende 8 ukersmelding for melding ${aktiverMelding.id}"
-                            )
                             false
                         }
                         BREV_39_UKER_TYPE -> {
-                            log.info(
-                                "skal ikke sende 39 ukersmelding for melding ${aktiverMelding.id}, siden dette skal sendes fra Modia"
-                            )
                             false
                         }
                         else -> {
@@ -141,11 +135,9 @@ class AktiverMeldingService(
 
     private suspend fun sendTilArena(planlagtMelding: PlanlagtMeldingDbModel) {
         if (planlagtMelding.type == AKTIVITETSKRAV_8_UKER_TYPE) {
-            log.warn("Should not send 8 ukersmelding til arena ${planlagtMelding.id}")
             return
         }
         if (planlagtMelding.type == BREV_39_UKER_TYPE) {
-            log.warn("Should not send 39 ukersmelding til arena ${planlagtMelding.id}")
             return
         }
         if (pdlPersonService.isAlive(planlagtMelding.fnr, planlagtMelding.id)) {

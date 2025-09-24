@@ -66,7 +66,7 @@ val objectMapper: ObjectMapper =
 fun main() {
     val env = Environment()
     val serviceuser = Serviceuser()
-    MqTlsUtils.getMqTlsConfig().forEach { key, value ->
+    MqTlsUtils.getMqTlsConfig().forEach { (key, value) ->
         System.setProperty(key as String, value as String)
     }
     DefaultExports.initialize()
@@ -177,8 +177,7 @@ fun main() {
             KvitteringService(database)
         )
 
-    val mottattSykmeldingService =
-        MottattSykmeldingService(database, syfoSyketilfelleClient, arenaMeldingService)
+    val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient)
 
     val personhendelserConsumer = PersonhendelserConsumer(kafkaClients.personhendelserKafkaConsumer)
     val dodshendelserService =

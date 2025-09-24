@@ -41,7 +41,6 @@ class MottattSykmeldingServiceTest :
                 MottattSykmeldingService(
                     testDb,
                     syfoSyketilfelleClient,
-                    arenaMeldingService,
                 )
             val idAvbrutt = UUID.randomUUID()
             val idAvbrutt2 = UUID.randomUUID()

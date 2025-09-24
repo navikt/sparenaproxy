@@ -14,9 +14,7 @@ class PdlPersonService(
         val accessToken = accessTokenClientV2.getAccessTokenV2(pdlScope)
         val pdlResponse = pdlClient.getPerson(ident, accessToken)
 
-        if (pdlResponse.errors != null) {
-            pdlResponse.errors.forEach { log.error("PDL returnerte error {}, {}", it, meldingId) }
-        }
+        pdlResponse.errors?.forEach { log.error("PDL returnerte error {}, {}", it, meldingId) }
 
         if (pdlResponse.data.hentPerson == null) {
             log.error("Fant ikke person i PDL {}", meldingId)
