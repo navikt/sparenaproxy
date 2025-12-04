@@ -18,7 +18,7 @@ class SyfoSyketilfelleClient(
     private val resourceId: String,
     private val httpClient: HttpClient,
     private val cluster: String,
-    private val retryBackoff: List<Long> = listOf(10, 50, 100, 1000, 1000, 1000, 1000, 1000)
+    private val retryBackoff: List<Long> = listOf(2000, 4000, 8000, 16000, 30000)
 ) {
 
     @WithSpan
