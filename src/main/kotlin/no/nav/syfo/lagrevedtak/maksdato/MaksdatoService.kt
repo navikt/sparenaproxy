@@ -83,7 +83,11 @@ class MaksdatoService(
                 K278M830(
                     startdato = formatDate(utbetaltEvent.startdato),
                     maksdato = formatDate(utbetaltEvent.maksdato),
-                    orgnummer = utbetaltEvent.organisasjonsnummer.padEnd(9, ' ')
+                    orgnummer =
+                        when {
+                            utbetaltEvent.organisasjonsnummer.length > 9 -> ""
+                            else -> utbetaltEvent.organisasjonsnummer
+                        }.padEnd(9, ' ')
                 ),
             k278M840 = K278M840()
         )

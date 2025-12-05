@@ -82,5 +82,21 @@ class MaksdatoServiceTest :
                     id
                 ) shouldBeEqualTo false
             }
+
+            test("Maksdatomelding med SELVSTENDIG") {
+                val utbetalingsevent =
+                    lagUtbetaltEvent(
+                        id = UUID.randomUUID(),
+                        fnr = "12345678910",
+                        startdato = LocalDate.of(2020, 5, 2),
+                        gjenstaendeSykedager = 50,
+                        tom = LocalDate.of(2020, 9, 9),
+                        maksdato = LocalDate.of(2020, 12, 1),
+                        orgnummer = "SELVSTENDIG",
+                    )
+                val maksdatomelding =
+                    maksdatoService.tilMaksdatoMelding(utbetalingsevent, now = OffsetDateTime.now())
+                maksdatomelding.tilMqMelding()
+            }
         }
     })

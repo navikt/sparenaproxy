@@ -111,14 +111,15 @@ fun lagUtbetaltEvent(
     fnr: String,
     tom: LocalDate = LocalDate.of(2020, 6, 29),
     gjenstaendeSykedager: Int = 300,
-    maksdato: LocalDate = LocalDate.now().plusDays(gjenstaendeSykedager.toLong())
+    maksdato: LocalDate = LocalDate.now().plusDays(gjenstaendeSykedager.toLong()),
+    orgnummer: String = "orgnummer"
 ): UtbetaltEvent =
     UtbetaltEvent(
         utbetalteventid = id,
         startdato = startdato,
         aktorid = "aktorid",
         fnr = fnr,
-        organisasjonsnummer = "orgnummer",
+        organisasjonsnummer = orgnummer,
         fom = startdato,
         tom = tom,
         forbrukteSykedager = 0,
