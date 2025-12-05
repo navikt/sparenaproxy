@@ -4,20 +4,20 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.time.delay
 import no.nav.syfo.aktivermelding.arenamodel.tilKvittering
 import no.nav.syfo.aktivermelding.db.resendPlanlagtMelding
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.KVITTERING_MED_FEIL
 import no.nav.syfo.application.metrics.KVITTERING_SENDT
 import no.nav.syfo.log
-import no.nav.syfo.securelog
+import no.nav.syfo.teamLogger
 
 class KvitteringService(
     private val database: DatabaseInterface,
     val dbUpdateRetires: Int = 5,
     val dbUpdateTimeout: Duration = 1.seconds
 ) {
+    private val teamlog = teamLogger()
 
     @WithSpan
     suspend fun behandleKvittering(kvitteringsmelding: String, correlationId: String) {
@@ -25,11 +25,11 @@ class KvitteringService(
 
         if (kvittering.statusOk == "J") {
             log.info("Mottatt ok-kvittering fra Arena")
-            securelog.info("Kvittering: $kvittering melding med id $correlationId")
+            teamlog.info("Kvittering: $kvittering melding med id $correlationId")
             KVITTERING_SENDT.inc()
         } else {
             KVITTERING_MED_FEIL.inc()
-            securelog.info("Kvittering: $kvittering melding med id $correlationId")
+            teamlog.info("Kvittering: $kvittering melding med id $correlationId")
             log.warn(
                 "Melding med id $correlationId har feilet i Arena, statusOk: ${kvittering.statusOk}, feilkode: ${kvittering.feilkode}, feilmelding ${kvittering.feilmelding}"
             )

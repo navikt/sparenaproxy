@@ -52,7 +52,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.sparenaproxy")
-val securelog: Logger = LoggerFactory.getLogger("securelog")
+
+inline fun <reified T> T.teamLogger(): Logger =
+    LoggerFactory.getLogger("teamlog.${T::class.java.name}")
 
 val objectMapper: ObjectMapper =
     ObjectMapper().apply {

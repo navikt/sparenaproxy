@@ -23,11 +23,12 @@ import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
-import no.nav.syfo.securelog
+import no.nav.syfo.teamLogger
 
 class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
+    private val teamlog = teamLogger()
 
     fun sendPlanlagtMeldingTilArena(planlagtMeldingDbModel: PlanlagtMeldingDbModel): String {
         when (planlagtMeldingDbModel.type) {
@@ -41,7 +42,7 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                             .tilMqMelding(),
                     )
                     .also {
-                        securelog.info(
+                        teamlog.info(
                             "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
                         )
                         log.info(
@@ -50,14 +51,14 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                     }
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
-                securelog.info(
+                teamlog.info(
                     "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}",
                 )
                 log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
                 return planlagtMeldingDbModel.id.toString()
             }
             BREV_39_UKER_TYPE -> {
-                securelog.info(
+                teamlog.info(
                     "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
                 )
                 log.warn(
@@ -75,7 +76,7 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                             .tilMqMelding(),
                     )
                     .also {
-                        securelog.info(
+                        teamlog.info(
                             "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
                         )
                         log.info(

@@ -90,6 +90,7 @@ fun K278M810Stans.tilTekst(): String {
 
     val k278M810SomTekst = sb.toString()
     if (k278M810SomTekst.length != 72) {
+
         log.error("K278M810 (stans) har feil lengde: ${k278M810SomTekst.length}")
         throw IllegalStateException("K278M810 har feil lengde")
     }

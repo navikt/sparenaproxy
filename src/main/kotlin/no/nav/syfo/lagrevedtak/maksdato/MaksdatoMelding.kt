@@ -1,6 +1,10 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
 import no.nav.syfo.log
+import no.nav.syfo.objectMapper
+import org.slf4j.LoggerFactory
+
+private val teamlog = LoggerFactory.getLogger("teamlog.MaksdatoMeldingKt")
 
 data class MaksdatoMelding(
     val k278M810: K278M810,
@@ -68,6 +72,9 @@ fun MaksdatoMelding.tilMqMelding(): String {
 
     val maksdatomeldingSomTekst = sb.toString()
     if (maksdatomeldingSomTekst.length != 482) {
+        teamlog.warn(
+            "MaksdatoMelding har feil lengde ${maksdatomeldingSomTekst.length}, value: ${objectMapper.writeValueAsString(this)}, sb: $sb"
+        )
         log.error("Maksdatomelding har feil lengde: ${maksdatomeldingSomTekst.length}")
         throw IllegalStateException("Maksdatomelding har feil lengde")
     }
@@ -136,6 +143,9 @@ fun K278M830.tilTekst(): String {
 
     val k278M830SomTekst = sb.toString()
     if (k278M830SomTekst.length != 116) {
+        teamlog.warn(
+            "K278M830 har feil lengde ${k278M830SomTekst.length}, value: ${objectMapper.writeValueAsString(this)}, sb: $sb"
+        )
         log.error("K278M830 har feil lengde: ${k278M830SomTekst.length}")
         throw IllegalStateException("K278M830 har feil lengde")
     }

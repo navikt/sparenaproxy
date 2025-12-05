@@ -10,7 +10,7 @@ import no.nav.syfo.application.metrics.SENDT_MAKSDATOMELDING
 import no.nav.syfo.lagrevedtak.UtbetaltEvent
 import no.nav.syfo.log
 import no.nav.syfo.pdl.service.PdlPersonService
-import no.nav.syfo.securelog
+import no.nav.syfo.teamLogger
 
 class MaksdatoService(
     private val arenaMqProducer: ArenaMqProducer,
@@ -18,6 +18,7 @@ class MaksdatoService(
 ) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
+    private val teamlog = teamLogger()
 
     suspend fun sendMaksdatomeldingTilArena(utbetaltEvent: UtbetaltEvent) {
         if (
@@ -37,7 +38,7 @@ class MaksdatoService(
                 utbetaltEvent.utbetalteventid,
                 correlationId
             )
-            securelog.info(
+            teamlog.info(
                 "Har sendt maksdatomelding for utbetaltevent {}, correlationId: {}, fnr: {}",
                 utbetaltEvent.utbetalteventid,
                 correlationId,
