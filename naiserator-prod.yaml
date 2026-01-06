@@ -113,3 +113,5 @@ spec:
       value: api://prod-fss.pdl.pdl-api/.default
     - name: SYKETILLFELLE_SCOPE
       value: api://prod-gcp.flex.flex-syketilfelle/.default
+    - name: KAFKA_RESET_POLICY
+      value: none

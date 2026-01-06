@@ -38,7 +38,7 @@ class KafkaClients(env: Environment) {
                 )
                 .also {
                     it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
-                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
+                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = env.kafkaResetPolicy
                     it["specific.avro.reader"] = false
                 }
 
@@ -55,7 +55,7 @@ class KafkaClients(env: Environment) {
                     valueDeserializer = StringDeserializer::class
                 )
                 .also {
-                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
+                    it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = env.kafkaResetPolicy
                     it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
                 }
 
