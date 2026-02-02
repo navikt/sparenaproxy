@@ -2,9 +2,9 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val coroutinesVersion = "1.10.2"
-val jacksonVersion = "2.19.1"
+val jacksonVersion = "2.20.2"
 val kluentVersion = "1.73"
-val ktorVersion = "3.2.1"
+val ktorVersion = "3.4.0"
 val logbackVersion = "1.5.18"
 val logstashEncoderVersion = "8.1"
 val prometheusVersion = "0.16.0"
@@ -13,7 +13,7 @@ val mockkVersion = "1.14.4"
 val postgresVersion = "42.7.7"
 val flywayVersion = "11.10.1"
 val hikariVersion = "6.3.0"
-val confluentVersion = "8.0.0"
+val confluentVersion = "8.1.1"
 val kotlinVersion = "2.2.0"
 val testContainerVersion = "1.21.3"
 val ktfmtVersion = "0.44"
@@ -59,7 +59,6 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
-
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
@@ -85,11 +84,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-    constraints {
-        implementation("org.apache.avro:avro:$avroVersion") {
-            because("override transient from io.confluent:kafka-avro-serializer")
-        }
-    }
+
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
