@@ -5,7 +5,7 @@ val coroutinesVersion = "1.10.2"
 val jacksonVersion = "2.20.2"
 val kluentVersion = "1.73"
 val ktorVersion = "3.4.0"
-val logbackVersion = "1.5.18"
+val logbackVersion = "1.5.26"
 val logstashEncoderVersion = "8.1"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
@@ -15,9 +15,8 @@ val flywayVersion = "11.10.1"
 val hikariVersion = "6.3.0"
 val confluentVersion = "8.1.1"
 val kotlinVersion = "2.2.0"
-val testContainerVersion = "1.21.3"
+val testcontainerVersion = "2.0.1"
 val ktfmtVersion = "0.44"
-val snappyJavaVersion = "1.1.10.7"
 val avroVersion = "1.12.0"
 val opentelemetryVersion = "2.17.0"
 val kafkaVersion = "3.9.1"
@@ -62,12 +61,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
 
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
-    constraints {
-        implementation("org.xerial.snappy:snappy-java:$snappyJavaVersion") {
-            because("override transient from org.apache.kafka:kafka_2.12")
-        }
-    }
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:$ibmMqVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -91,8 +85,8 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.testcontainers:kafka:$testContainerVersion")
-    testImplementation("org.testcontainers:postgresql:$testContainerVersion")
+    testImplementation("org.testcontainers:testcontainers-kafka:$testcontainerVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainerVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")
     }
