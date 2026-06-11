@@ -82,8 +82,6 @@ spec:
             - port: 1413
   envFrom:
     - secret: srvsparenaproxy-secrets
-  secureLogs:
-    enabled: true
   env:
     - name: SMREGISTER_SCOPE
       value: api://dev-gcp.teamsykmelding.syfosmregister/.default
