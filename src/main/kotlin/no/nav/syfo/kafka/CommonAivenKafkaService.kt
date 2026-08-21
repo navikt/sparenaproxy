@@ -59,7 +59,7 @@ class CommonAivenKafkaService(
 
             records.forEach {
                 val span = tracer.spanBuilder("kafka-consumer-root.records.message").startSpan()
-                if (it.value() != null) {
+                if (!isNull(it.value())) {
                     when (it.topic()) {
                         env.utbetalingTopic -> utbetaltEventService.mottaUtbetaltEvent(it.value())
                         env.okSykmeldingTopic ->
@@ -80,6 +80,14 @@ class CommonAivenKafkaService(
                 span.end()
             }
             yield()
+        }
+    }
+
+    private fun isNull(value: String?): Boolean {
+        return when (value) {
+            null -> true
+            "null" -> true
+            else -> false
         }
     }
 }
