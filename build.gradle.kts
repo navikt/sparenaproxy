@@ -2,31 +2,31 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val coroutinesVersion = "1.10.2"
-val jacksonVersion = "2.20.2"
+val jacksonVersion = "3.2.2"
 val kluentVersion = "1.73"
-val ktorVersion = "3.4.0"
-val logbackVersion = "1.5.26"
-val logstashEncoderVersion = "8.1"
+val ktorVersion = "3.5.2"
+val logbackVersion = "1.6.3"
+val logstashEncoderVersion = "9.0"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
 val mockkVersion = "1.14.4"
 val postgresVersion = "42.7.7"
-val flywayVersion = "11.10.1"
-val hikariVersion = "6.3.0"
+val flywayVersion = "13.4.0"
+val hikariVersion = "7.1.0"
 val confluentVersion = "8.1.1"
-val kotlinVersion = "2.2.0"
-val testcontainerVersion = "2.0.3"
-val ktfmtVersion = "0.44"
+val kotlinVersion = "2.4.10"
+val testcontainerVersion = "2.0.5"
+val ktfmtVersion = "0.56"
 val avroVersion = "1.12.0"
 val opentelemetryVersion = "2.17.0"
-val kafkaVersion = "3.9.1"
-val ibmMqVersion = "9.4.3.0"
+val kafkaVersion = "4.3.1"
+val ibmMqVersion = "10.0.0.0"
 
 
 plugins {
     id("application")
-    id("com.diffplug.spotless") version "7.0.4"
-    kotlin("jvm") version "2.2.0"
+    id("com.diffplug.spotless") version "8.10.1"
+    kotlin("jvm") version "2.4.10"
     id("com.gradleup.shadow") version "8.3.8"
 }
 
@@ -44,8 +44,6 @@ repositories {
 
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
@@ -57,11 +55,12 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson3:$ktorVersion")
 
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:$ibmMqVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -72,10 +71,9 @@ dependencies {
     compileOnly("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 

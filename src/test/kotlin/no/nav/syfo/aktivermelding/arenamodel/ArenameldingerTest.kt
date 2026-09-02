@@ -12,7 +12,7 @@ class ArenameldingerTest :
                 meldingId = "M-RK68-1  ",
                 versjon = "008",
                 meldingsdata =
-                    "02052020                                                                                  " // lengde 90
+                    "02052020                                                                                  ", // lengde 90
             )
         val n28408uker =
             N2840(
@@ -27,7 +27,7 @@ class ArenameldingerTest :
                 meldingId = "M-F226-1  ",
                 versjon = "015",
                 meldingsdata =
-                    "02052020                                                                                  " // lengde 90
+                    "02052020                                                                                  ", // lengde 90
             )
         val n284039uker =
             N2840(
@@ -39,7 +39,7 @@ class ArenameldingerTest :
                 n2810 = n281039uker,
                 n2820 = N2820(),
                 n2830 = n283039uker,
-                n2840 = n284039uker
+                n2840 = n284039uker,
             )
 
         context("Aktivitetskravmelding får riktig tekstverdi") {

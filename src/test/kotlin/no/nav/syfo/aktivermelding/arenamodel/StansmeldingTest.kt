@@ -13,7 +13,7 @@ class StansmeldingTest :
                 k278M810 = k278M810,
                 k278M815 = K278M815Stans(),
                 k278M830 = k278M830,
-                k278M840 = K278M840Stans()
+                k278M840 = K278M840Stans(),
             )
 
         context("Stansmelding får riktig tekstverdi") {

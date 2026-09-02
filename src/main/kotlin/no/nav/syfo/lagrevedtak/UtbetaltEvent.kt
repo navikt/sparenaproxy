@@ -16,5 +16,5 @@ data class UtbetaltEvent(
     val gjenstaendeSykedager: Int,
     val opprettet: LocalDateTime,
     val maksdato: LocalDate,
-    val utbetalingId: UUID
+    val utbetalingId: UUID,
 )

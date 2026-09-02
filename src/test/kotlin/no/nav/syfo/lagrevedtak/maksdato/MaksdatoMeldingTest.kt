@@ -14,7 +14,7 @@ class MaksdatoMeldingTest :
                 k278M810 = k278M810,
                 k278M815 = K278M815(),
                 k278M830 = k278M830,
-                k278M840 = K278M840()
+                k278M840 = K278M840(),
             )
 
         context("Maksdatomelding får riktig tekstverdi") {

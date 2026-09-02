@@ -8,7 +8,7 @@ data class Brev39UkerMelding(
     val n2810: N2810,
     val n2820: N2820,
     val n2830: N2830,
-    val n2840: N2840
+    val n2840: N2840,
 )
 
 data class N2810(
@@ -25,7 +25,7 @@ data class N2810(
     val navAnsatt: String = " ", // lengde 1, brukes ikke
     val ytelse: String = "SP", // lengde 2
     val meldKode: String, // lengde 1
-    val uaktuell: String = " " // lengde 1
+    val uaktuell: String = " ", // lengde 1
 )
 
 data class N2820(
@@ -38,7 +38,7 @@ data class N2820(
     val adresse2: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val adresse3: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val postnr: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
-    val bokommune: String = "".padEnd(4, ' ') // lengde 4, brukes ikke
+    val bokommune: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
 )
 
 data class N2830(
@@ -46,13 +46,13 @@ data class N2830(
     val antall: String = "00001", // lengde 5
     val meldingId: String, // lengde 10
     val versjon: String, // lengde 3
-    val meldingsdata: String // lengde 90: startdato (lengde 8) + filler (lengde 80)
+    val meldingsdata: String, // lengde 90: startdato (lengde 8) + filler (lengde 80)
 )
 
 data class N2840(
     val copyId: String = "N2840".padEnd(8, ' '), // lengde 8
     val antall: String = "00001", // lengde 5
-    val taglinje: String // lengde 80
+    val taglinje: String, // lengde 80
 )
 
 fun Brev4UkerMelding.tilMqMelding(): String {

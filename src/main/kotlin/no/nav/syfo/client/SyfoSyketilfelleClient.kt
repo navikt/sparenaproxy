@@ -18,7 +18,7 @@ class SyfoSyketilfelleClient(
     private val resourceId: String,
     private val httpClient: HttpClient,
     private val cluster: String,
-    private val retryBackoff: List<Long> = listOf(2000, 4000, 8000, 16000, 30000)
+    private val retryBackoff: List<Long> = listOf(2000, 4000, 8000, 16000, 30000),
 ) {
 
     @WithSpan
@@ -26,7 +26,7 @@ class SyfoSyketilfelleClient(
         fnr: String,
         fom: LocalDate,
         tom: LocalDate,
-        sporingsId: UUID
+        sporingsId: UUID,
     ): LocalDate {
         val sykeforloep = fetchSykeforloep(fnr)
         val startdato = getStartdatoByFomTom(fom, tom, sykeforloep)
@@ -47,10 +47,7 @@ class SyfoSyketilfelleClient(
     }
 
     @WithSpan
-    suspend fun getStartDatoForSykmelding(
-        fnr: String,
-        sykmeldingId: String,
-    ): LocalDate {
+    suspend fun getStartDatoForSykmelding(fnr: String, sykmeldingId: String): LocalDate {
         val sykeforloep = fetchSykeforloepUntilSykmeldingFound(fnr, sykmeldingId)
         val aktueltSykeforloep =
             sykeforloep.firstOrNull {
@@ -75,7 +72,7 @@ class SyfoSyketilfelleClient(
     suspend fun harSykeforlopMedNyereStartdato(
         fnr: String,
         startdato: LocalDate,
-        planlagtMeldingId: UUID
+        planlagtMeldingId: UUID,
     ): Boolean {
         val sykeforloep = fetchSykeforloep(fnr)
         if (sykeforloep.isEmpty()) {
@@ -85,7 +82,7 @@ class SyfoSyketilfelleClient(
                 return false
             }
             throw RuntimeException(
-                "Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId",
+                "Fant ingen sykeforløp for planlagt melding med id $planlagtMeldingId"
             )
         } else {
             return sykeforloep.any { it.oppfolgingsdato.isAfter(startdato) }
@@ -96,7 +93,7 @@ class SyfoSyketilfelleClient(
     private suspend fun fetchSykeforloepUntilSykmeldingFound(
         fnr: String,
         sykmeldingId: String,
-        attempt: Int = 0
+        attempt: Int = 0,
     ): List<Sykeforloep> {
         /* We assume that most cases the processing is flex-syketilfelle is pretty fast. But for
         cases where the old 5s implementation actually required 5s, let's back off, so it waits
@@ -156,22 +153,15 @@ class SyfoSyketilfelleClient(
             .body<List<Sykeforloep>>()
 }
 
-data class Sykeforloep(
-    var oppfolgingsdato: LocalDate,
-    val sykmeldinger: List<SimpleSykmelding>,
-)
+data class Sykeforloep(var oppfolgingsdato: LocalDate, val sykmeldinger: List<SimpleSykmelding>)
 
-data class SimpleSykmelding(
-    val id: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-)
+data class SimpleSykmelding(val id: String, val fom: LocalDate, val tom: LocalDate)
 
 @WithSpan
 internal fun getStartdatoByFomTom(
     fom: LocalDate,
     tom: LocalDate,
-    sykeforloep: List<Sykeforloep>
+    sykeforloep: List<Sykeforloep>,
 ): LocalDate? {
     val aktueltSykeforloep =
         sykeforloep

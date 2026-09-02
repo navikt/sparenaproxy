@@ -35,7 +35,7 @@ class MaksdatoServiceTest :
                         startdato = LocalDate.of(2020, 5, 2),
                         gjenstaendeSykedager = 50,
                         tom = LocalDate.of(2020, 9, 9),
-                        maksdato = LocalDate.of(2020, 12, 1)
+                        maksdato = LocalDate.of(2020, 12, 1),
                     )
 
                 val maksdatoMelding = maksdatoService.tilMaksdatoMelding(utbetaltEvent, now)
@@ -58,7 +58,7 @@ class MaksdatoServiceTest :
                 maksdatoService.skalSendeMaksdatomelding(
                     fnr,
                     forbrukteSykedager,
-                    id
+                    id,
                 ) shouldBeEqualTo true
             }
             test(
@@ -69,7 +69,7 @@ class MaksdatoServiceTest :
                 maksdatoService.skalSendeMaksdatomelding(
                     fnr,
                     forbrukteSykedager,
-                    id
+                    id,
                 ) shouldBeEqualTo false
             }
             test("Skal ikke sende maksdatomelding hvis bruker er død") {
@@ -79,7 +79,7 @@ class MaksdatoServiceTest :
                 maksdatoService.skalSendeMaksdatomelding(
                     fnr,
                     forbrukteSykedager,
-                    id
+                    id,
                 ) shouldBeEqualTo false
             }
 

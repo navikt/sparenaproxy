@@ -19,7 +19,7 @@ fun DatabaseInterface.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? {
 fun DatabaseInterface.finnesNyerePlanlagtMeldingMedAnnenStartdato(
     fnr: String,
     startdato: LocalDate,
-    opprettet: OffsetDateTime
+    opprettet: OffsetDateTime,
 ): Boolean {
     connection.use { connection ->
         return connection.finnesNyerePlanlagtMeldingMedAnnenStartdato(fnr, startdato, opprettet)
@@ -87,7 +87,7 @@ private fun Connection.hentPlanlagtMelding(id: UUID): PlanlagtMeldingDbModel? =
 private fun Connection.finnesNyerePlanlagtMeldingMedAnnenStartdato(
     fnr: String,
     startdato: LocalDate,
-    opprettet: OffsetDateTime
+    opprettet: OffsetDateTime,
 ): Boolean =
     this.prepareStatement(
             """

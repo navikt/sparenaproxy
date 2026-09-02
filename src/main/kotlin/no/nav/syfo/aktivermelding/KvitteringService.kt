@@ -15,7 +15,7 @@ import no.nav.syfo.teamLogger
 class KvitteringService(
     private val database: DatabaseInterface,
     val dbUpdateRetires: Int = 5,
-    val dbUpdateTimeout: Duration = 1.seconds
+    val dbUpdateTimeout: Duration = 1.seconds,
 ) {
     private val teamlog = teamLogger()
 

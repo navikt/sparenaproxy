@@ -1,7 +1,7 @@
 package no.nav.syfo.lagrevedtak.maksdato
 
+import no.nav.syfo.jsonMapper
 import no.nav.syfo.log
-import no.nav.syfo.objectMapper
 import org.slf4j.LoggerFactory
 
 private val teamlog = LoggerFactory.getLogger("teamlog.MaksdatoMeldingKt")
@@ -10,7 +10,7 @@ data class MaksdatoMelding(
     val k278M810: K278M810,
     val k278M815: K278M815,
     val k278M830: K278M830,
-    val k278M840: K278M840
+    val k278M840: K278M840,
 )
 
 data class K278M810(
@@ -27,7 +27,7 @@ data class K278M810(
     val navAnsatt: String = " ", // lengde 1, brukes ikke
     val ytelse: String = "SP", // lengde 2
     val meldKode: String = "I", // lengde 1
-    val uaktuell: String = " " // lengde 1
+    val uaktuell: String = " ", // lengde 1
 )
 
 data class K278M815(
@@ -40,7 +40,7 @@ data class K278M815(
     val adresse2: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val adresse3: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val postnr: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
-    val bokommune: String = "".padEnd(4, ' ') // lengde 4, brukes ikke
+    val bokommune: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
 )
 
 data class K278M830(
@@ -54,13 +54,13 @@ data class K278M830(
     val orgnummer2: String = "".padEnd(9, ' '), // lengde 9, brukes ikke
     val orgnummer3: String = "".padEnd(9, ' '), // lengde 9, brukes ikke
     val orgnummer4: String = "".padEnd(9, ' '), // lengde 9, brukes ikke
-    val filler: String = "".padEnd(38, ' ') // lengde 38
+    val filler: String = "".padEnd(38, ' '), // lengde 38
 )
 
 data class K278M840(
     val copyId: String = "K278M840", // lengde 8
     val antall: String = "00001", // lengde 5
-    val taglinje: String = "SP: SP, max.dato sykepenger".padEnd(80, ' ') // lengde 80
+    val taglinje: String = "SP: SP, max.dato sykepenger".padEnd(80, ' '), // lengde 80
 )
 
 fun MaksdatoMelding.tilMqMelding(): String {
@@ -73,7 +73,7 @@ fun MaksdatoMelding.tilMqMelding(): String {
     val maksdatomeldingSomTekst = sb.toString()
     if (maksdatomeldingSomTekst.length != 482) {
         teamlog.warn(
-            "MaksdatoMelding har feil lengde ${maksdatomeldingSomTekst.length}, value: ${objectMapper.writeValueAsString(this)}, sb: $sb"
+            "MaksdatoMelding har feil lengde ${maksdatomeldingSomTekst.length}, value: ${jsonMapper.writeValueAsString(this)}, sb: $sb"
         )
         log.error("Maksdatomelding har feil lengde: ${maksdatomeldingSomTekst.length}")
         throw IllegalStateException("Maksdatomelding har feil lengde")
@@ -144,7 +144,7 @@ fun K278M830.tilTekst(): String {
     val k278M830SomTekst = sb.toString()
     if (k278M830SomTekst.length != 116) {
         teamlog.warn(
-            "K278M830 har feil lengde ${k278M830SomTekst.length}, value: ${objectMapper.writeValueAsString(this)}, sb: $sb"
+            "K278M830 har feil lengde ${k278M830SomTekst.length}, value: ${jsonMapper.writeValueAsString(this)}, sb: $sb"
         )
         log.error("K278M830 har feil lengde: ${k278M830SomTekst.length}")
         throw IllegalStateException("K278M830 har feil lengde")

@@ -12,12 +12,12 @@ class PdlFactory private constructor() {
             environment: Environment,
             httpClient: HttpClient,
             accessTokenClientV2: AccessTokenClientV2,
-            pdlScope: String
+            pdlScope: String,
         ): PdlPersonService {
             return PdlPersonService(
                 getPdlClient(httpClient, environment),
                 accessTokenClientV2,
-                pdlScope
+                pdlScope,
             )
         }
 
@@ -25,7 +25,7 @@ class PdlFactory private constructor() {
             return PdlClient(
                 httpClient,
                 environment.pdlGraphqlPath,
-                PdlClient::class.java.getResource("/graphql/getPerson.graphql").readText()
+                PdlClient::class.java.getResource("/graphql/getPerson.graphql").readText(),
             )
         }
     }

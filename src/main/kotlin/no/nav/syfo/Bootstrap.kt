@@ -1,19 +1,14 @@
 package no.nav.syfo
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.engine.apache.ApacheEngineConfig
+import io.ktor.client.engine.apache5.Apache5
+import io.ktor.client.engine.apache5.Apache5EngineConfig
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.prometheus.client.hotspot.DefaultExports
 import jakarta.jms.Session
 import kotlinx.coroutines.CoroutineScope
@@ -50,19 +45,15 @@ import no.nav.syfo.mq.producerForQueue
 import no.nav.syfo.pdl.PdlFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.sparenaproxy")
 
 inline fun <reified T> T.teamLogger(): Logger =
     LoggerFactory.getLogger("teamlog.${T::class.java.name}")
 
-val objectMapper: ObjectMapper =
-    ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    }
+val jsonMapper: JsonMapper = jacksonMapperBuilder().build()
 
 @DelicateCoroutinesApi
 fun main() {
@@ -76,15 +67,8 @@ fun main() {
 
     val database = Database(env)
 
-    val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        install(ContentNegotiation) {
-            jackson {
-                registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
+    val config: HttpClientConfig<Apache5EngineConfig>.() -> Unit = {
+        install(ContentNegotiation) { jackson {} }
         HttpResponseValidator {
             handleResponseExceptionWithRequest { exception, _ ->
                 when (exception) {
@@ -112,14 +96,14 @@ fun main() {
         }
     }
 
-    val httpClient = HttpClient(Apache, config)
+    val httpClient = HttpClient(Apache5, config)
 
     val accessTokenClientV2 =
         AccessTokenClientV2(
             env.aadAccessTokenV2Url,
             clientId = env.clientIdV2,
             clientSecret = env.clientSecretV2,
-            httpClient = httpClient
+            httpClient = httpClient,
         )
     val syfoSyketilfelleClient =
         SyfoSyketilfelleClient(
@@ -127,14 +111,14 @@ fun main() {
             accessTokenClientV2 = accessTokenClientV2,
             resourceId = env.syketilfelleScope,
             httpClient = httpClient,
-            cluster = env.cluster
+            cluster = env.cluster,
         )
     val smregisterClient =
         SmregisterClient(
             env.smregisterEndpointURL,
             accessTokenClientV2,
             env.smregisterScope,
-            httpClient
+            httpClient,
         )
     val pdlPersonService =
         PdlFactory.getPdlService(env, httpClient, accessTokenClientV2, env.pdlScope)
@@ -159,7 +143,7 @@ fun main() {
         UtbetaltEventService(
             syfoSyketilfelleClient,
             lagreUtbetaltEventOgPlanlagtMeldingService,
-            maksdatoService
+            maksdatoService,
         )
 
     val aktiverMeldingService =
@@ -168,7 +152,7 @@ fun main() {
             smregisterClient,
             arenaMeldingService,
             pdlPersonService,
-            syfoSyketilfelleClient
+            syfoSyketilfelleClient,
         )
 
     val kvitteringListener =
@@ -176,7 +160,7 @@ fun main() {
             applicationState,
             kvitteringConsumer,
             backoutProducer,
-            KvitteringService(database)
+            KvitteringService(database),
         )
 
     val mottattSykmeldingService = MottattSykmeldingService(database, syfoSyketilfelleClient)
@@ -192,7 +176,7 @@ fun main() {
             env,
             utbetaltEventService,
             mottattSykmeldingService,
-            aktiverMeldingService
+            aktiverMeldingService,
         )
 
     val applicationEngine = createApplicationEngine(env, applicationState)
@@ -208,7 +192,7 @@ fun main() {
 @DelicateCoroutinesApi
 fun createListener(
     applicationState: ApplicationState,
-    action: suspend CoroutineScope.() -> Unit
+    action: suspend CoroutineScope.() -> Unit,
 ): Job =
     GlobalScope.launch(Dispatchers.IO) {
         try {

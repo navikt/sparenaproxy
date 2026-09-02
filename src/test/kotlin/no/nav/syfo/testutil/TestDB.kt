@@ -88,7 +88,7 @@ fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbMod
                         Timestamp.from(planlagtMeldingDbModel.avbrutt?.toInstant())
                     } else {
                         null
-                    }
+                    },
                 )
                 it.setTimestamp(
                     8,
@@ -96,7 +96,7 @@ fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbMod
                         Timestamp.from(planlagtMeldingDbModel.sendt?.toInstant())
                     } else {
                         null
-                    }
+                    },
                 )
                 it.setString(9, planlagtMeldingDbModel.jmsCorrelationId)
                 it.execute()
@@ -107,7 +107,7 @@ fun Connection.lagrePlanlagtMelding(planlagtMeldingDbModel: PlanlagtMeldingDbMod
 
 fun Connection.hentPlanlagtMelding(
     fnr: String,
-    startdato: LocalDate
+    startdato: LocalDate,
 ): List<PlanlagtMeldingDbModel> = use { connection ->
     connection
         .prepareStatement(
@@ -161,7 +161,7 @@ fun ResultSet.toUtbetaltEvent(): UtbetaltEvent =
         gjenstaendeSykedager = getInt("gjenstaende_sykedager"),
         opprettet = getObject("opprettet", LocalDateTime::class.java),
         maksdato = getObject("maksdato", LocalDate::class.java),
-        utbetalingId = getObject("utbetalingid", UUID::class.java)
+        utbetalingId = getObject("utbetalingid", UUID::class.java),
     )
 
 fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: String) {
@@ -196,7 +196,7 @@ fun Connection.lagreUtbetaltEvent(fnr: String, startdato: LocalDate, aktorId: St
                 ps.setInt(9, 250)
                 ps.setTimestamp(
                     10,
-                    Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())))
+                    Timestamp.valueOf(LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault()))),
                 )
                 ps.setObject(11, LocalDate.now().plusDays(250))
                 ps.setObject(12, UUID.randomUUID())

@@ -30,7 +30,7 @@ fun opprettPlanlagtMelding(
     avbrutt: OffsetDateTime? = null,
     sendt: OffsetDateTime? = null,
     startdato: LocalDate = LocalDate.of(2020, 1, 14),
-    jmsCorrelationId: String? = null
+    jmsCorrelationId: String? = null,
 ): PlanlagtMeldingDbModel {
     return PlanlagtMeldingDbModel(
         id = id,
@@ -41,7 +41,7 @@ fun opprettPlanlagtMelding(
         sendes = sendes,
         avbrutt = avbrutt,
         sendt = sendt,
-        jmsCorrelationId = jmsCorrelationId
+        jmsCorrelationId = jmsCorrelationId,
     )
 }
 
@@ -61,7 +61,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
                         her = null,
                         tlf = null,
                         hpr = null,
-                        mellomnavn = null
+                        mellomnavn = null,
                     ),
                 arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, null, null, null),
                 andreTiltak = null,
@@ -81,7 +81,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
                 syketilfelleStartDato = LocalDate.now(),
                 tiltakArbeidsplassen = null,
                 tiltakNAV = null,
-                utdypendeOpplysninger = emptyMap()
+                utdypendeOpplysninger = emptyMap(),
             ),
         msgId = "1",
         fellesformat = "",
@@ -101,7 +101,7 @@ fun opprettReceivedSykmelding(fnr: String, perioder: List<Periode>): ReceivedSyk
         legeHelsepersonellkategori = null,
         legeHprNr = null,
         vedlegg = null,
-        utenlandskSykmelding = null
+        utenlandskSykmelding = null,
     )
 }
 
@@ -112,7 +112,7 @@ fun lagUtbetaltEvent(
     tom: LocalDate = LocalDate.of(2020, 6, 29),
     gjenstaendeSykedager: Int = 300,
     maksdato: LocalDate = LocalDate.now().plusDays(gjenstaendeSykedager.toLong()),
-    orgnummer: String = "orgnummer"
+    orgnummer: String = "orgnummer",
 ): UtbetaltEvent =
     UtbetaltEvent(
         utbetalteventid = id,
@@ -126,5 +126,5 @@ fun lagUtbetaltEvent(
         gjenstaendeSykedager = gjenstaendeSykedager,
         opprettet = LocalDateTime.now(Clock.tickMillis(ZoneId.systemDefault())),
         maksdato = maksdato,
-        utbetalingId = UUID.randomUUID()
+        utbetalingId = UUID.randomUUID(),
     )

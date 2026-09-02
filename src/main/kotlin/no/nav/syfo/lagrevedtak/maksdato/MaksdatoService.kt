@@ -14,7 +14,7 @@ import no.nav.syfo.teamLogger
 
 class MaksdatoService(
     private val arenaMqProducer: ArenaMqProducer,
-    private val pdlPersonService: PdlPersonService
+    private val pdlPersonService: PdlPersonService,
 ) {
     private val dateFormat = "ddMMyyyy"
     private val dateTimeFormat = "ddMMyyyy,HHmmss"
@@ -25,7 +25,7 @@ class MaksdatoService(
             skalSendeMaksdatomelding(
                 utbetaltEvent.fnr,
                 utbetaltEvent.forbrukteSykedager,
-                utbetaltEvent.utbetalteventid
+                utbetaltEvent.utbetalteventid,
             )
         ) {
             val correlationId =
@@ -36,13 +36,13 @@ class MaksdatoService(
             log.info(
                 "Har sendt maksdatomelding for utbetaltevent {}, correlationId: {}",
                 utbetaltEvent.utbetalteventid,
-                correlationId
+                correlationId,
             )
             teamlog.info(
                 "Har sendt maksdatomelding for utbetaltevent {}, correlationId: {}, fnr: {}",
                 utbetaltEvent.utbetalteventid,
                 correlationId,
-                utbetaltEvent.fnr
+                utbetaltEvent.fnr,
             )
 
             SENDT_MAKSDATOMELDING.inc()
@@ -52,7 +52,7 @@ class MaksdatoService(
     suspend fun skalSendeMaksdatomelding(
         fnr: String,
         forbrukteSykedager: Int,
-        utbetalteventid: UUID
+        utbetalteventid: UUID,
     ): Boolean {
         return if (forbrukteSykedager >= 20) {
             if (pdlPersonService.isAlive(fnr, utbetalteventid)) {
@@ -76,7 +76,7 @@ class MaksdatoService(
                 K278M810(
                     dato = nowFormatted.split(',')[0],
                     klokke = nowFormatted.split(',')[1],
-                    fnr = utbetaltEvent.fnr
+                    fnr = utbetaltEvent.fnr,
                 ),
             k278M815 = K278M815(),
             k278M830 =
@@ -87,9 +87,9 @@ class MaksdatoService(
                         when {
                             utbetaltEvent.organisasjonsnummer.length > 9 -> ""
                             else -> utbetaltEvent.organisasjonsnummer
-                        }.padEnd(9, ' ')
+                        }.padEnd(9, ' '),
                 ),
-            k278M840 = K278M840()
+            k278M840 = K278M840(),
         )
     }
 

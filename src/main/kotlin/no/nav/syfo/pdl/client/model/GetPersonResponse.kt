@@ -6,7 +6,7 @@ data class ResponseError(
     val message: String?,
     val locations: List<ErrorLocation>?,
     val path: List<String>?,
-    val extensions: ErrorExtension?
+    val extensions: ErrorExtension?,
 )
 
 data class ResponseData(val hentPerson: HentPerson?)

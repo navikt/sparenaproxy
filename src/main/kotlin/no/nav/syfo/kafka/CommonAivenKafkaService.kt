@@ -20,7 +20,7 @@ class CommonAivenKafkaService(
     private val env: Environment,
     private val utbetaltEventService: UtbetaltEventService,
     private val mottattSykmeldingService: MottattSykmeldingService,
-    private val aktiverMeldingService: AktiverMeldingService
+    private val aktiverMeldingService: AktiverMeldingService,
 ) {
     suspend fun start() {
 
@@ -32,14 +32,14 @@ class CommonAivenKafkaService(
                         env.utbetalingTopic,
                         env.okSykmeldingTopic,
                         env.manuellSykmeldingTopic,
-                        env.aktiverMeldingAivenTopic
+                        env.aktiverMeldingAivenTopic,
                     )
                 )
                 consumeMessages()
             } catch (ex: Exception) {
                 log.error(
                     "Error prosessing message, unsubscribing and waiting 60s: ${ex.message}",
-                    ex
+                    ex,
                 )
                 kafkaConsumer.unsubscribe()
                 delay(60.seconds)
@@ -72,7 +72,7 @@ class CommonAivenKafkaService(
                             span.addEvent("Ukjent topic")
                             span.end()
                             throw IllegalStateException(
-                                "Har mottatt melding på ukjent topic: ${it.topic()}",
+                                "Har mottatt melding på ukjent topic: ${it.topic()}"
                             )
                         }
                     }

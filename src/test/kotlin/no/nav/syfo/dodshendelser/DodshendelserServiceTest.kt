@@ -26,7 +26,7 @@ class DodshendelserServiceTest :
             DodshendelserService(
                 ApplicationState(alive = true, ready = true),
                 personhendelserConsumer,
-                testDb
+                testDb,
             )
         val avbruttTidspunkt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusDays(3)
 
@@ -37,7 +37,7 @@ class DodshendelserServiceTest :
                     id = UUID.randomUUID(),
                     fnr = "12345678910",
                     startdato = LocalDate.of(2020, 1, 25),
-                    avbrutt = avbruttTidspunkt
+                    avbrutt = avbruttTidspunkt,
                 )
             )
             testDb.connection.lagrePlanlagtMelding(
@@ -45,21 +45,21 @@ class DodshendelserServiceTest :
                     id = UUID.randomUUID(),
                     fnr = "12345678910",
                     startdato = LocalDate.of(2020, 2, 25),
-                    sendt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusWeeks(3)
+                    sendt = OffsetDateTime.now(Clock.tickMillis(ZoneOffset.UTC)).minusWeeks(3),
                 )
             )
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = UUID.randomUUID(),
                     fnr = "12345678910",
-                    startdato = LocalDate.of(2020, 3, 25)
+                    startdato = LocalDate.of(2020, 3, 25),
                 )
             )
             testDb.connection.lagrePlanlagtMelding(
                 opprettPlanlagtMelding(
                     id = UUID.randomUUID(),
                     fnr = "01987654321",
-                    startdato = LocalDate.of(2020, 4, 25)
+                    startdato = LocalDate.of(2020, 4, 25),
                 )
             )
         }

@@ -4,30 +4,30 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
 import no.nav.syfo.application.metrics.MOTTATT_VEDTAK
 import no.nav.syfo.client.SyfoSyketilfelleClient
+import no.nav.syfo.jsonMapper
 import no.nav.syfo.lagrevedtak.kafka.model.UtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.kafka.model.tilUtbetaltEventKafkaMessage
 import no.nav.syfo.lagrevedtak.maksdato.MaksdatoService
 import no.nav.syfo.log
-import no.nav.syfo.objectMapper
 
 class UtbetaltEventService(
     private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
     private val lagreUtbetaltEventOgPlanlagtMeldingService:
         LagreUtbetaltEventOgPlanlagtMeldingService,
-    private val maksdatoService: MaksdatoService
+    private val maksdatoService: MaksdatoService,
 ) {
 
     @WithSpan
     suspend fun mottaUtbetaltEvent(record: String) {
         val jsonNode = toJsonNode(record)
-        if (jsonNode["event"]?.asText() == "utbetaling_utbetalt") {
-            val utbetalingId = jsonNode["utbetalingId"].asText()
+        if (jsonNode["event"]?.asString() == "utbetaling_utbetalt") {
+            val utbetalingId = jsonNode["utbetalingId"].asString()
             log.info("Mottatt melding med utbetalingId {}", utbetalingId)
             handleUtbetaltEvent(tilUtbetaltEventKafkaMessage(jsonNode))
         }
     }
 
-    private fun toJsonNode(record: String) = objectMapper.readTree(record)
+    private fun toJsonNode(record: String) = jsonMapper.readTree(record)
 
     @WithSpan
     suspend fun handleUtbetaltEvent(utbetaltEventKafkaMessage: UtbetaltEventKafkaMessage) {
@@ -49,7 +49,7 @@ class UtbetaltEventService(
                 fnr = utbetaltEventKafkaMessage.fnr,
                 fom = utbetaltEventKafkaMessage.fom,
                 tom = utbetaltEventKafkaMessage.tom,
-                sporingsId = utbetaltEventKafkaMessage.utbetalteventid
+                sporingsId = utbetaltEventKafkaMessage.utbetalteventid,
             )
         val utbetaltEvent =
             UtbetaltEvent(
@@ -64,7 +64,7 @@ class UtbetaltEventService(
                 gjenstaendeSykedager = utbetaltEventKafkaMessage.gjenstaendeSykedager,
                 opprettet = LocalDateTime.now(),
                 maksdato = utbetaltEventKafkaMessage.maksdato,
-                utbetalingId = utbetaltEventKafkaMessage.utbetalingId
+                utbetalingId = utbetaltEventKafkaMessage.utbetalingId,
             )
 
         lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(

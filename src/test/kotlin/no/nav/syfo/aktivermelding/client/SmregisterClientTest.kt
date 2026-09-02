@@ -1,17 +1,12 @@
 package no.nav.syfo.aktivermelding.client
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.core.spec.style.FunSpec
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.call
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -36,29 +31,14 @@ class SmregisterClientTest :
         val fom = LocalDate.of(2020, 3, 15)
         val tom = LocalDate.of(2020, 4, 12)
         val accessTokenClientMock = mockk<AccessTokenClientV2>()
-        val httpClient =
-            HttpClient(Apache) {
-                install(ContentNegotiation) {
-                    jackson {
-                        registerKotlinModule()
-                        registerModule(JavaTimeModule())
-                        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    }
-                }
-            }
+        val httpClient = HttpClient(Apache5) { install(ContentNegotiation) { jackson {} } }
 
         val mockHttpServerPort = ServerSocket(0).use { it.localPort }
         val mockHttpServerUrl = "http://localhost:$mockHttpServerPort"
         val mockServer =
             embeddedServer(Netty, mockHttpServerPort) {
                     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
-                        jackson {
-                            registerKotlinModule()
-                            registerModule(JavaTimeModule())
-                            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        }
+                        jackson {}
                     }
                     routing {
                         accept(ContentType.Application.Json) {
@@ -71,13 +51,13 @@ class SmregisterClientTest :
                                                 erSykmeldt = true,
                                                 gradert = false,
                                                 fom = fom,
-                                                tom = tom
-                                            )
+                                                tom = tom,
+                                            ),
                                         )
                                     "fnr-ikkesyk" ->
                                         call.respond(
                                             HttpStatusCode.OK,
-                                            SykmeldtStatus(erSykmeldt = false)
+                                            SykmeldtStatus(erSykmeldt = false),
                                         )
                                     "fnr-gradert" ->
                                         call.respond(
@@ -86,8 +66,8 @@ class SmregisterClientTest :
                                                 erSykmeldt = true,
                                                 gradert = true,
                                                 fom = fom,
-                                                tom = tom
-                                            )
+                                                tom = tom,
+                                            ),
                                         )
                                     "fnr-sykmeldtutentom" ->
                                         call.respond(
@@ -96,8 +76,8 @@ class SmregisterClientTest :
                                                 erSykmeldt = true,
                                                 gradert = true,
                                                 fom = fom,
-                                                tom = null
-                                            )
+                                                tom = null,
+                                            ),
                                         )
                                 }
                             }
@@ -168,7 +148,7 @@ class SmregisterClientTest :
                     runBlocking {
                         smregisterClient.erSykmeldtTilOgMed(
                             "fnr-sykmeldtutentom",
-                            UUID.randomUUID()
+                            UUID.randomUUID(),
                         )
                     }
                 }

@@ -29,7 +29,7 @@ class PdlPersonServiceTest :
                 coEvery { pdlClient.getPerson(any(), any()) } returns
                     GetPersonResponse(
                         ResponseData(HentPerson(listOf(Doedsfall("2020-08-11")))),
-                        errors = null
+                        errors = null,
                     )
                 coEvery { accessTokenClient.getAccessTokenV2(any()) } returns "token"
 

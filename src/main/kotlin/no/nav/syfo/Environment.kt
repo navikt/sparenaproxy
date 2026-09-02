@@ -37,7 +37,7 @@ data class Environment(
     val schemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
     val kafkaSchemaRegistryUsername: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
     val kafkaSchemaRegistryPassword: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
-    val kafkaResetPolicy: String = getEnvVar("KAFKA_RESET_POLICY")
+    val kafkaResetPolicy: String = getEnvVar("KAFKA_RESET_POLICY"),
 ) : MqConfig {
     fun jdbcUrl(): String {
         return "jdbc:postgresql://$dbHost:$dbPort/$dbName"
@@ -46,7 +46,7 @@ data class Environment(
 
 data class Serviceuser(
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
-    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD")
+    val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
 ) : KafkaCredentials {
     override val kafkaUsername: String = serviceuserUsername
     override val kafkaPassword: String = serviceuserPassword
@@ -54,4 +54,5 @@ data class Serviceuser(
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName)
-        ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
+        ?: defaultValue
+        ?: throw RuntimeException("Missing required variable \"$varName\"")

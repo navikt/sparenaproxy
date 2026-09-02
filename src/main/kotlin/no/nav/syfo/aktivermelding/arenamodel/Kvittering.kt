@@ -10,7 +10,7 @@ data class Kvittering(
     val fnr: String, // lengde 11
     val statusOk: String, // lengde 1, J hvis ok
     val feilkode: String, // lengde 8
-    val feilmelding: String // lengde 100
+    val feilmelding: String, // lengde 100
 )
 
 fun tilKvittering(kvitteringsmelding: String): Kvittering {
@@ -20,6 +20,6 @@ fun tilKvittering(kvitteringsmelding: String): Kvittering {
         fnr = kvitteringsmelding.substring(43, 54),
         statusOk = kvitteringsmelding[54].toString(),
         feilkode = kvitteringsmelding.substring(55, 63),
-        feilmelding = kvitteringsmelding.substring(63)
+        feilmelding = kvitteringsmelding.substring(63),
     )
 }

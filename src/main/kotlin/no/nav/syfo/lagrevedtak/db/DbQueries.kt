@@ -21,13 +21,13 @@ fun DatabaseInterface.erBehandletTidligere(utbetalingId: UUID): Boolean {
 
 fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
     utbetaltEvent: UtbetaltEvent,
-    planlagtStansmelding: PlanlagtMeldingDbModel
+    planlagtStansmelding: PlanlagtMeldingDbModel,
 ) {
     connection.use { connection ->
         val melding =
             connection.hentPlanlagtStansmelding(
                 planlagtStansmelding.fnr,
-                planlagtStansmelding.startdato
+                planlagtStansmelding.startdato,
             )
         if (melding == null) {
             connection.lagrePlanlagtMelding(planlagtStansmelding)
@@ -47,7 +47,7 @@ fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
                         .atStartOfDay()
                         .atZone(ZoneId.systemDefault())
                         .withZoneSameInstant(ZoneOffset.UTC)
-                        .toOffsetDateTime()
+                        .toOffsetDateTime(),
                 )
             }
         }
@@ -58,7 +58,7 @@ fun DatabaseInterface.lagreUtbetaltEventOgOppdaterStansmelding(
 
 fun DatabaseInterface.lagreUtbetaltEventOgPlanlagtMelding(
     utbetaltEvent: UtbetaltEvent,
-    planlagteMeldinger: List<PlanlagtMeldingDbModel>
+    planlagteMeldinger: List<PlanlagtMeldingDbModel>,
 ) {
     connection.use { connection ->
         connection.lagreUtbetaltEvent(utbetaltEvent)
@@ -111,7 +111,7 @@ private fun Connection.lagreUtbetaltEvent(utbetaltEvent: UtbetaltEvent) {
 
 private fun Connection.hentPlanlagtStansmelding(
     fnr: String,
-    startdato: LocalDate
+    startdato: LocalDate,
 ): PlanlagtMeldingDbModel? =
     this.prepareStatement(
             """
