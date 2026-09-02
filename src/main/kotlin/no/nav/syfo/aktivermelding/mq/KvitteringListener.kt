@@ -13,7 +13,7 @@ class KvitteringListener(
     private val applicationState: ApplicationState,
     private val kvitteringConsumer: MessageConsumer,
     private val backoutProducer: MessageProducer,
-    private val kvitteringService: KvitteringService
+    private val kvitteringService: KvitteringService,
 ) {
     suspend fun start() {
         while (applicationState.ready) {

@@ -21,20 +21,20 @@ class KafkaClients(env: Environment) {
                 .apply {
                     setProperty(
                         KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG,
-                        env.schemaRegistryUrl
+                        env.schemaRegistryUrl,
                     )
                     setProperty(
                         KafkaAvroSerializerConfig.USER_INFO_CONFIG,
-                        "${env.kafkaSchemaRegistryUsername}:${env.kafkaSchemaRegistryPassword}"
+                        "${env.kafkaSchemaRegistryUsername}:${env.kafkaSchemaRegistryPassword}",
                     )
                     setProperty(
                         KafkaAvroSerializerConfig.BASIC_AUTH_CREDENTIALS_SOURCE,
-                        "USER_INFO"
+                        "USER_INFO",
                     )
                 }
                 .toConsumerConfig(
                     "${env.applicationName}-consumer",
-                    valueDeserializer = KafkaAvroDeserializer::class
+                    valueDeserializer = KafkaAvroDeserializer::class,
                 )
                 .also {
                     it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1"
@@ -52,7 +52,7 @@ class KafkaClients(env: Environment) {
             KafkaUtils.getAivenKafkaConfig("sparenaproxy-consumer")
                 .toConsumerConfig(
                     "${env.applicationName}-consumer",
-                    valueDeserializer = StringDeserializer::class
+                    valueDeserializer = StringDeserializer::class,
                 )
                 .also {
                     it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = env.kafkaResetPolicy

@@ -9,7 +9,7 @@ import no.nav.syfo.application.db.DatabaseInterface
 @WithSpan
 fun DatabaseInterface.avbrytPlanlagteMeldingerVedDodsfall(
     personidenter: List<String>,
-    avbrutt: OffsetDateTime
+    avbrutt: OffsetDateTime,
 ): Int {
     var avbrutteMeldinger = 0
     connection.use { connection ->
@@ -23,7 +23,7 @@ fun DatabaseInterface.avbrytPlanlagteMeldingerVedDodsfall(
 
 private fun Connection.avbrytPlanlagtMeldingVedDodsfall(
     personident: String,
-    avbrutt: OffsetDateTime
+    avbrutt: OffsetDateTime,
 ): Int =
     this.prepareStatement(
             """

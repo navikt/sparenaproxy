@@ -41,7 +41,7 @@ class AktiverMeldingServiceTest :
                 smregisterClient,
                 arenaMeldingService,
                 pdlPersonService,
-                syfosyketilfelleClient
+                syfosyketilfelleClient,
             )
 
         beforeTest {
@@ -58,7 +58,7 @@ class AktiverMeldingServiceTest :
                     opprettPlanlagtMelding(
                         id = id,
                         sendes = OffsetDateTime.of(2023, 3, 11, 12, 0, 0, 0, ZoneOffset.UTC),
-                        avbrutt = null
+                        avbrutt = null,
                     )
                 )
 
@@ -162,7 +162,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = "fnr",
                         startdato = LocalDate.of(2020, 1, 10),
-                        type = AKTIVITETSKRAV_8_UKER_TYPE
+                        type = AKTIVITETSKRAV_8_UKER_TYPE,
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -171,7 +171,7 @@ class AktiverMeldingServiceTest :
                         fnr = "fnr",
                         startdato = LocalDate.of(2020, 1, 10),
                         type = STANS_TYPE,
-                        avbrutt = OffsetDateTime.now(ZoneOffset.UTC)
+                        avbrutt = OffsetDateTime.now(ZoneOffset.UTC),
                     )
                 )
                 testDb.connection.lagreUtbetaltEvent("fnr", LocalDate.of(2020, 1, 10), "aktorId")
@@ -201,7 +201,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = "fnr",
                         startdato = LocalDate.of(2020, 1, 10),
-                        type = AKTIVITETSKRAV_8_UKER_TYPE
+                        type = AKTIVITETSKRAV_8_UKER_TYPE,
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -210,7 +210,7 @@ class AktiverMeldingServiceTest :
                         fnr = "fnr",
                         startdato = LocalDate.of(2020, 1, 10),
                         type = STANS_TYPE,
-                        avbrutt = null
+                        avbrutt = null,
                     )
                 )
                 testDb.connection.lagreUtbetaltEvent("fnr", LocalDate.of(2020, 1, 10), "aktorId")
@@ -240,7 +240,7 @@ class AktiverMeldingServiceTest :
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 10),
                         type = BREV_4_UKER_TYPE,
-                        sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20)
+                        sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20),
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -248,7 +248,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 10),
-                        type = STANS_TYPE
+                        type = STANS_TYPE,
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -256,7 +256,7 @@ class AktiverMeldingServiceTest :
                         id = id2,
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 5, 10),
-                        type = BREV_4_UKER_TYPE
+                        type = BREV_4_UKER_TYPE,
                     )
                 )
 
@@ -282,7 +282,7 @@ class AktiverMeldingServiceTest :
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 14),
                         type = BREV_4_UKER_TYPE,
-                        sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20)
+                        sendt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(20),
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -290,7 +290,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 14),
-                        type = STANS_TYPE
+                        type = STANS_TYPE,
                     )
                 )
 
@@ -318,7 +318,7 @@ class AktiverMeldingServiceTest :
                         id = UUID.randomUUID(),
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 14),
-                        type = BREV_4_UKER_TYPE
+                        type = BREV_4_UKER_TYPE,
                     )
                 )
                 testDb.connection.lagrePlanlagtMelding(
@@ -326,7 +326,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 14),
-                        type = STANS_TYPE
+                        type = STANS_TYPE,
                     )
                 )
 
@@ -352,7 +352,7 @@ class AktiverMeldingServiceTest :
                         id = id,
                         fnr = fnr,
                         startdato = LocalDate.of(2020, 1, 14),
-                        type = STANS_TYPE
+                        type = STANS_TYPE,
                     )
                 )
 

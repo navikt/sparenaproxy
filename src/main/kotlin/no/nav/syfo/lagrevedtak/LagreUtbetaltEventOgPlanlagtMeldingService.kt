@@ -34,19 +34,19 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                     .atStartOfDay()
                     .atZone(ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneOffset.UTC)
-                    .toOffsetDateTime()
+                    .toOffsetDateTime(),
             )
         if (database.planlagtMeldingFinnes(utbetaltEvent.fnr, utbetaltEvent.startdato)) {
             log.info(
                 "Meldinger er allerede opprettet, lagrer nytt utbetalingsevent {}",
-                utbetaltEvent.utbetalteventid
+                utbetaltEvent.utbetalteventid,
             )
             KUN_LAGRET_VEDTAK.inc()
             database.lagreUtbetaltEventOgOppdaterStansmelding(utbetaltEvent, planlagtStansmelding)
         } else {
             log.info(
                 "Lagrer utbetalingsevent {} og planlagte meldinger",
-                utbetaltEvent.utbetalteventid
+                utbetaltEvent.utbetalteventid,
             )
             OPPRETTET_PLANLAGT_MELDING.labels(BREV_4_UKER_TYPE).inc()
             OPPRETTET_PLANLAGT_MELDING.labels(STANS_TYPE).inc()
@@ -61,10 +61,10 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
                             .atStartOfDay()
                             .atZone(ZoneId.systemDefault())
                             .withZoneSameInstant(ZoneOffset.UTC)
-                            .toOffsetDateTime()
+                            .toOffsetDateTime(),
                     ),
-                    planlagtStansmelding
-                )
+                    planlagtStansmelding,
+                ),
             )
         }
     }
@@ -72,7 +72,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
     private fun lagPlanlagtMeldingDbModelForUtbetaling(
         utbetaltEvent: UtbetaltEvent,
         type: String,
-        sendes: OffsetDateTime
+        sendes: OffsetDateTime,
     ): PlanlagtMeldingDbModel {
         return PlanlagtMeldingDbModel(
             id = UUID.randomUUID(),
@@ -80,7 +80,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingService(private val database: DatabaseI
             startdato = utbetaltEvent.startdato,
             type = type,
             opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-            sendes = sendes
+            sendes = sendes,
         )
     }
 }

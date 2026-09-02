@@ -17,7 +17,7 @@ class SmregisterClient(
     private val smregisterEndpointURL: String,
     private val accessTokenClientV2: AccessTokenClientV2,
     private val resourceId: String,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
 
     suspend fun er100ProsentSykmeldt(fnr: String, planlagtMeldingId: UUID): Boolean {
@@ -28,7 +28,7 @@ class SmregisterClient(
         } catch (e: Exception) {
             log.error(
                 "Feil ved henting av sykmeldingstatus for planlagtMelding $planlagtMeldingId {}",
-                e.message
+                e.message,
             )
             throw e
         }
@@ -37,7 +37,7 @@ class SmregisterClient(
     suspend fun erSykmeldt(fnr: String, planlagtMeldingId: UUID): Boolean {
         log.info(
             "Henter sykmeldingstatus uavhengig av grad for planlagtMelding {}",
-            planlagtMeldingId
+            planlagtMeldingId,
         )
         try {
             val sykmeldingstatus = hentSykmeldingstatus(fnr)
@@ -45,7 +45,7 @@ class SmregisterClient(
         } catch (e: Exception) {
             log.error(
                 "Feil ved henting av sykmeldingstatus uavhengig av grad for planlagtMelding $planlagtMeldingId {}",
-                e.message
+                e.message,
             )
             throw e
         }
@@ -63,7 +63,7 @@ class SmregisterClient(
         } catch (e: Exception) {
             log.error(
                 "Feil ved henting av sykmeldingstatus uavhengig av grad for stansmelding $planlagtMeldingId {}",
-                e.message
+                e.message,
             )
             throw e
         }
@@ -87,5 +87,5 @@ data class SykmeldtStatus(
     val erSykmeldt: Boolean,
     val gradert: Boolean? = null,
     val fom: LocalDate? = null,
-    val tom: LocalDate? = null
+    val tom: LocalDate? = null,
 )

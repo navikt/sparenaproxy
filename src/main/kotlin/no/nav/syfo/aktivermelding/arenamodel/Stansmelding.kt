@@ -6,7 +6,7 @@ data class Stansmelding(
     val k278M810: K278M810Stans,
     val k278M815: K278M815Stans,
     val k278M830: K278M830Stans,
-    val k278M840: K278M840Stans
+    val k278M840: K278M840Stans,
 )
 
 data class K278M810Stans(
@@ -23,7 +23,7 @@ data class K278M810Stans(
     val navAnsatt: String = " ", // lengde 1, brukes ikke
     val ytelse: String = "SP", // lengde 2
     val meldKode: String = "O", // lengde 1
-    val uaktuell: String = " " // lengde 1
+    val uaktuell: String = " ", // lengde 1
 )
 
 data class K278M815Stans(
@@ -36,7 +36,7 @@ data class K278M815Stans(
     val adresse2: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val adresse3: String = "".padEnd(30, ' '), // lengde 30, brukes ikke
     val postnr: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
-    val bokommune: String = "".padEnd(4, ' ') // lengde 4, brukes ikke
+    val bokommune: String = "".padEnd(4, ' '), // lengde 4, brukes ikke
 )
 
 data class K278M830Stans(
@@ -47,13 +47,13 @@ data class K278M830Stans(
     val startdato: String, // lengde 8
     val stanskode: String = "AA", // lengde 2
     val stanstekst: String = "AVSLUTTET".padEnd(50, ' '), // lengde 50
-    val filler: String = "".padEnd(30, ' ') // lengde 30
+    val filler: String = "".padEnd(30, ' '), // lengde 30
 )
 
 data class K278M840Stans(
     val copyId: String = "K278M840", // lengde 8
     val antall: String = "00001", // lengde 5
-    val taglinje: String = "SP: SP sykepenger er stanset".padEnd(80, ' ') // lengde 80
+    val taglinje: String = "SP: SP sykepenger er stanset".padEnd(80, ' '), // lengde 80
 )
 
 fun Stansmelding.tilMqMelding(): String {

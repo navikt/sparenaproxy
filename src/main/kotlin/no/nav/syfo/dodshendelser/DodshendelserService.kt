@@ -18,7 +18,7 @@ import org.apache.avro.generic.GenericRecord
 class DodshendelserService(
     private val applicationState: ApplicationState,
     private val personhendelserConsumer: PersonhendelserConsumer,
-    private val database: DatabaseInterface
+    private val database: DatabaseInterface,
 ) {
 
     suspend fun start() {
@@ -44,7 +44,7 @@ class DodshendelserService(
         val antallAvbrutteMeldinger =
             database.avbrytPlanlagteMeldingerVedDodsfall(
                 personidenter,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                OffsetDateTime.now(ZoneOffset.UTC),
             )
         if (antallAvbrutteMeldinger > 0) {
             log.info("Avbrøt $antallAvbrutteMeldinger melding(er) pga dødsfall")

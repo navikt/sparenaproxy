@@ -13,5 +13,5 @@ data class UtbetaltEventKafkaMessage(
     val forbrukteSykedager: Int,
     val gjenstaendeSykedager: Int,
     val maksdato: LocalDate,
-    val utbetalingId: UUID
+    val utbetalingId: UUID,
 )

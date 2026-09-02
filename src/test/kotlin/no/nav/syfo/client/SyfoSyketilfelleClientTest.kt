@@ -1,15 +1,11 @@
 package no.nav.syfo.client
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.core.spec.style.FunSpec
 import io.ktor.client.*
-import io.ktor.client.engine.apache.*
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.*
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -38,29 +34,14 @@ class SyfoSyketilfelleClientTest :
         val errorFnr = "error"
 
         val accessTokenClientMock = mockk<AccessTokenClientV2>()
-        val httpClient =
-            HttpClient(Apache) {
-                install(ContentNegotiation) {
-                    jackson {
-                        registerKotlinModule()
-                        registerModule(JavaTimeModule())
-                        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    }
-                }
-            }
+        val httpClient = HttpClient(Apache5) { install(ContentNegotiation) { jackson {} } }
 
         val mockHttpServerPort = ServerSocket(0).use { it.localPort }
         val mockHttpServerUrl = "http://localhost:$mockHttpServerPort"
         val mockServer =
             embeddedServer(Netty, mockHttpServerPort) {
                     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
-                        jackson {
-                            registerKotlinModule()
-                            registerModule(JavaTimeModule())
-                            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        }
+                        jackson {}
                     }
                     routing {
                         get("/api/v1/sykeforloep") {
@@ -74,9 +55,9 @@ class SyfoSyketilfelleClientTest :
                                                     SimpleSykmelding(
                                                         UUID.randomUUID().toString(),
                                                         oppfolgingsdato1,
-                                                        oppfolgingsdato1.plusWeeks(3)
+                                                        oppfolgingsdato1.plusWeeks(3),
                                                     )
-                                                )
+                                                ),
                                             ),
                                             Sykeforloep(
                                                 oppfolgingsdato2,
@@ -84,9 +65,9 @@ class SyfoSyketilfelleClientTest :
                                                     SimpleSykmelding(
                                                         sykmeldingUUID.toString(),
                                                         oppfolgingsdato2,
-                                                        oppfolgingsdato2.plusWeeks(4)
+                                                        oppfolgingsdato2.plusWeeks(4),
                                                     )
-                                                )
+                                                ),
                                             ),
                                             Sykeforloep(
                                                 oppfolgingsdato3,
@@ -94,10 +75,10 @@ class SyfoSyketilfelleClientTest :
                                                     SimpleSykmelding(
                                                         UUID.randomUUID().toString(),
                                                         oppfolgingsdato3,
-                                                        oppfolgingsdato3.plusWeeks(8)
+                                                        oppfolgingsdato3.plusWeeks(8),
                                                     )
-                                                )
-                                            )
+                                                ),
+                                            ),
                                         )
                                     )
                                 fnr2 ->
@@ -109,9 +90,9 @@ class SyfoSyketilfelleClientTest :
                                                     SimpleSykmelding(
                                                         UUID.randomUUID().toString(),
                                                         oppfolgingsdato1,
-                                                        oppfolgingsdato1.plusWeeks(3)
+                                                        oppfolgingsdato1.plusWeeks(3),
                                                     )
-                                                )
+                                                ),
                                             ),
                                             Sykeforloep(
                                                 oppfolgingsdato3,
@@ -119,10 +100,10 @@ class SyfoSyketilfelleClientTest :
                                                     SimpleSykmelding(
                                                         UUID.randomUUID().toString(),
                                                         oppfolgingsdato3,
-                                                        oppfolgingsdato3.plusWeeks(8)
+                                                        oppfolgingsdato3.plusWeeks(8),
                                                     )
-                                                )
-                                            )
+                                                ),
+                                            ),
                                         )
                                     )
                                 fnr3 -> call.respond(emptyList<Sykeforloep>())
@@ -209,19 +190,19 @@ class SyfoSyketilfelleClientTest :
                             SimpleSykmelding(
                                 UUID.randomUUID().toString(),
                                 oppfolgingsdato1,
-                                oppfolgingsdato1.plusWeeks(3)
+                                oppfolgingsdato1.plusWeeks(3),
                             ),
                             SimpleSykmelding(
                                 UUID.randomUUID().toString(),
                                 oppfolgingsdato1.plusWeeks(3),
-                                oppfolgingsdato1.plusWeeks(7)
+                                oppfolgingsdato1.plusWeeks(7),
                             ),
                             SimpleSykmelding(
                                 UUID.randomUUID().toString(),
                                 oppfolgingsdato1.plusWeeks(8),
-                                oppfolgingsdato1.plusWeeks(19)
-                            )
-                        )
+                                oppfolgingsdato1.plusWeeks(19),
+                            ),
+                        ),
                     ),
                     Sykeforloep(
                         oppfolgingsdato2,
@@ -229,9 +210,9 @@ class SyfoSyketilfelleClientTest :
                             SimpleSykmelding(
                                 UUID.randomUUID().toString(),
                                 oppfolgingsdato2,
-                                oppfolgingsdato2.plusWeeks(4)
+                                oppfolgingsdato2.plusWeeks(4),
                             )
-                        )
+                        ),
                     ),
                     Sykeforloep(
                         oppfolgingsdato3,
@@ -239,17 +220,17 @@ class SyfoSyketilfelleClientTest :
                             SimpleSykmelding(
                                 UUID.randomUUID().toString(),
                                 oppfolgingsdato3,
-                                oppfolgingsdato3.plusWeeks(8)
+                                oppfolgingsdato3.plusWeeks(8),
                             )
-                        )
-                    )
+                        ),
+                    ),
                 )
             test("Finner riktig startdato når fom og tom er en sykmeldingsperiode") {
                 val startdato =
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato2,
                         tom = oppfolgingsdato2.plusWeeks(4),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato2
@@ -259,7 +240,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato3.plusWeeks(1),
                         tom = oppfolgingsdato3.plusWeeks(3),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato3
@@ -271,7 +252,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato1,
                         tom = oppfolgingsdato1.plusWeeks(18),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato1
@@ -283,7 +264,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato1.minusWeeks(1),
                         tom = oppfolgingsdato1.plusWeeks(18),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato1
@@ -293,7 +274,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato3.plusWeeks(8),
                         tom = oppfolgingsdato3.plusWeeks(10),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato3
@@ -305,7 +286,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato1.plusWeeks(7).plusDays(1),
                         tom = oppfolgingsdato1.plusWeeks(7).plusDays(5),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato1
@@ -317,7 +298,7 @@ class SyfoSyketilfelleClientTest :
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato1.plusWeeks(19).plusDays(1),
                         tom = oppfolgingsdato1.plusWeeks(20),
-                        sykeforloep = sykeforloep
+                        sykeforloep = sykeforloep,
                     )
 
                 startdato shouldBeEqualTo null
@@ -333,9 +314,9 @@ class SyfoSyketilfelleClientTest :
                                 SimpleSykmelding(
                                     UUID.randomUUID().toString(),
                                     oppfolgingsdato4,
-                                    oppfolgingsdato4.plusWeeks(3)
+                                    oppfolgingsdato4.plusWeeks(3),
                                 )
-                            )
+                            ),
                         ),
                         Sykeforloep(
                             oppfolgingsdato5,
@@ -343,16 +324,16 @@ class SyfoSyketilfelleClientTest :
                                 SimpleSykmelding(
                                     UUID.randomUUID().toString(),
                                     oppfolgingsdato5,
-                                    oppfolgingsdato5.plusWeeks(4)
+                                    oppfolgingsdato5.plusWeeks(4),
                                 )
-                            )
-                        )
+                            ),
+                        ),
                     )
                 val startdato =
                     getStartdatoByFomTom(
                         fom = oppfolgingsdato4.plusWeeks(2),
                         tom = oppfolgingsdato4.plusWeeks(3),
-                        sykeforloep = sykeforloepMedOverlapp
+                        sykeforloep = sykeforloepMedOverlapp,
                     )
 
                 startdato shouldBeEqualTo oppfolgingsdato5
@@ -366,7 +347,7 @@ class SyfoSyketilfelleClientTest :
                 syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
                     fnr1,
                     startDato,
-                    UUID.randomUUID()
+                    UUID.randomUUID(),
                 ) shouldBeEqualTo true
             }
             test("Returnerer false hvis det ikke finnes syketilfeller med nyere startdato") {
@@ -375,7 +356,7 @@ class SyfoSyketilfelleClientTest :
                 syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
                     fnr1,
                     startDato,
-                    UUID.randomUUID()
+                    UUID.randomUUID(),
                 ) shouldBeEqualTo false
             }
             test("Kaster feil hvis det ikke finnes noen syketilfeller") {
@@ -384,7 +365,7 @@ class SyfoSyketilfelleClientTest :
                         syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
                             fnr3,
                             LocalDate.now(),
-                            UUID.randomUUID()
+                            UUID.randomUUID(),
                         )
                     }
                 }
@@ -398,13 +379,13 @@ class SyfoSyketilfelleClientTest :
                         accessTokenClientMock,
                         "resource",
                         httpClient,
-                        "dev-gcp"
+                        "dev-gcp",
                     )
 
                 syfoSyketilfelleClientDev.harSykeforlopMedNyereStartdato(
                     fnr3,
                     LocalDate.now(),
-                    UUID.randomUUID()
+                    UUID.randomUUID(),
                 ) shouldBeEqualTo false
             }
         }

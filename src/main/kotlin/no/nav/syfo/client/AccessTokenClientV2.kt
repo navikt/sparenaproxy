@@ -20,7 +20,7 @@ class AccessTokenClientV2(
     private val aadAccessTokenUrl: String,
     private val clientId: String,
     private val clientSecret: String,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
     private val log: Logger = LoggerFactory.getLogger("azureadtokenclient")
     private val mutex = Mutex()
@@ -54,7 +54,7 @@ class AccessTokenClientV2(
                             AadAccessTokenMedExpiry(
                                 access_token = response.access_token,
                                 expires_in = response.expires_in,
-                                expiresOn = Instant.now().plusSeconds(response.expires_in.toLong())
+                                expiresOn = Instant.now().plusSeconds(response.expires_in.toLong()),
                             )
                         tokenMap[resource] = tokenMedExpiry
                         log.debug("Har hentet accesstoken")
@@ -71,5 +71,5 @@ data class AadAccessTokenV2(val access_token: String, val expires_in: Int)
 data class AadAccessTokenMedExpiry(
     val access_token: String,
     val expires_in: Int,
-    val expiresOn: Instant
+    val expiresOn: Instant,
 )

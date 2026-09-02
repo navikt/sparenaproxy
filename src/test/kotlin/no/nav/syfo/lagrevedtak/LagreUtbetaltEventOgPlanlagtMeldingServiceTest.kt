@@ -160,9 +160,9 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                                     .atZone(ZoneId.systemDefault())
                                     .withZoneSameInstant(ZoneOffset.UTC)
                                     .toOffsetDateTime(),
-                            sendt = null
+                            sendt = null,
                         )
-                    )
+                    ),
                 )
                 lagreUtbetaltEventOgPlanlagtMeldingService.lagreUtbetaltEventOgPlanlagtMelding(
                     nesteUtbetaltEvent
@@ -187,7 +187,7 @@ class LagreUtbetaltEventOgPlanlagtMeldingServiceTest :
                     opprettPlanlagtMelding(
                         id = UUID.randomUUID(),
                         fnr = "fnr",
-                        startdato = startdato
+                        startdato = startdato,
                     )
                 )
 

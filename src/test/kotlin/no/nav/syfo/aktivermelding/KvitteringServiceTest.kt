@@ -27,7 +27,7 @@ class KvitteringServiceTest :
                     opprettPlanlagtMelding(
                         id = UUID.randomUUID(),
                         sendt = OffsetDateTime.now(ZoneOffset.UTC),
-                        jmsCorrelationId = "correlationId"
+                        jmsCorrelationId = "correlationId",
                     )
                 )
 

@@ -29,7 +29,7 @@ class ArenaMeldingServiceTest :
                         startdato = LocalDate.of(2020, 5, 2),
                         type = BREV_4_UKER_TYPE,
                         opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
-                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
+                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10),
                     )
 
                 val brev4Ukersmelding =
@@ -56,7 +56,7 @@ class ArenaMeldingServiceTest :
                         startdato = LocalDate.of(2020, 5, 2),
                         type = BREV_39_UKER_TYPE,
                         opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
-                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
+                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10),
                     )
 
                 val brev39Ukersmelding =
@@ -83,7 +83,7 @@ class ArenaMeldingServiceTest :
                         startdato = LocalDate.of(2020, 5, 2),
                         type = STANS_TYPE,
                         opprettet = OffsetDateTime.now(ZoneOffset.UTC).minusWeeks(8),
-                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10)
+                        sendes = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(10),
                     )
 
                 val stansmelding = arenaMeldingService.tilStansmelding(planlagtMeldingDbModel, now)

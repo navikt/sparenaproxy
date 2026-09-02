@@ -8,7 +8,7 @@ import no.nav.syfo.pdl.client.PdlClient
 class PdlPersonService(
     private val pdlClient: PdlClient,
     private val accessTokenClientV2: AccessTokenClientV2,
-    private val pdlScope: String
+    private val pdlScope: String,
 ) {
     suspend fun isAlive(ident: String, meldingId: UUID): Boolean {
         val accessToken = accessTokenClientV2.getAccessTokenV2(pdlScope)

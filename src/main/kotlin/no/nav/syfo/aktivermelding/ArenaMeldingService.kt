@@ -39,30 +39,30 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                                 planlagtMeldingDbModel,
                                 OffsetDateTime.now(ZoneId.of("Europe/Oslo")),
                             )
-                            .tilMqMelding(),
+                            .tilMqMelding()
                     )
                     .also {
                         teamlog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
                         )
                         log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
                         )
                     }
             }
             AKTIVITETSKRAV_8_UKER_TYPE -> {
                 teamlog.info(
-                    "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}",
+                    "Skal ikke sende til 8Ukersmelding til arena id: ${planlagtMeldingDbModel.id}, fnr: ${planlagtMeldingDbModel.fnr}"
                 )
                 log.warn("Skal ikke sende til 8Ukersmelding til arena ${planlagtMeldingDbModel.id}")
                 return planlagtMeldingDbModel.id.toString()
             }
             BREV_39_UKER_TYPE -> {
                 teamlog.info(
-                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
+                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
                 )
                 log.warn(
-                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
+                    "Planlagt, men ikke sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
                 )
                 return planlagtMeldingDbModel.id.toString()
             }
@@ -73,14 +73,14 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                                 planlagtMeldingDbModel,
                                 OffsetDateTime.now(ZoneId.of("Europe/Oslo")),
                             )
-                            .tilMqMelding(),
+                            .tilMqMelding()
                     )
                     .also {
                         teamlog.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}",
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id} fnr: ${planlagtMeldingDbModel.fnr}"
                         )
                         log.info(
-                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}",
+                            "Sendt melding om ${planlagtMeldingDbModel.type} til Arena, id ${planlagtMeldingDbModel.id}"
                         )
                     }
             }
@@ -91,7 +91,7 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                     planlagtMeldingDbModel.type,
                 )
                 throw IllegalStateException(
-                    "Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}",
+                    "Planlagt melding har ukjent type: ${planlagtMeldingDbModel.type}"
                 )
             }
         }
@@ -99,7 +99,7 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
 
     fun til4Ukersmelding(
         planlagtMeldingDbModel: PlanlagtMeldingDbModel,
-        now: OffsetDateTime
+        now: OffsetDateTime,
     ): Brev4UkerMelding {
         val nowFormatted = formatDateTime(now)
         return Brev4UkerMelding(
@@ -121,14 +121,14 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 N2840(
                     taglinje =
                         "SP: 4 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
-                            .padEnd(80, ' '),
+                            .padEnd(80, ' ')
                 ),
         )
     }
 
     fun til39Ukersmelding(
         planlagtMeldingDbModel: PlanlagtMeldingDbModel,
-        now: OffsetDateTime
+        now: OffsetDateTime,
     ): Brev39UkerMelding {
         val nowFormatted = formatDateTime(now)
         return Brev39UkerMelding(
@@ -150,14 +150,14 @@ class ArenaMeldingService(private val arenaMqProducer: ArenaMqProducer) {
                 N2840(
                     taglinje =
                         "SP: 39 ukersbrevet er dannet. Brevet sendes fra Arena (via denne hendelsen)."
-                            .padEnd(80, ' '),
+                            .padEnd(80, ' ')
                 ),
         )
     }
 
     fun tilStansmelding(
         planlagtMeldingDbModel: PlanlagtMeldingDbModel,
-        now: OffsetDateTime
+        now: OffsetDateTime,
     ): Stansmelding {
         val nowFormatted = formatDateTime(now)
         return Stansmelding(

@@ -1,6 +1,5 @@
 package no.nav.syfo.aktivermelding
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -23,26 +22,27 @@ import no.nav.syfo.application.metrics.UTSATT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
 import no.nav.syfo.db.fireukersmeldingErSendt
 import no.nav.syfo.dodshendelser.db.avbrytPlanlagteMeldingerVedDodsfall
+import no.nav.syfo.jsonMapper
 import no.nav.syfo.log
 import no.nav.syfo.model.AKTIVITETSKRAV_8_UKER_TYPE
 import no.nav.syfo.model.BREV_39_UKER_TYPE
 import no.nav.syfo.model.BREV_4_UKER_TYPE
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.STANS_TYPE
-import no.nav.syfo.objectMapper
 import no.nav.syfo.pdl.service.PdlPersonService
+import tools.jackson.module.kotlin.readValue
 
 class AktiverMeldingService(
     private val database: DatabaseInterface,
     private val smregisterClient: SmregisterClient,
     private val arenaMeldingService: ArenaMeldingService,
     private val pdlPersonService: PdlPersonService,
-    private val syfoSyketilfelleClient: SyfoSyketilfelleClient
+    private val syfoSyketilfelleClient: SyfoSyketilfelleClient,
 ) {
 
     @WithSpan
     suspend fun mottaAktiverMelding(record: String) {
-        val aktiverMelding: AktiverMelding = objectMapper.readValue(record)
+        val aktiverMelding: AktiverMelding = jsonMapper.readValue(record)
         log.info("Behandler melding med id {}", aktiverMelding.id)
         MOTTATT_AKTIVERMELDING.inc()
         behandleAktiverMelding(aktiverMelding)
@@ -55,7 +55,7 @@ class AktiverMeldingService(
                 database.finnesNyerePlanlagtMeldingMedAnnenStartdato(
                     planlagtMelding.fnr,
                     planlagtMelding.startdato,
-                    planlagtMelding.opprettet
+                    planlagtMelding.opprettet,
                 )
             if (finnesNyerePlanlagtMeldingMedAnnenStartdato) {
                 log.info(
@@ -127,7 +127,7 @@ class AktiverMeldingService(
                     .atStartOfDay()
                     .atZone(ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneOffset.UTC)
-                    .toOffsetDateTime()
+                    .toOffsetDateTime(),
             )
             UTSATT_MELDING.inc()
         }
@@ -146,7 +146,7 @@ class AktiverMeldingService(
             database.sendPlanlagtMelding(
                 planlagtMelding.id,
                 OffsetDateTime.now(ZoneOffset.UTC),
-                correlationId
+                correlationId,
             )
             SENDT_MELDING.inc()
         } else {
@@ -164,7 +164,7 @@ class AktiverMeldingService(
         return !syfoSyketilfelleClient.harSykeforlopMedNyereStartdato(
             planlagtMelding.fnr,
             planlagtMelding.startdato,
-            planlagtMelding.id
+            planlagtMelding.id,
         )
     }
 
@@ -178,7 +178,7 @@ class AktiverMeldingService(
         val antallAvbrutteMeldinger =
             database.avbrytPlanlagteMeldingerVedDodsfall(
                 listOf(fnr),
-                OffsetDateTime.now(ZoneOffset.UTC)
+                OffsetDateTime.now(ZoneOffset.UTC),
             )
         if (antallAvbrutteMeldinger > 0) {
             log.info("Avbrøt $antallAvbrutteMeldinger melding(er) fordi bruker er død, $meldingId")

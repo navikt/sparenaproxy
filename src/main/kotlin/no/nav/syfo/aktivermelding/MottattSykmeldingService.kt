@@ -1,6 +1,5 @@
 package no.nav.syfo.aktivermelding
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
@@ -13,12 +12,13 @@ import no.nav.syfo.aktivermelding.db.utsettPlanlagtMelding
 import no.nav.syfo.application.db.DatabaseInterface
 import no.nav.syfo.application.metrics.UTSATT_MELDING
 import no.nav.syfo.client.SyfoSyketilfelleClient
+import no.nav.syfo.jsonMapper
 import no.nav.syfo.log
 import no.nav.syfo.model.Periode
 import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.syfo.objectMapper
 import org.postgresql.util.PSQLException
+import tools.jackson.module.kotlin.readValue
 
 class MottattSykmeldingService(
     private val database: DatabaseInterface,
@@ -27,10 +27,10 @@ class MottattSykmeldingService(
 
     @WithSpan
     suspend fun mottaNySykmelding(record: String) {
-        val receivedSykmelding: ReceivedSykmelding = objectMapper.readValue(record)
+        val receivedSykmelding: ReceivedSykmelding = jsonMapper.readValue(record)
         if (receivedSykmelding.merknader?.any { it.type == "UNDER_BEHANDLING" } == true) {
             log.info(
-                "Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}",
+                "Ignorerer sykmelding som er til manuell behandling ${receivedSykmelding.sykmelding.id}"
             )
             Span.current().addEvent("Ignorerer sykmelding som er til manuell behandling")
         } else {
@@ -67,7 +67,7 @@ class MottattSykmeldingService(
 
         if (aktiveStansmeldinger.isEmpty() && avbrutteAktivitetskravMeldinger.isEmpty()) {
             log.info(
-                "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId",
+                "Fant ingen relevante planlagte meldinger knyttet til sykmeldingid $sykmeldingId"
             )
             Span.current().addEvent("Ingen relevante planlagte meldinger")
             return
@@ -77,9 +77,7 @@ class MottattSykmeldingService(
                 fnr = receivedSykmelding.personNrPasient,
                 sykmeldingId = sykmeldingId,
             )
-        log.info(
-            "Sender ikke avbrutt 39 ukers melding $sykmeldingId",
-        )
+        log.info("Sender ikke avbrutt 39 ukers melding $sykmeldingId")
         utsettStansmelding(
             receivedSykmelding,
             aktiveStansmeldinger.firstOrNull { it.startdato == startdato },
@@ -89,7 +87,7 @@ class MottattSykmeldingService(
     @WithSpan
     fun utsettStansmelding(
         receivedSykmelding: ReceivedSykmelding,
-        stansmelding: PlanlagtMeldingDbModel?
+        stansmelding: PlanlagtMeldingDbModel?,
     ) {
         val sykmeldingId = receivedSykmelding.sykmelding.id
         if (stansmelding == null) {
@@ -108,7 +106,7 @@ class MottattSykmeldingService(
 
             if (oppdatertSendes.isAfter(stansmelding.sendes)) {
                 log.info(
-                    "Mottatt sykmelding med nyeste tomdato senere en utsendingstidspunkt, utsetter stansmelding ${stansmelding.id}",
+                    "Mottatt sykmelding med nyeste tomdato senere en utsendingstidspunkt, utsetter stansmelding ${stansmelding.id}"
                 )
                 database.utsettPlanlagtMelding(stansmelding.id, oppdatertSendes)
                 UTSATT_MELDING.inc()
