@@ -1,16 +1,16 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.10.2"
+val coroutinesVersion = "1.11.0"
 val jacksonVersion = "3.2.2"
 val kluentVersion = "1.73"
 val ktorVersion = "3.5.2"
 val logbackVersion = "1.6.3"
 val logstashEncoderVersion = "9.0"
 val prometheusVersion = "0.16.0"
-val kotestVersion = "5.9.1"
-val mockkVersion = "1.14.4"
-val postgresVersion = "42.7.7"
+val kotestVersion = "6.2.4"
+val mockkVersion = "1.14.11"
+val postgresVersion = "42.7.13"
 val flywayVersion = "13.4.0"
 val hikariVersion = "7.1.0"
 val confluentVersion = "8.1.1"
@@ -18,7 +18,7 @@ val kotlinVersion = "2.4.10"
 val testcontainerVersion = "2.0.5"
 val ktfmtVersion = "0.56"
 val avroVersion = "1.12.0"
-val opentelemetryVersion = "2.17.0"
+val opentelemetryVersion = "2.31.1"
 val kafkaVersion = "4.3.1"
 val ibmMqVersion = "10.0.0.0"
 
@@ -27,7 +27,7 @@ plugins {
     id("application")
     id("com.diffplug.spotless") version "8.10.1"
     kotlin("jvm") version "2.4.10"
-    id("com.gradleup.shadow") version "8.3.8"
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 application {
