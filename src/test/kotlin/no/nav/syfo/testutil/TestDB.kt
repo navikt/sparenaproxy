@@ -19,7 +19,7 @@ import no.nav.syfo.model.PlanlagtMeldingDbModel
 import no.nav.syfo.model.toPlanlagtMeldingDbModel
 import org.testcontainers.containers.PostgreSQLContainer
 
-class PsqlContainer : PostgreSQLContainer<PsqlContainer>("postgres:12")
+class PsqlContainer : PostgreSQLContainer<PsqlContainer>("postgres:16")
 
 class TestDB private constructor() {
     companion object {
